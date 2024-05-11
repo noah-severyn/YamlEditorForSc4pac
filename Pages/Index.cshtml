@@ -1,0 +1,85 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div style="display:flex">
+    <div id="Column1" class="column">
+        <form method="get">
+            <h2>Package Data</h2>
+            <fieldset>
+                <legend>Package Properties</legend>
+                <label for="PackageGoup">Group</label>
+                <input id="PackageGroup" type="text" asp-for="@Model.Package.Group" placeholder="Group" />
+                <br>
+
+                <label for="PackageName">Name</label>
+                <input id="PackageName" type="text" asp-for="@Model.Package.Name" placeholder="Name" />
+                <br>
+
+                <label for="PackageVersion">Version</label>
+                <input id="PackageVersion" type="text" asp-for="@Model.Package.Version" placeholder="Version" />
+                <br>
+
+                <label for="Subfolder">Subfolder</label>
+                <select id="Subfolder" asp-for="@Model.Package.Subfolder">
+                    <option value="050-early-mods">050-early-mods</option>
+                    <option value="100-props-textures">100-props-textures</option>
+                    <option value="150-mods">150-mods</option>
+                    <option value="170-terrain">170-terrain</option>
+                    <option value="180-flora">180-flora</option>
+                    <option value="200-residential">200-residential</option>
+                    <option value="300-commercial">300-commercial</option>
+                    <option value="360-landmark">360-landmark</option>
+                    <option value="400-industrial">400-industrial</option>
+                    <option value="410-agriculture">410-agriculture</option>
+                    <option value="500-utilities">500-utilities</option>
+                    <option value="600-civics">600-civics</option>
+                    <option value="610-safety">610-safety</option>
+                    <option value="620-education">620-education</option>
+                    <option value="630-health">630-health</option>
+                    <option value="640-government">640-government</option>
+                    <option value="650-religion">650-religion</option>
+                    <option value="660-parks">660-parks</option>
+                    <option value="700-transit">700-transit</option>
+                    <option value="900-overrides">900-overrides</option>
+                </select>
+            </fieldset>
+            <br>
+
+            <fieldset>
+                <legend>Package Info</legend>
+
+                <label for="PackageSummary">Summary</label>
+                <input id="PackageSummary" type="text" asp-for="@Model.Package.PackageInfo.Summary" placeholder="Summary" />
+                <br>
+
+                <label for="PackageConflicts">Conflicts</label>
+                <input id="PackageConflicts" type="text" asp-for="@Model.Package.PackageInfo.Conflicts" placeholder="Conflicts" />
+                <br>
+
+                <label for="PackageDescription">Description</label>
+                <textarea id="PackageDescription" asp-for="@Model.Package.PackageInfo.Description" placeholder="Description"> </textarea>
+                <br>
+
+                <label for="PackageAuthor">Author</label>
+                <input id="PackageAuthor" type="text" asp-for="@Model.Package.PackageInfo.Author" placeholder="Author" />
+                <br>
+
+                @* TODO - Add input for images *@
+
+                <label for="PackageWebsite">Website</label>
+                <input id="PackageWebsite" type="text" asp-for="@Model.Package.PackageInfo.Website" placeholder="Group" />
+            </fieldset>
+
+        </form>
+    </div>
+    <div id="Column2" class="column">
+        <h3>YAML Output</h3>
+        @* <input id="YAMLOutput" readonly="readonly" /> *@
+        <pre><code>@Model.YAMLOutput</code></pre>
+    </div>
+    
+</div>
+
