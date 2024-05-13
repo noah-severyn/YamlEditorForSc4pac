@@ -1,4 +1,6 @@
-﻿namespace SC4PackMan.Pages.Shared {
+﻿using System;
+
+namespace SC4PackMan.Pages.Shared {
     public class PackageInfo {
         /// <summary>
         /// Single line summary.
@@ -41,5 +43,32 @@
         //    Author = author;
         //    Images = images ?? new List<string>();
         //}
+
+        public override string ToString() {
+            return $"Summary: {Summary}, Website: {Website}, Warning: {Warning}, Conflicts:{Conflicts}, Description:{Description}, Author:{Author}, Images:{Images}";
+        }
+
+        public string ToYAMLString() {
+            string output = "\r\ninfo:\r\n";
+            output = output + "summary: " + Summary + "\r\n";
+            if (Warning != string.Empty) {
+                output = output + "  warning: " + Warning + "\r\n";
+            }
+            if (Conflicts != string.Empty) {
+                output = output + "  conflicts: " + Conflicts + "\r\n";
+            }
+            if (Description != string.Empty) {
+                output = output + "  description: >\r\n" + Description + "\r\n";
+            }
+            if (Author != string.Empty) {
+                output = output + "  author:" + Author + "\r\n";
+            }
+            if (Images is not null && Images.Count > 0) {
+                output = output + "  images:" + Images.ToYAMLString() + "\r\n";
+            }
+            output = output + "website: " + Website + "\r\n";
+
+            return output;
+        }
     }
 }

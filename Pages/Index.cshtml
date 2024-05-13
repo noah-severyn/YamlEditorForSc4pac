@@ -3,6 +3,11 @@
 @{
     ViewData["Title"] = "Home page";
 }
+<link rel="stylesheet" href="/css/codemirror.css" type="text/css" />
+@* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />  *@
+@* <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script> *@
+<script type="text/javascript" src="/js/codemirror.js"></script>
+
 
 <div style="display:flex">
     <div id="Column1" class="column">
@@ -11,19 +16,19 @@
             <fieldset>
                 <legend>Package Properties</legend>
                 <label for="PackageGoup">Group</label>
-                <input id="PackageGroup" type="text" asp-for="@Model.Package.Group" placeholder="Group" />
+                <input id="PackageGroup" type="text" asp-for="@Model.Package.Group" oninput="UpdatePkgItem('Group')" required />
                 <br>
 
                 <label for="PackageName">Name</label>
-                <input id="PackageName" type="text" asp-for="@Model.Package.Name" placeholder="Name" />
+                <input id="PackageName" type="text" asp-for="@Model.Package.Name" oninput="UpdatePkgItem('Name')" required />
                 <br>
 
                 <label for="PackageVersion">Version</label>
-                <input id="PackageVersion" type="text" asp-for="@Model.Package.Version" placeholder="Version" />
+                <input id="PackageVersion" type="text" asp-for="@Model.Package.Version" oninput="UpdatePkgItem('Version')" required />
                 <br>
 
-                <label for="Subfolder">Subfolder</label>
-                <select id="Subfolder" asp-for="@Model.Package.Subfolder">
+                <label for="PackageSubfolder">Subfolder</label>
+                <select id="PackageSubfolder" asp-for="@Model.Package.Subfolder" oninput="UpdatePkgItem('Subfolder')" required >
                     <option value="050-early-mods">050-early-mods</option>
                     <option value="100-props-textures">100-props-textures</option>
                     <option value="150-mods">150-mods</option>
@@ -52,33 +57,63 @@
                 <legend>Package Info</legend>
 
                 <label for="PackageSummary">Summary</label>
-                <input id="PackageSummary" type="text" asp-for="@Model.Package.PackageInfo.Summary" placeholder="Summary" />
+                <input id="PackageSummary" type="text" asp-for="@Model.Package.PackageInfo.Summary" oninput="UpdatePkgItem('Summary')" required  />
                 <br>
 
                 <label for="PackageConflicts">Conflicts</label>
-                <input id="PackageConflicts" type="text" asp-for="@Model.Package.PackageInfo.Conflicts" placeholder="Conflicts" />
+                <input id="PackageConflicts" type="text" asp-for="@Model.Package.PackageInfo.Conflicts" oninput="UpdatePkgItem('Conflicts')" />
+                <br>
+
+                <label for="PackageWarning">Warning</label>
+                <input id="PackageWarning" type="text" asp-for="@Model.Package.PackageInfo.Warning" oninput="UpdatePkgItem('Warning')" />
                 <br>
 
                 <label for="PackageDescription">Description</label>
-                <textarea id="PackageDescription" asp-for="@Model.Package.PackageInfo.Description" placeholder="Description"> </textarea>
+                <textarea id="PackageDescription" asp-for="@Model.Package.PackageInfo.Description" oninput="UpdatePkgItem('Description')"> </textarea>
                 <br>
 
                 <label for="PackageAuthor">Author</label>
-                <input id="PackageAuthor" type="text" asp-for="@Model.Package.PackageInfo.Author" placeholder="Author" />
+                <input id="PackageAuthor" type="text" asp-for="@Model.Package.PackageInfo.Author" oninput="UpdatePkgItem('Author')" />
                 <br>
 
                 @* TODO - Add input for images *@
 
                 <label for="PackageWebsite">Website</label>
-                <input id="PackageWebsite" type="text" asp-for="@Model.Package.PackageInfo.Website" placeholder="Group" />
+                <input id="PackageWebsite" type="url" asp-for="@Model.Package.PackageInfo.Website" oninput="UpdatePkgItem('Website')" required />
             </fieldset>
-
+            <br>
         </form>
+
+        <form>
+            <fieldset>
+                <legend>Add Assets</legend>
+
+                <label for="AssetID">Asset ID</label>
+                <input id="AssetID" type="text" required />
+                <br>
+
+                <label for="AssetURL">URL</label>
+                <input id="AssetURL" type="url" required />
+                <br>
+
+                <label for="AssetVersion">Version</label>
+                <input id="AssetVersion" type="text" required />
+                <br>
+
+                <label for="AssetLastModified">Last Modified</label>
+                <input id="AssetLastModified" type="datetime-local" required />
+
+                <input id="AddAsset" type="button" value="Add Asset" onclick="AddAnAsset()" style="margin-left:120px" />
+            </fieldset>
+        </form>
+
     </div>
     <div id="Column2" class="column">
-        <h3>YAML Output</h3>
-        @* <input id="YAMLOutput" readonly="readonly" /> *@
-        <pre><code>@Model.YAMLOutput</code></pre>
+        <h2>YAML Output</h2>
+        <h5>Creating <span id="FileName">newfile.yaml</span></h5>
+        <p>The contents in this code pane are automatically generated from inputs on the left, but is also able to be customized manually. Beware, manual changes may be overriden if any of the input values are changed!</p>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/yaml/yaml.min.js"></script>
+        <div id="editor"></div>
     </div>
     
 </div>

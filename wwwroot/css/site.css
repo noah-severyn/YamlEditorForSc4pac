@@ -1,5 +1,7 @@
 html {
-  font-size: 14px;
+    font-family: "Times New Roman";
+    font-size: 14px;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
@@ -23,4 +25,13 @@ body {
 
 .column {
     flex: 50%;
+    /*display:flex*/
+}
+
+#FileName {
+    font-family: Courier New, Courier, monospace;
+}
+#editor {
+    height: 650px;
+    width: 100%;
 }

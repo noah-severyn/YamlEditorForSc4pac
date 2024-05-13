@@ -23,6 +23,14 @@
         /// Only needed for assets containing Clickteam exe-installers (in particular, not needed for NSIS exe-installers).
         /// </summary>
         public ArchiveType? ArchiveType { get; set; }
+
+        public override string ToString() {
+            return $"assetID: {AssetID}, version: {Version}, url: {URL}, lastModified:{LastModified}";
+        }
+
+        public string ToYAMLString() {
+            return $"\r\n---\r\nassetID: \"{AssetID}\"\r\nurl: \"{URL}\"\r\nversion: \"{Version}\"\r\nlastModified:\"{LastModified}\"";
+        }
     }
 
 
@@ -34,4 +42,6 @@
         /// </summary>
         public byte Version { get; set; }
     }
+
+    
 }
