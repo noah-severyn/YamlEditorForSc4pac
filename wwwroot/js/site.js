@@ -33,19 +33,39 @@ const cm = document.querySelector('.CodeMirror').CodeMirror;
 
 
 function UpdatePkgItem(itemName) {
-	var inputText = document.getElementById("Package" + itemName).value;
+	var inputElement = document.getElementById("Package" + itemName);
+	var inputText = inputElement.value;
+	var newValue = "";
 
 	//Special case for Description because it's multiline text while all others are single line
 	if (itemName === 'Description') {
 		var rgx = new RegExp('>(.|\n)*(?=\n  author:)');
-		var newValue = '>\n    ' + inputText.replaceAll('\n', '\n    ');
-	} else {
-		var rgx = new RegExp(itemName.toLowerCase() + ': "(.*)"');
-		var newValue = itemName.toLowerCase() + ': ' + '"' + inputText + '"'
+		newValue = '>\n    ' + inputText.replaceAll('\n', '\n    ');
 	}
-	console.log(rgx.test(cm.getValue()))
-	console.log(itemName.toLowerCase() + " _ " +  cm.getValue().search(rgx));
-	console.log(newValue);
+
+	//Special case for items entered as an array because we parse the multiline into multiple list items
+	else if (['Images'].includes(itemName)) {
+		var rgx = new RegExp('(?<=images:)(.|\n)*(?=\n  website:)');
+		var imagelist = inputText.replaceAll('\n', '').split(';');
+		if (imagelist.at(-1) === '') {
+			imagelist.pop();
+		}
+		
+		imagelist.forEach((img) => {
+			newValue = newValue + '\n  - "' + img + '"'
+		});
+		//console.log(imagelist.length);
+		//console.log(newValue);
+	}
+
+	//Default case for most individual inputs
+	else {
+		var rgx = new RegExp(itemName.toLowerCase() + ': "(.*)"');
+		newValue = itemName.toLowerCase() + ': ' + '"' + inputText + '"'
+	}
+	//console.log(rgx.test(cm.getValue()))
+	//console.log(itemName.toLowerCase() + " _ " +  cm.getValue().search(rgx));
+	//console.log(newValue);
 
 	cm.setValue(cm.getValue().replace(rgx, newValue));
 

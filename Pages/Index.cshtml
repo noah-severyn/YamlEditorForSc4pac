@@ -7,6 +7,8 @@
 @* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />  *@
 @* <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script> *@
 <script type="text/javascript" src="/js/codemirror.js"></script>
+@* <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/yaml/yaml.min.js"></script> *@
+<script type="text/javascript" src="/js/codemirror-yaml.js"></script>
 
 
 <div style="display:flex">
@@ -69,14 +71,16 @@
                 <br>
 
                 <label for="PackageDescription">Description</label>
-                <textarea id="PackageDescription" asp-for="@Model.Package.PackageInfo.Description" oninput="UpdatePkgItem('Description')"> </textarea>
+                <textarea id="PackageDescription" asp-for="@Model.Package.PackageInfo.Description" rows="6" cols="30"  oninput="UpdatePkgItem('Description')"> </textarea>
                 <br>
 
                 <label for="PackageAuthor">Author</label>
                 <input id="PackageAuthor" type="text" asp-for="@Model.Package.PackageInfo.Author" oninput="UpdatePkgItem('Author')" />
                 <br>
 
-                @* TODO - Add input for images *@
+                <label for="PackageImages">Images</label>
+                <textarea id="PackageImages" asp-for="@Model.Package.PackageInfo.Images" rows="3" oninput="UpdatePkgItem('Images')"> </textarea>
+                <br>
 
                 <label for="PackageWebsite">Website</label>
                 <input id="PackageWebsite" type="url" asp-for="@Model.Package.PackageInfo.Website" oninput="UpdatePkgItem('Website')" required />
@@ -112,7 +116,6 @@
         <h2>YAML Output</h2>
         <h5>Creating <span id="FileName">newfile.yaml</span></h5>
         <p>The contents in this code pane are automatically generated from inputs on the left, but is also able to be customized manually. Beware, manual changes may be overriden if any of the input values are changed!</p>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/yaml/yaml.min.js"></script>
         <div id="editor"></div>
     </div>
     
