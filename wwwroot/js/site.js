@@ -37,13 +37,14 @@ function UpdatePkgItem(itemName) {
 
 	//Special case for Description because it's multiline text while all others are single line
 	if (itemName === 'Description') {
-		var rgx = new RegExp('>[\s\S]*(?=\n  author:)');
+		var rgx = new RegExp('>(.|\n)*(?=\n  author:)');
 		var newValue = '>\n    ' + inputText.replaceAll('\n', '\n    ');
 	} else {
 		var rgx = new RegExp(itemName.toLowerCase() + ': "(.*)"');
 		var newValue = itemName.toLowerCase() + ': ' + '"' + inputText + '"'
 	}
-	console.log(cm.getValue().search(rgx));
+	console.log(rgx.test(cm.getValue()))
+	console.log(itemName.toLowerCase() + " _ " +  cm.getValue().search(rgx));
 	console.log(newValue);
 
 	cm.setValue(cm.getValue().replace(rgx, newValue));
