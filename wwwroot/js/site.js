@@ -2,7 +2,7 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 
-//Initialize CodeMirror component
+//Initialize required items (these are run as top-level statements)
 CodeMirror(document.querySelector('#editor'), {
 	lineNumbers: true,
 	tabSize: 2,
@@ -27,38 +27,80 @@ info:
   website: ""`,
 	mode: 'yaml'
 });
-
+const packages = FetchSc4pacData();
+const sc4edata = FetchSc4EvermoreData();
+console.log(sc4edata);
 
 const cm = document.querySelector('.CodeMirror').CodeMirror;
+const urlValidation = '^(https?:\/\/)?([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5})(:[0-9]{1,5})?(\/.*)?$';
+
+
+
+
+
+//sc4e metadata: https://www.sc4evermore.com/latest-modified-downloads.php
+
+
+
+
+
+async function FetchSc4pacData() {
+	const request = new Request('https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json');
+	const response = await fetch(request);
+	return await response.json();
+}
+async function FetchSc4EvermoreData() {
+	const request = new Request('https://www.sc4evermore.com/latest-modified-downloads.php');
+	const response = await fetch(request);
+	return await response.json();
+}
+
+
 
 
 function UpdatePkgItem(itemName) {
 	var inputElement = document.getElementById("Package" + itemName);
 	var inputText = inputElement.value;
-	var newValue = "";
 
-	//Special case for Description because it's multiline text while all others are single line
+	//Special case for Description: it's multiline text while all others are single line
 	if (itemName === 'Description') {
 		var rgx = new RegExp('>(.|\n)*(?=\n  author:)');
-		newValue = '>\n    ' + inputText.replaceAll('\n', '\n    ');
+		var newValue = '>\n    ' + inputText.replaceAll('\n', '\n    ');
 	}
 
-	//Special case for items entered as an array because we parse the multiline into multiple list items
-	else if (['Images'].includes(itemName)) {
-		var rgx = new RegExp('(?<=images:)(.|\n)*(?=\n  website:)');
-		var imagelist = inputText.replaceAll('\n', '').split(';');
-		if (imagelist.at(-1) === '') {
-			imagelist.pop();
+	//Special case for items entered as an array: parse the multiline into multiple list items
+	else if (['Include', 'Exclude', 'Images'].includes(itemName)) {
+		switch (itemName) {
+			case 'Include':
+				var rgx = new RegExp('(?<=include:)(.|\n)*(?=\nexclude:)');
+				break;
+			case 'Exclude':
+				var rgx = new RegExp('(?<=exclude:)(.|\n)*(?=\n\ninfo:)');
+				break;
+			case 'Images':
+				var rgx = new RegExp('(?<=images:)(.|\n)*(?=\n  website:)');
+				break;
+		}
+
+		var itemlist = inputText.replaceAll('\n', '').replaceAll('\\', '/').split(';');
+		var newValue = "";
+		if (itemlist.at(-1) === '') {
+			itemlist.pop();
 		}
 		
-		imagelist.forEach((img) => {
-			newValue = newValue + '\n  - "' + img + '"'
+		itemlist.forEach((item) => {
+			//Check if item looks like a file/folder path
+			//if (true) {
+
+			//}
+
+			newValue = newValue + '\n  - "' + item.trim() + '"'
 		});
 		//console.log(imagelist.length);
 		//console.log(newValue);
 	}
 
-	//Default case for most individual inputs
+	//Default case for other inputs
 	else {
 		var rgx = new RegExp(itemName.toLowerCase() + ': "(.*)"');
 		newValue = itemName.toLowerCase() + ': ' + '"' + inputText + '"'
