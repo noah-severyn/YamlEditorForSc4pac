@@ -61,6 +61,10 @@ async function FetchSc4EvermoreData() {
 function UpdatePkgItem(itemName) {
 	var inputElement = document.getElementById("Package" + itemName);
 	var inputText = inputElement.value;
+	if (itemName === 'Group' || itemName === 'Name' || itemName === 'AssetID') {
+		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-zA-Z0-9-]'), '');
+	}
+
 
 	//Special case for Description: it's multiline text while all others are single line
 	if (itemName === 'Description') {

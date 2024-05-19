@@ -7,9 +7,9 @@ namespace SC4PackMan.Pages {
     public class IndexModel : PageModel {
 
         [BindProperty]
-        public Package Package { get; set; }
+        public SC4PacPackage Package { get; set; }
         public string GeneratedYAML { get; set; }
-        
+        public List<YamlError> Errors { get; set; }
 
 
         private readonly ILogger<IndexModel> _logger; 
@@ -19,19 +19,13 @@ namespace SC4PackMan.Pages {
         }
 
         public void OnGet() {
-            Package Package = new Package();
-            
+            SC4PacPackage Package = new SC4PacPackage();
 
-            //StringBuilder GeneratedYAML = new StringBuilder();
-            //GeneratedYAML.AppendLine("group: #pkg.group#");
-            //GeneratedYAML.AppendLine("name: #pkg.name#");
-            //GeneratedYAML.AppendLine("version: #pkg.version#");
-            //GeneratedYAML.AppendLine("subfolder: #pkg.subfolder#");
-            //GeneratedYAML.AppendLine("dependencies: #pkg.dependencies#");
-            //GeneratedYAML.AppendLine("assets: #pkg.assets#");
-            //GeneratedYAML.AppendLine("include: #pkg.include#");
-            //GeneratedYAML.AppendLine("exclude: #pkg.exclude#");
-            //GeneratedYAML.AppendLine("info: #pkg.info#");
+
+            YamlSchema.ValidateYaml();
         }
+
+        
+        
     }
 }

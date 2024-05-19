@@ -2,12 +2,14 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
+
+
+    //Model.ValidateYAMLSyntax();
 }
+
+
 <link rel="stylesheet" href="/css/codemirror.css" type="text/css" />
-@* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />  *@
-@* <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script> *@
 <script type="text/javascript" src="/js/codemirror.js"></script>
-@* <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/yaml/yaml.min.js"></script> *@
 <script type="text/javascript" src="/js/codemirror-yaml.js"></script>
 
 
@@ -18,10 +20,9 @@
             <p>For the Include, Exclude, and Images fields, add multiple items separated by a semicolon.</p>
             <fieldset>
                 <legend>Package Properties</legend>
-                <table>
+                <table class="inputForm">
                     <colgroup>
-                        <col span="1" style="width: 20%;" >
-                        <col span="1" style="width: 80%;" >
+                        <col style="width: 120px;">
                     </colgroup>
                     <tbody>
                         <tr>
@@ -65,11 +66,11 @@
                         </tr>
                         <tr>
                             <td><label for="PackageInclude">Include</label></td>
-                            <td><textarea id="PackageInclude" rows="2" cols="50" oninput="UpdatePkgItem('Include')"> </textarea></td>
+                            <td><textarea id="PackageInclude" rows="2" oninput="UpdatePkgItem('Include')"> </textarea></td>
                         </tr>
                         <tr>
                             <td><label for="PackageExclude">Exclude</label></td>
-                            <td><textarea id="PackageExclude" rows="2" cols="50" oninput="UpdatePkgItem('Exclude')"> </textarea></td>
+                            <td><textarea id="PackageExclude" rows="2" oninput="UpdatePkgItem('Exclude')"> </textarea></td>
                         </tr>
                     </tbody>
                 </table>
@@ -77,10 +78,9 @@
 
             <fieldset>
                 <legend>Package Info</legend>
-                <table>
+                <table class="inputForm">
                     <colgroup>
-                        <col span="1" style="width: 20%;">
-                        <col span="1" style="width: 80%;">
+                        <col style="width: 120px;">
                     </colgroup>
                     <tbody>
                         <tr>
@@ -97,7 +97,7 @@
                         </tr>
                         <tr>
                             <td><label for="PackageDescription">Description</label></td>
-                            <td><textarea id="PackageDescription" rows="4" cols="50" oninput="UpdatePkgItem('Description')"> </textarea></td>
+                            <td><textarea id="PackageDescription" rows="4" oninput="UpdatePkgItem('Description')"> </textarea></td>
                         </tr>
                         <tr>
                             <td><label for="PackageAuthor">Author</label></td>
@@ -105,7 +105,7 @@
                         </tr>
                         <tr>
                             <td><label for="PackageImages">Images</label></td>
-                            <td><textarea id="PackageImages" rows="2" cols="50" oninput="UpdatePkgItem('Images')"> </textarea></td>
+                            <td><textarea id="PackageImages" rows="2" oninput="UpdatePkgItem('Images')"> </textarea></td>
                         </tr>
                         <tr>
                             <td><label for="PackageWebsite">Website</label></td>
@@ -119,10 +119,9 @@
         <form>
             <fieldset>
                 <legend>Add Assets</legend>
-                <table>
+                <table class="inputForm">
                     <colgroup>
-                        <col span="1" style="width: 20%;">
-                        <col span="1" style="width: 80%;">
+                        <col style="width: 120px;">
                     </colgroup>
                     <tbody>
                         <tr>

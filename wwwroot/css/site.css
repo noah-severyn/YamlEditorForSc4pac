@@ -13,10 +13,12 @@ html {
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
+.container {
+    max-width: 98%
+}
 
 html {
   position: relative;
-  min-height: 100%;
 }
 
 body {
@@ -31,19 +33,27 @@ body {
 #FileName {
     font-family: Courier New, Courier, monospace;
 }
-#editor {
-    height: 650px;
-    width: 100%;
+
+.CodeMirror {
+    border: 1px solid turquoise;
+}
+.CodeMirror-scroll {
+    /*height: 650px;*/
+    background-color: azure;
 }
 
 fieldset {
-    border: 1px solid turquoise; 
+    border-bottom: 1px dashed black; 
 }
-input[type=text], input[type=url] {
-    width: 100%
+textarea, input[type=text], input[type=url] {
+    width: 99%
 }
 
 .valid {
     border-color: #cf222e;
     border-color: #1a7f37;
+}
+
+table {
+    width: 100%;
 }

@@ -1,35 +1,39 @@
-﻿namespace SC4PackMan.Pages.Shared {
+﻿using YamlDotNet.Serialization;
+
+namespace SC4PackMan.Pages.Shared {
     /// <summary>
     /// An asset is usually a ZIP file that can be downloaded from the file exchanges. An asset cannot be installed directly by users of sc4pac, but it can provide files for one or multiple installable packages.
     /// </summary>
-    public class Asset {
+    public class SC4PacAsset {
         /// <summary>
         /// This is the direct download link of the ZIP file hosted on a file exchange server. Get it from the Download button of the original upload.
         /// </summary>
-        public string URL { get; set; }
+        public string Url { get; set; }
         /// <summary>
         /// This is a unique identifier used internally by sc4pac and not visible to the user.
         /// </summary>
-        public string AssetID {  get; set; }
+
+        //[YamlMember(Alias = "assetId", ApplyNamingConventions = false)]
+        public string AssetId { get; set; }
         /// <summary>
         /// The version string should be identical to the one of the original upload. It is used for determining when an asset has changed, so packages using its files can be reinstalled.
         /// </summary>
-        public Version Version { get; set; }
+        public string Version { get; set; }
         /// <summary>
         /// The timestamp of the last-modification date of the upload.
         /// </summary>
-        public DateTime LastModified { get; set; }
+        public string LastModified { get; set; }
         /// <summary>
         /// Only needed for assets containing Clickteam exe-installers (in particular, not needed for NSIS exe-installers).
         /// </summary>
         public ArchiveType? ArchiveType { get; set; }
 
         public override string ToString() {
-            return $"assetID: {AssetID}, version: {Version}, url: {URL}, lastModified:{LastModified}";
+            return $"assetID: {AssetId}, version: {Version}, lastModified:{LastModified}, url: {Url}";
         }
 
         public string ToYAMLString() {
-            return $"\r\n---\r\nassetID: \"{AssetID}\"\r\nurl: \"{URL}\"\r\nversion: \"{Version}\"\r\nlastModified:\"{LastModified}\"";
+            return $"\r\n---\r\nassetID: \"{AssetId}\"\r\nurl: \"{Url}\"\r\nversion: \"{Version}\"\r\nlastModified:\"{LastModified}\"";
         }
     }
 
