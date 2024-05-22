@@ -32,13 +32,6 @@ const sc4edata = FetchSc4EvermoreData();
 console.log(sc4edata);
 
 const cm = document.querySelector('.CodeMirror').CodeMirror;
-const urlValidation = '^(https?:\/\/)?([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5})(:[0-9]{1,5})?(\/.*)?$';
-
-
-
-
-
-//sc4e metadata: https://www.sc4evermore.com/latest-modified-downloads.php
 
 
 
@@ -93,11 +86,6 @@ function UpdatePkgItem(itemName) {
 		}
 		
 		itemlist.forEach((item) => {
-			//Check if item looks like a file/folder path
-			//if (true) {
-
-			//}
-
 			newValue = newValue + '\n  - "' + item.trim() + '"'
 		});
 		//console.log(imagelist.length);
@@ -142,4 +130,9 @@ function AddAnAsset() {
 		'\r\n- assetId: "' + id + '"' +
 		currentContents.slice(assetHeaderLocn + 7)
 	);
+}
+
+function SetYamlText() {
+	document.getElementById('YamlText').innerHTML = cm.getValue();
+	alert("updated!");
 }

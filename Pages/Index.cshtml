@@ -3,8 +3,11 @@
 @{
     ViewData["Title"] = "Home page";
 
-
-    //Model.ValidateYAMLSyntax();
+    if (Request.QueryString.HasValue) {
+        string yamlText = Request.Form["yamltext"];
+        Model.ValidateYaml(yamlText);
+    }
+    //
 }
 
 
@@ -15,145 +18,155 @@
 
 <div style="display:flex">
     <div id="Column1" class="column">
-        <form method="get">
-            <h2>Package Data</h2>
-            <p>For the Include, Exclude, and Images fields, add multiple items separated by a semicolon.</p>
-            <fieldset>
-                <legend>Package Properties</legend>
-                <table class="inputForm">
-                    <colgroup>
-                        <col style="width: 120px;">
-                    </colgroup>
-                    <tbody>
-                        <tr>
-                            <td><label for="PackageGoup">Group</label></td>
-                            <td><input id="PackageGroup" type="text" oninput="UpdatePkgItem('Group')" required /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageName">Name</label></td>
-                            <td><input id="PackageName" type="text" class="valid" oninput="UpdatePkgItem('Name')" required /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageVersion">Version</label></td>
-                            <td><input id="PackageVersion" type="text" oninput="UpdatePkgItem('Version')" required /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageSubfolder">Subfolder</label></td>
-                            <td>
-                                <select id="PackageSubfolder" oninput="UpdatePkgItem('Subfolder')" required>
-                                    <option value="050-early-mods">050-early-mods</option>
-                                    <option value="100-props-textures">100-props-textures</option>
-                                    <option value="150-mods">150-mods</option>
-                                    <option value="170-terrain">170-terrain</option>
-                                    <option value="180-flora">180-flora</option>
-                                    <option value="200-residential">200-residential</option>
-                                    <option value="300-commercial">300-commercial</option>
-                                    <option value="360-landmark">360-landmark</option>
-                                    <option value="400-industrial">400-industrial</option>
-                                    <option value="410-agriculture">410-agriculture</option>
-                                    <option value="500-utilities">500-utilities</option>
-                                    <option value="600-civics">600-civics</option>
-                                    <option value="610-safety">610-safety</option>
-                                    <option value="620-education">620-education</option>
-                                    <option value="630-health">630-health</option>
-                                    <option value="640-government">640-government</option>
-                                    <option value="650-religion">650-religion</option>
-                                    <option value="660-parks">660-parks</option>
-                                    <option value="700-transit">700-transit</option>
-                                    <option value="900-overrides">900-overrides</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageInclude">Include</label></td>
-                            <td><textarea id="PackageInclude" rows="2" oninput="UpdatePkgItem('Include')"> </textarea></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageExclude">Exclude</label></td>
-                            <td><textarea id="PackageExclude" rows="2" oninput="UpdatePkgItem('Exclude')"> </textarea></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </fieldset>
+        <h2>Package Data</h2>
+        <p>For the Include, Exclude, and Images fields, add multiple items separated by a semicolon.</p>
+        <fieldset>
+            <legend>Package Properties</legend>
+            <table class="inputForm">
+                <colgroup>
+                    <col style="width: 120px;">
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td><label for="PackageGoup">Group</label></td>
+                        <td><input id="PackageGroup" type="text" oninput="UpdatePkgItem('Group')" required /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="PackageName">Name</label></td>
+                        <td><input id="PackageName" type="text" class="valid" oninput="UpdatePkgItem('Name')" required /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="PackageVersion">Version</label></td>
+                        <td><input id="PackageVersion" type="text" oninput="UpdatePkgItem('Version')" required /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="PackageSubfolder">Subfolder</label></td>
+                        <td>
+                            <select id="PackageSubfolder" oninput="UpdatePkgItem('Subfolder')" required>
+                                <option value="050-early-mods">050-early-mods</option>
+                                <option value="100-props-textures">100-props-textures</option>
+                                <option value="150-mods">150-mods</option>
+                                <option value="170-terrain">170-terrain</option>
+                                <option value="180-flora">180-flora</option>
+                                <option value="200-residential">200-residential</option>
+                                <option value="300-commercial">300-commercial</option>
+                                <option value="360-landmark">360-landmark</option>
+                                <option value="400-industrial">400-industrial</option>
+                                <option value="410-agriculture">410-agriculture</option>
+                                <option value="500-utilities">500-utilities</option>
+                                <option value="600-civics">600-civics</option>
+                                <option value="610-safety">610-safety</option>
+                                <option value="620-education">620-education</option>
+                                <option value="630-health">630-health</option>
+                                <option value="640-government">640-government</option>
+                                <option value="650-religion">650-religion</option>
+                                <option value="660-parks">660-parks</option>
+                                <option value="700-transit">700-transit</option>
+                                <option value="900-overrides">900-overrides</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="PackageInclude">Include</label></td>
+                        <td><textarea id="PackageInclude" rows="2" oninput="UpdatePkgItem('Include')"> </textarea></td>
+                    </tr>
+                    <tr>
+                        <td><label for="PackageExclude">Exclude</label></td>
+                        <td><textarea id="PackageExclude" rows="2" oninput="UpdatePkgItem('Exclude')"> </textarea></td>
+                    </tr>
+                </tbody>
+            </table>
+        </fieldset>
 
-            <fieldset>
-                <legend>Package Info</legend>
-                <table class="inputForm">
-                    <colgroup>
-                        <col style="width: 120px;">
-                    </colgroup>
-                    <tbody>
-                        <tr>
-                            <td><label for="PackageSummary">Summary</label></td>
-                            <td><input id="PackageSummary" type="text" oninput="UpdatePkgItem('Summary')" required /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageConflicts">Conflicts</label></td>
-                            <td><input id="PackageConflicts" type="text" oninput="UpdatePkgItem('Conflicts')" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageWarning">Warning</label></td>
-                            <td><input id="PackageWarning" type="text" oninput="UpdatePkgItem('Warning')" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageDescription">Description</label></td>
-                            <td><textarea id="PackageDescription" rows="4" oninput="UpdatePkgItem('Description')"> </textarea></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageAuthor">Author</label></td>
-                            <td><input id="PackageAuthor" type="text" oninput="UpdatePkgItem('Author')" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageImages">Images</label></td>
-                            <td><textarea id="PackageImages" rows="2" oninput="UpdatePkgItem('Images')"> </textarea></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageWebsite">Website</label></td>
-                            <td><input id="PackageWebsite" type="url" oninput="UpdatePkgItem('Website')" required /></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </fieldset>
-        </form>
+        <fieldset>
+            <legend>Package Info</legend>
+            <table class="inputForm">
+                <colgroup>
+                    <col style="width: 120px;">
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td><label for="PackageSummary">Summary</label></td>
+                        <td><input id="PackageSummary" type="text" oninput="UpdatePkgItem('Summary')" required /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="PackageConflicts">Conflicts</label></td>
+                        <td><input id="PackageConflicts" type="text" oninput="UpdatePkgItem('Conflicts')" /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="PackageWarning">Warning</label></td>
+                        <td><input id="PackageWarning" type="text" oninput="UpdatePkgItem('Warning')" /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="PackageDescription">Description</label></td>
+                        <td><textarea id="PackageDescription" rows="4" oninput="UpdatePkgItem('Description')"> </textarea></td>
+                    </tr>
+                    <tr>
+                        <td><label for="PackageAuthor">Author</label></td>
+                        <td><input id="PackageAuthor" type="text" oninput="UpdatePkgItem('Author')" /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="PackageImages">Images</label></td>
+                        <td><textarea id="PackageImages" rows="2" oninput="UpdatePkgItem('Images')"> </textarea></td>
+                    </tr>
+                    <tr>
+                        <td><label for="PackageWebsite">Website</label></td>
+                        <td><input id="PackageWebsite" type="url" oninput="UpdatePkgItem('Website')" required /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </fieldset>
 
-        <form>
-            <fieldset>
-                <legend>Add Assets</legend>
-                <table class="inputForm">
-                    <colgroup>
-                        <col style="width: 120px;">
-                    </colgroup>
-                    <tbody>
-                        <tr>
-                            <td><label for="AssetURL">URL</label></td>
-                            <td><input id="AssetURL" type="url" required /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="AssetID">Asset ID</label></td>
-                            <td><input id="AssetID" type="text" required /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="AssetVersion">Version</label></td>
-                            <td><input id="AssetVersion" type="text" required /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="AssetLastModified">Last Modified</label></td>
-                            <td>
-                                <input id="AssetLastModified" type="datetime-local" required />
-                                <input id="AddAsset" type="button" value="Add Asset" onclick="AddAnAsset()" style="margin-left:20px; width:90px" />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </fieldset>
-        </form>
+
+
+        <fieldset>
+            <legend>Add Assets</legend>
+            <table class="inputForm">
+                <colgroup>
+                    <col style="width: 120px;">
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <td><label for="AssetURL">URL</label></td>
+                        <td><input id="AssetURL" type="url" required /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="AssetID">Asset ID</label></td>
+                        <td><input id="AssetID" type="text" required /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="AssetVersion">Version</label></td>
+                        <td><input id="AssetVersion" type="text" required /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="AssetLastModified">Last Modified</label></td>
+                        <td>
+                            <input id="AssetLastModified" type="datetime-local" required />
+                            <input id="AddAsset" type="button" value="Add Asset" onclick="AddAnAsset()" style="margin-left:20px; width:90px" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </fieldset>
 
     </div>
     <div id="Column2" class="column">
         <h2>YAML Output</h2>
         <h5>Creating <span id="FileName">newfile.yaml</span></h5>
         <p>The contents in this code pane are automatically generated from inputs on the left, but is also able to be customized manually. Beware, manual changes may be overriden if any of the input values are changed!</p>
-        <div id="editor"></div>
+        <p>
+            @foreach (var err in Model.Errors) {
+                <span>&#10;&#13;<span class="@(err.ErrorType == Shared.YamlErrorType.Warning ? "text-warning" :"text-danger")">Line:@err.LineNumber) > @err.Message</span></span>
+            }
+
+        </p>
+
+        <form method="post">
+            <input type="submit" value="Validate" onclick="SetYamlText()" />
+            <input id="YamlText" type="hidden" value="" name="yamltext"/>
+            <div id="editor"></div>
+        </form>
+        
     </div>
     
 </div>

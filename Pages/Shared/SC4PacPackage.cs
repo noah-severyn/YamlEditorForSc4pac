@@ -32,18 +32,6 @@ namespace SC4PackMan.Pages.Shared {
         /// </summary>
         public PackageInfo Info { get; set; }
 
-        //public Package(string group, string name, string version, int subfolder, string summary, string website, List<string>? dependencies = null, List<string>? assets = null, List<string>? include = null, List<string>? exclude = null, string warning = "", string conflicts = "", string description = "", string author = "", List<string>? images = null) {
-        //    Group = group;
-        //    Name = name;
-        //    Version = new Version(version);
-        //    Subfolder = subfolder;
-        //    Dependencies = dependencies ?? new List<string>();
-        //    Assets = assets ?? new List<string>();
-        //    Include = include ?? new List<string>();
-        //    Exclude = exclude ?? new List<string>();
-        //    PackageInfo = new PackageInfo(summary, website, warning, conflicts, description, author, images);
-        //}
-
         public override string ToString() {
             return $"{Group}:{Name} (v{Version}), {Subfolder}";
         }
@@ -77,12 +65,12 @@ namespace SC4PackMan.Pages.Shared {
             /// <summary>
             /// Single line summary.
             /// </summary>
-            public string Summary { get; set; }
+            public string? Summary { get; set; }
 
             /// <summary>
             /// A link to a website, usually the original download page.
             /// </summary>
-            public string Website { get; set; }
+            public string? Website { get; set; }
 
             /// <summary>
             /// An informational message that displayed during the installation process.
@@ -108,41 +96,9 @@ namespace SC4PackMan.Pages.Shared {
             /// </summary>
             public List<string>? Images { get; set; }
 
-            //public PackageInfo(string summary, string website, string warning = "", string conflicts = "", string description = "", string author = "", List<string>? images = null) {
-            //    Summary = summary;
-            //    Website = website;
-            //    Warning = warning;
-            //    Conflicts = conflicts;
-            //    Description = description;
-            //    Author = author;
-            //    Images = images ?? new List<string>();
-            //}
 
             public override string ToString() {
                 return Summary;
-            }
-
-            public string ToYAMLString() {
-                string output = "\r\ninfo:\r\n";
-                output = output + "summary: " + Summary + "\r\n";
-                if (Warning != string.Empty) {
-                    output = output + "  warning: " + Warning + "\r\n";
-                }
-                if (Conflicts != string.Empty) {
-                    output = output + "  conflicts: " + Conflicts + "\r\n";
-                }
-                if (Description != string.Empty) {
-                    output = output + "  description: >\r\n" + Description + "\r\n";
-                }
-                if (Author != string.Empty) {
-                    output = output + "  author:" + Author + "\r\n";
-                }
-                if (Images is not null && Images.Count > 0) {
-                    output = output + "  images:" + Images.ToYAMLString() + "\r\n";
-                }
-                output = output + "website: " + Website + "\r\n";
-
-                return output;
             }
         }
     }

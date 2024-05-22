@@ -56,20 +56,20 @@ namespace SC4PackMan.Pages.Shared {
 
 
 
-        public static void ValidateYaml() {
-            string test1 = "group: \"aqua877\"\r\nname: \"jrs-prop-pack-signs\"\r\nversion: \"1\"\r\nsubfolder: \"100-props-textures\"\r\nassets:\r\n- assetId: \"aqua-877-jrs-prop-pack-signs\"\r\ninfo:\r\n  summary: \"Japanese Road-Sign props\"\r\n  author: \"aqua877\"\r\n  website: \"http://hide-inoki.com/bbs/archives/sc4_0721.html\"\r\n\r\n---\r\nassetId: \"aqua-877-jrs-prop-pack-signs\"\r\nversion: \"1\"\r\nlastModified: \"2020-08-26T12:37:13Z\"\r\nurl: \"http://hide-inoki.com/bbs/archives/files/1107.zip\"\r\n";
-            string test2 = File.ReadAllText("C:\\source\\repos\\sc4pac\\src\\yaml\\aqua877\\jrs-prop-pack.yaml");
+        public static List<YamlError> ValidateYaml(string yamlText) {
+            //string test1 = "group: \"aqua877\"\r\nname: \"jrs-prop-pack-signs\"\r\nversion: \"1\"\r\nsubfolder: \"100-props-textures\"\r\nassets:\r\n- assetId: \"aqua-877-jrs-prop-pack-signs\"\r\ninfo:\r\n  summary: \"Japanese Road-Sign props\"\r\n  author: \"aqua877\"\r\n  website: \"http://hide-inoki.com/bbs/archives/sc4_0721.html\"\r\n\r\n---\r\nassetId: \"aqua-877-jrs-prop-pack-signs\"\r\nversion: \"1\"\r\nlastModified: \"2020-08-26T12:37:13Z\"\r\nurl: \"http://hide-inoki.com/bbs/archives/files/1107.zip\"\r\n";
+            //string test2 = File.ReadAllText("C:\\source\\repos\\sc4pac\\src\\yaml\\aqua877\\jrs-prop-pack.yaml");
 
-            YamlError? error = ValidateDocumentSeparators(test2);
+            YamlError? error = ValidateDocumentSeparators(yamlText);
 
             //First form the document - this assumes the yaml is properly formed already
-            YamlFile yaml = Deserialize(test2);
+            YamlFile yaml = Deserialize(yamlText);
 
             //The idea is we want to fully deserialze the data even if there are error so we can show all errors at once isntead of multiple times
             List<YamlError> errors = yaml.Validate();
 
 
-
+            return errors;
         }
 
 
