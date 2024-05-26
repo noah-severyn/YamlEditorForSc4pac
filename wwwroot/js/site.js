@@ -36,7 +36,6 @@ const cm = document.querySelector('.CodeMirror').CodeMirror;
 
 
 
-
 async function FetchSc4pacData() {
 	const request = new Request('https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json');
 	const response = await fetch(request);
@@ -57,7 +56,6 @@ function UpdatePkgItem(itemName) {
 	if (itemName === 'Group' || itemName === 'Name' || itemName === 'AssetID') {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-zA-Z0-9-]'), '');
 	}
-
 
 	//Special case for Description: it's multiline text while all others are single line
 	if (itemName === 'Description') {
@@ -88,8 +86,6 @@ function UpdatePkgItem(itemName) {
 		itemlist.forEach((item) => {
 			newValue = newValue + '\n  - "' + item.trim() + '"'
 		});
-		//console.log(imagelist.length);
-		//console.log(newValue);
 	}
 
 	//Default case for other inputs
@@ -97,9 +93,6 @@ function UpdatePkgItem(itemName) {
 		var rgx = new RegExp(itemName.toLowerCase() + ': "(.*)"');
 		newValue = itemName.toLowerCase() + ': ' + '"' + inputText + '"'
 	}
-	//console.log(rgx.test(cm.getValue()))
-	//console.log(itemName.toLowerCase() + " _ " +  cm.getValue().search(rgx));
-	//console.log(newValue);
 
 	cm.setValue(cm.getValue().replace(rgx, newValue));
 
@@ -132,7 +125,7 @@ function AddAnAsset() {
 	);
 }
 
+//This function is critical to update the value of the hidden control that gets submitted for validation
 function SetYamlText() {
-	document.getElementById('YamlText').innerHTML = cm.getValue();
-	alert("updated!");
+	document.getElementById('SubmittedYaml').value = cm.getValue();
 }

@@ -2,12 +2,6 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
-
-    if (Request.QueryString.HasValue) {
-        string yamlText = Request.Form["yamltext"];
-        Model.ValidateYaml(yamlText);
-    }
-    //
 }
 
 
@@ -62,6 +56,7 @@
                                 <option value="650-religion">650-religion</option>
                                 <option value="660-parks">660-parks</option>
                                 <option value="700-transit">700-transit</option>
+                                <option value="710-automata">710-automata</option>
                                 <option value="900-overrides">900-overrides</option>
                             </select>
                         </td>
@@ -155,17 +150,25 @@
         <h5>Creating <span id="FileName">newfile.yaml</span></h5>
         <p>The contents in this code pane are automatically generated from inputs on the left, but is also able to be customized manually. Beware, manual changes may be overriden if any of the input values are changed!</p>
         <p>
-            @foreach (var err in Model.Errors) {
-                <span>&#10;&#13;<span class="@(err.ErrorType == Shared.YamlErrorType.Warning ? "text-warning" :"text-danger")">Line:@err.LineNumber) > @err.Message</span></span>
+
+            @{
+                if(Model.Errors.Count == 0) {
+                    <span>&#10;&#13;<span class="text-success">YAML schema validated. No errors found.</span></span>
+                } else {
+                    foreach (var err in Model.Errors) {
+                        <span>&#10;&#13;<span class="@(err.ErrorType == Shared.YamlErrorType.Warning ? "text-warning" :"text-danger")">Line:@err.LineNumber > @err.Message</span></span>
+                    }
+                }
             }
 
         </p>
 
-        <form method="post">
+        <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
+        <form method="post" action="javascript:void(0);">
             <input type="submit" value="Validate" onclick="SetYamlText()" />
-            <input id="YamlText" type="hidden" value="" name="yamltext"/>
-            <div id="editor"></div>
+            <input id="SubmittedYaml" type="hidden" asp-for="YamlText" />
         </form>
+        <div id="editor"></div>
         
     </div>
     

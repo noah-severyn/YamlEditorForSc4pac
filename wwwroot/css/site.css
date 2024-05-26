@@ -43,7 +43,9 @@ body {
 }
 
 fieldset {
-    border-bottom: 1px dashed black; 
+    border-bottom: 1px dashed black;
+    padding-bottom: 10px;
+    padding-top: 10px;
 }
 textarea, input[type=text], input[type=url] {
     width: 99%

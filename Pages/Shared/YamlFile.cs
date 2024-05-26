@@ -43,8 +43,6 @@ namespace SC4PackMan.Pages.Shared {
                 //Version
                 if (pkg.Version is null || pkg.Version == "") {
                     errors.Add(new YamlError(YamlErrorType.Error, -1, "Version cannot be blank."));
-                } else if (!Version.TryParse(pkg.Version, out _)) {
-                    errors.Add(new YamlError(YamlErrorType.Error, -1, "Version is an invalid format."));
                 }
 
                 //Subfolder
@@ -157,8 +155,6 @@ namespace SC4PackMan.Pages.Shared {
                 //Version
                 if (ast.Version is null || ast.Version == "") {
                     errors.Add(new YamlError(YamlErrorType.Error, -1, "Version cannot be blank."));
-                } else if (!Version.TryParse(ast.Version, out _)) {
-                    errors.Add(new YamlError(YamlErrorType.Error, -1, "Version is an invalid format."));
                 }
 
                 //Last Modified

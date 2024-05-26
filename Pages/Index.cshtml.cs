@@ -1,4 +1,5 @@
 using System.Text;
+using System.Xml;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SC4PackMan.Pages.Shared;
@@ -6,7 +7,6 @@ using SC4PackMan.Pages.Shared;
 namespace SC4PackMan.Pages {
     public class IndexModel : PageModel {
         public List<YamlError> Errors { get; set; }
-        public string YamlText { get; set; }
         private readonly ILogger<IndexModel> _logger; 
 
         public IndexModel(ILogger<IndexModel> logger) {
@@ -22,8 +22,18 @@ namespace SC4PackMan.Pages {
             //Errors = YamlSchema.ValidateYaml();
         }
 
-        public void ValidateYaml(string yamlText) {
-            Errors = YamlSchema.ValidateYaml(yamlText);
+        public void ValidateYaml() {
+            //SubmittedYaml.Value
+            
+        }
+
+        [BindProperty]
+        public string YamlText { get; set; }
+        public void OnPost() {
+            if (YamlText is null) {
+                return;
+            }
+            Errors = YamlSchema.ValidateYaml(YamlText);
         }
 
 
