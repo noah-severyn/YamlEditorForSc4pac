@@ -13,16 +13,20 @@
 <div style="display:flex">
     <div id="Column1" class="column">
         <h2>Package Data</h2>
-        <p>For the Include, Exclude, and Images fields, add multiple items separated by a semicolon. Variants and options are not yet supported with this tool.</p>
+        <p>For the Dependencies, Include, Exclude, and Images fields, add multiple items separated by a semicolon. Variants and options are not yet supported with this tool.</p>
         <label for="EditingToggle">Edit Package</label>
         <input type="checkbox" id="EditingToggle" checked="true" onclick="ToggleEditingView()" />
         <br />
 
         <label for="SelectPackageNumber">Editing Package: </label>
-        <select id="SelectPackageNumber" onfocus="ToggleEditingView('true')"></select>
+        <select id="SelectPackageNumber" onfocus="ToggleEditingView('true')">
+            <option value="0">New</option>
+        </select>
 
         <label for="SelectAssetNumber">Editing Asset:</label>
-        <select id="SelectAssetNumber" onfocus="ToggleEditingView('false')"></select>
+        <select id="SelectAssetNumber" onfocus="ToggleEditingView('false')" onchange="FillAssetForm()">
+            <option value="0">New</option>
+        </select>
 
         <div id="EditingPackageDiv">
             <fieldset id="PackageProperties">
@@ -73,12 +77,16 @@
                             </td>
                         </tr>
                         <tr>
+                            <td><label for="PackageDependencies">Dependencies</label></td>
+                            <td><textarea id="PackageDependencies" rows="2" oninput="UpdatePkgItem('Dependencies')"></textarea></td>
+                        </tr>
+                        <tr>
                             <td><label for="PackageInclude">Include</label></td>
-                            <td><textarea id="PackageInclude" rows="2" oninput="UpdatePkgItem('Include')"> </textarea></td>
+                            <td><textarea id="PackageInclude" rows="2" oninput="UpdatePkgItem('Include')"></textarea></td>
                         </tr>
                         <tr>
                             <td><label for="PackageExclude">Exclude</label></td>
-                            <td><textarea id="PackageExclude" rows="2" oninput="UpdatePkgItem('Exclude')"> </textarea></td>
+                            <td><textarea id="PackageExclude" rows="2" oninput="UpdatePkgItem('Exclude')"></textarea></td>
                         </tr>
                     </tbody>
                 </table>
@@ -105,7 +113,7 @@
                         </tr>
                         <tr>
                             <td><label for="PackageDescription">Description</label></td>
-                            <td><textarea id="PackageDescription" rows="4" oninput="UpdatePkgItem('Description')"> </textarea></td>
+                            <td><textarea id="PackageDescription" rows="4" oninput="UpdatePkgItem('Description')"></textarea></td>
                         </tr>
                         <tr>
                             <td><label for="PackageAuthor">Author</label></td>
@@ -113,7 +121,7 @@
                         </tr>
                         <tr>
                             <td><label for="PackageImages">Images</label></td>
-                            <td><textarea id="PackageImages" rows="2" oninput="UpdatePkgItem('Images')"> </textarea></td>
+                            <td><textarea id="PackageImages" rows="2" oninput="UpdatePkgItem('Images')"></textarea></td>
                         </tr>
                         <tr>
                             <td><label for="PackageWebsite">Website</label></td>
@@ -181,8 +189,8 @@
         </p> *@
 
         <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
-        <form method="post" action="">
-            <input type="submit" value="Validate" onclick="SetYamlText()" />
+        <form method="post" action="javascript:void(0);">
+            <input type="submit" value="Validate" onclick="CountItems()" />
             <input id="SubmittedYaml" type="hidden" asp-for="YamlText" />
         </form>
         <div id="editor"></div>
