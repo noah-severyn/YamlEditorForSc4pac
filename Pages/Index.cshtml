@@ -144,21 +144,21 @@
                     </colgroup>
                     <tbody>
                         <tr>
-                            <td><label for="AssetURL">URL</label></td>
-                            <td><input id="AssetURL" type="url" required /></td>
+                            <td><label for="AssetUrl">URL</label></td>
+                            <td><input id="AssetUrl" type="url" oninput="UpdateAssetItem('Url')" /></td>
                         </tr>
                         <tr>
-                            <td><label for="AssetID">Asset ID</label></td>
-                            <td><input id="AssetID" type="text" required /></td>
+                            <td><label for="AssetId">Asset ID</label></td>
+                            <td><input id="AssetId" type="text" oninput="UpdateAssetItem('AssetId')" /></td>
                         </tr>
                         <tr>
                             <td><label for="AssetVersion">Version</label></td>
-                            <td><input id="AssetVersion" type="text" required /></td>
+                            <td><input id="AssetVersion" type="text" oninput="UpdateAssetItem('Version')" /></td>
                         </tr>
                         <tr>
                             <td><label for="AssetLastModified">Last Modified</label></td>
                             <td>
-                                <input id="AssetLastModified" type="datetime-local" required />
+                                <input id="AssetLastModified" type="datetime-local" step="1" oninput="UpdateAssetItem('LastModified')" />
                                 <input id="AddAssetButton" type="button" value="Add Asset" onclick="AddNewAsset()" style="margin-left:20px; width:90px" />
                             </td>
                         </tr>

@@ -8,7 +8,43 @@ CodeMirror(document.querySelector('#editor'), {
 	tabSize: 2,
 	lineWrapping: true,
 	value:
-	'#Start by adding a package or an asset from the pane on the left.',
+`group: mattb325
+name: new-york-w2w-pack-vol01
+version: "1.0"
+subfolder: 300-commercial
+
+info:
+  summary: Ten W2W buildings from New York City
+  description: >
+    This Wall-to-Wall pack consists of real buildings from around the Noho and Soho districts that take in a large variety of architectural styles.
+    In addition to being taller mid-rise buildings which are great for busy city street scenes, these buildings are mostly all corner buildings.
+
+    Some of the buildings not only grow as Commercial, but also as Residential buildings.
+    They grow on lot sizes 1×1, 1×2 and 2×2 for medium and high-density zones with the New York tileset.
+  author: "mattb325"
+  website: https://community.simtropolis.com/files/file/33079-new-york-w2w-pack-vol01-maxis-nite-version/
+
+variants:
+  - variant: { nightmode: standard }
+    assets:
+      - assetId: mattb325-new-york-w2w-01-maxisnite
+  - variant: { nightmode: dark }
+    dependencies: [ "simfox:day-and-nite-mod" ]
+    assets:
+      - assetId: mattb325-new-york-w2w-01-darknite
+
+---
+assetId: mattb325-new-york-w2w-01-darknite
+version: "1.0"
+lastModified: "2019-08-10T21:32:52Z"
+url: https://community.simtropolis.com/files/file/33078-new-york-w2w-pack-vol01-darknite-version/?do=download
+
+---
+assetId: mattb325-new-york-w2w-01-maxisnite
+version: "1.0"
+lastModified: "2019-08-10T21:37:39Z"
+url: https://community.simtropolis.com/files/file/33079-new-york-w2w-pack-vol01-maxis-nite-version/?do=download
+`,
 	mode: 'yaml'
 });
 //const packages = FetchSc4pacData();
@@ -36,11 +72,19 @@ async function FetchSc4EvermoreData() {
 
 
 
-function UpdatePkgItem(itemName) {
-	var inputElement = document.getElementById("Package" + itemName);
+function EntryValidation(itemType, fieldName) {
+	if (fieldName === 'AssetId') {
+		var inputElement = document.getElementById(fieldName);
+	} else {
+		var inputElement = document.getElementById(itemType + fieldName);
+	}
+
+	
 	var inputText = inputElement.value;
-	if (itemName === 'Group' || itemName === 'Name' || itemName === 'AssetID') {
+	if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'AssetId') {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-zA-Z0-9-]'), '');
+	} else if (fieldName === 'Website' || fieldName === 'URL') {
+
 	}
 	inputElement.value = inputText;
 
@@ -215,33 +259,67 @@ function AddNewAsset() {
 
 function FillAssetForm() {
 	var targetIdx = document.getElementById('SelectAssetNumber').value;
-	var idx = 0;
-	console.log(targetIdx === '0');
+	var assetIdx = 0;
+	console.log(targetIdx);
 	if (targetIdx === '0') {
-		document.getElementById('AssetURL').value = '';
-		document.getElementById('AssetID').value = '';
+		document.getElementById('AssetUrl').value = '';
+		document.getElementById('AssetId').value = '';
 		document.getElementById('AssetVersion').value = '';
 		document.getElementById('AssetLastModified').value = 0;
 	} else {
 		var documents = cm.getValue().split('---');
-		forEach(doc => {
-			alert(doc);
+		documents.forEach(doc => {
 			if (IsAsset(doc)) {
-				idx++;
-			}
-			if (idx == targetIdx) {
-				var rgx1 = new RegExp('(?<=assetId:)(.|\n)*(?=\nurl:)');
-				var rgx2 = new RegExp('(?<=url:)(.|\n)*(?=\nversion:)');
-				var rgx3 = new RegExp('(?<=version:)(.|\n)*(?=\nlastModified:)');
-				var rgx4 = new RegExp('(\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d)(Z|-\d\d:\d\d)');
+				assetIdx++;
+				if (assetIdx == targetIdx) {
+					var rgxAssetUrl = new RegExp('(?<=url: ).*');
+					var rgxAssetId = new RegExp('(?<=assetId: ).*');
+					var rgxAssetVer = new RegExp('(?<=version: ).*');
+					var rgxAssetMod = new RegExp('(?<=lastModified: ).*');
 
-				document.getElementById('AssetURL').value = doc.match(rgx1)[0];
-				document.getElementById('AssetID').value = doc.match(rgx2)[0];
-				document.getElementById('AssetVersion').value = doc.match(rgx3)[0];
-				document.getElementById('AssetLastModified').value = doc.match(rgx4)[0];
+					document.getElementById('AssetUrl').value = doc.match(rgxAssetUrl)[0].replaceAll('"','');
+					document.getElementById('AssetId').value = doc.match(rgxAssetId)[0].replaceAll('"', '');
+					document.getElementById('AssetVersion').value = doc.match(rgxAssetVer)[0].replaceAll('"', '');
+					document.getElementById('AssetLastModified').value = new Date(doc.match(rgxAssetMod)[0].replaceAll('"', '')).toISOString().slice(0, 19);
+				}
 			}
 		});
 	}
+}
+function UpdateAssetItem(itemName) {
+	EntryValidation('Asset', itemName);
+	var targetIdx = document.getElementById('SelectAssetNumber').value;
+	var assetIdx = 0;
+	var newValue = '';
+	if (targetIdx !== '0')  {
+		var documents = cm.getValue().split('---');
+		documents.forEach(doc => {
+			if (IsAsset(doc)) {
+				assetIdx++;
+				if (assetIdx == targetIdx) {
+					var rgx = new RegExp('(?<=' + itemName.charAt(0).toLowerCase() + itemName.slice(1) + ': ).*');
+					if (itemName === 'AssetId') {
+						var inputText = document.getElementById(itemName).value;
+					} else {
+						var inputText = document.getElementById("Asset" + itemName).value;
+					}
+
+					if (itemName === 'LastModified') {
+						inputText = inputText + 'Z'
+					}
+
+					//console.log('rgx: '+ rgx +', found at:' + doc.search(rgx) + ', new val:' + inputText);
+					doc = doc.replace(rgx, '"' + inputText + '"');
+				}
+			}
+			newValue = newValue + doc + '---'
+		});
+	}
+
+	if (newValue.slice(-3) === '---') {
+		newValue = newValue.slice(0, -3);
+	}
+	cm.setValue(newValue);
 }
 
 
@@ -275,6 +353,8 @@ function ToggleEditingView(valueToSet) {
 }
 
 function CountItems() {
+	countOfAssets = 0;
+	countOfPackages = 0;
 	var items = cm.getValue().split('---');
 	items.forEach((item) => {
 		if (IsAsset(item)) {
@@ -287,12 +367,14 @@ function CountItems() {
 	var astList = Array(countOfAssets).fill().map((element, index) => index + 1);
 
 	var pkgElement = document.getElementById('SelectPackageNumber');
+	pkgElement.replaceChildren();
+	pkgElement.appendChild(new Option('New', 0));
 	pkgList.forEach(i => pkgElement.add(new Option(i, i)));
-	//pkgElement.appendChild(new Option('New', countOfPackages + 1));
 
 	var assetElement = document.getElementById('SelectAssetNumber');
+	assetElement.replaceChildren();
+	assetElement.appendChild(new Option('New', 0));
 	astList.forEach(i => assetElement.add(new Option(i, i)));
-	//assetElement.appendChild(new Option('New', countOfAssets + 1));
 
 	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
 }
