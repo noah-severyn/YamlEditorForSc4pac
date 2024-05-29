@@ -14,10 +14,7 @@
 <div style="display:flex">
     <div id="Column1" class="column">
         <h2>Package Data</h2>
-        <p>For the Dependencies, Include, Exclude, and Images fields, add multiple items separated by a semicolon. Variants and options are not yet supported with this tool.</p>
-        <label for="EditingToggle">Edit Package</label>
-        <input type="checkbox" id="EditingToggle" checked="true" onclick="ToggleEditingView()" />
-        <br />
+        <p>For Dependencies, Include, Exclude, and Images fields add multiple items separated by a semicolon. Variants and options are not yet supported with this tool.</p>
 
         <label for="SelectPackageNumber">Modify Package: </label>
         <select id="SelectPackageNumber" onfocus="ToggleEditingView('true')" onchange="FillPackageForm()">
@@ -30,8 +27,19 @@
         </select>
 
         <div id="EditingPackageDiv">
-            <fieldset id="PackageProperties">
-                <legend>Package Properties</legend>
+
+            <div class="tab" >
+                <button class="tab-link" onclick="OpenTab(event, 'PackageProperties')">Package Properties</button>
+                <button class="tab-link" onclick="OpenTab(event, 'PackageInfo')">Package Info</button>
+            </div>
+
+
+
+
+
+
+            <fieldset id="PackageProperties" class="tabcontent">
+                @* <legend>Package Properties</legend> *@
                 <table class="inputForm">
                     <colgroup>
                         <col style="width: 120px;">
@@ -43,7 +51,7 @@
                         </tr>
                         <tr>
                             <td><label for="PackageName">Name</label></td>
-                            <td><input id="PackageName" type="text" class="valid" oninput="UpdatePackageItem('Name')" required /></td>
+                            <td><input id="PackageName" type="text" oninput="UpdatePackageItem('Name')" required /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageVersion">Version</label></td>
@@ -93,8 +101,8 @@
                 </table>
             </fieldset>
 
-            <fieldset id="PackageInfo">
-                <legend>Package Info</legend>
+            <fieldset id="PackageInfo" class="tabcontent">
+                @* <legend>Package Info</legend> *@
                 <table class="inputForm">
                     <colgroup>
                         <col style="width: 120px;">
@@ -114,7 +122,7 @@
                         </tr>
                         <tr>
                             <td><label for="PackageDescription">Description</label></td>
-                            <td><textarea id="PackageDescription" rows="4" oninput="UpdatePackageItem('Description')"></textarea></td>
+                            <td><textarea id="PackageDescription" rows="3" oninput="UpdatePackageItem('Description')"></textarea></td>
                         </tr>
                         <tr>
                             <td><label for="PackageAuthor">Author</label></td>
