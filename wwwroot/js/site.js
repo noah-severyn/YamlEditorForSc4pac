@@ -49,6 +49,7 @@ var countOfAssets = 0;
 CountItems();
 ClearAssetInputs();
 ClearPackageInputs();
+ToggleEditingView();
 
 
 async function FetchSc4pacData() {
@@ -70,7 +71,7 @@ function ToggleEditingView(valueToSet) {
 	if (valueToSet !== undefined) {
 		isEditingPackage = (valueToSet === 'true');
 	} else {
-		isEditingPackage = document.getElementById('EditingToggle').checked;
+		isEditingPackage = valueToSet;
 	}
 
 	if (isEditingPackage) {

@@ -145,8 +145,8 @@ function AddNewPackage() {
  */
 function FillPackageForm() {
 	var targetIdx = document.getElementById('SelectPackageNumber').value;
+	document.getElementById('AddPackageButton').disabled = (document.getElementById('SelectPackageNumber').value != '0');
 	var pkgIdx = 0;
-	console.log(targetIdx);
 	if (targetIdx === '0') {
 		ClearPackageInputs();
 	} else {
@@ -193,7 +193,7 @@ function UpdatePackageItem(itemName) {
 				if (pkgIdx == targetIdx) {
 					var inputText = document.getElementById('Package' + itemName).value;
 
-					//First check if the item is found to determine if we need to add or modify it
+					//Check if the item is found to determine if we need to add or modify it
 					if (doc.indexOf(itemName.toLowerCase() + ':') === -1) {
 						switch (itemName) {
 							case 'Dependencies':
@@ -202,19 +202,34 @@ function UpdatePackageItem(itemName) {
 								var depList = inputText.replaceAll('\n', '').split(';');
 								var newValue = 'dependencies:' + ArrayToYamlList(depList, 0) + '\n';
 								break;
+							case 'Warning':
+								var idx = FirstIndexOf(doc, '\n  conflicts:', '\n  description:', '\n  author:', '\n  images:', '\n  website:')
+								var newValue = '\n  warning: "' + inputText + '"';
+								break;
+							case 'Conflicts':
+								var idx = FirstIndexOf(doc, '\n  description:', '\n  author:', '\n  images:', '\n  website:')
+								var newValue = '\n  conflicts: "' + inputText + '"';
+								break;
+							case 'Description':
+								var idx = FirstIndexOf(doc, '\n  author:', '\n  images:', '\n  website:')
+								var newValue = '\n  description: >\n    ' + inputText.replaceAll('\n','\n    ') + '"';
+								break;
+							case 'Author':
+								var idx = FirstIndexOf(doc, '\n  images:', '\n  website:')
+								var newValue = '\n  author: "' + inputText + '"';
+								break;
+							case 'Images':
+								var idx = doc.indexOf('\n  website:');
+								var depList = inputText.replaceAll('\n', '').split(';');
+								var newValue = '\n  images:' + ArrayToYamlList(depList, 2);
+								break;
 						}
-
-						//console.log(doc.slice(0, idx));
-
-
-
-
-
 						doc = doc.slice(0, idx) + newValue + doc.slice(idx, -1);
-
-
 					}
+
+					//Otherwise update the existing item
 					else {
+						console.log('update');
 						//Special case for Description: it's multiline text while all others are single line
 						if (itemName === 'Description') {
 							var rgx = new RegExp('>(.|\n)*(?=\n  author:)');
@@ -260,6 +275,17 @@ function UpdatePackageItem(itemName) {
 }
 
 
+function FirstIndexOf(sourceText) {
+	var locn = 0;
+	for (var idx = 1; idx < arguments.length; idx++) {
+		locn = sourceText.indexOf(arguments[idx]);
+		if (locn > -1) {
+			break;
+		}
+	}
+	return locn;
+}
+
 
 
 /**
@@ -267,6 +293,7 @@ function UpdatePackageItem(itemName) {
  */
 function FillAssetForm() {
 	var targetIdx = document.getElementById('SelectAssetNumber').value;
+	document.getElementById('AddAssetButton').disabled = (document.getElementById('SelectAssetNumber').value != '0');
 	var assetIdx = 0;
 	if (targetIdx === '0') {
 		ClearAssetInputs();
@@ -380,7 +407,6 @@ function ArrayToYamlList(itemList, padding) {
 	var newValue = '';
 	itemList.forEach((item) => {
 		if (item !== '') {
-			console.log(item);
 			newValue = newValue + '\n' + ' '.repeat(padding) + '- "' + item.trim() + '"';
 		}
 	});

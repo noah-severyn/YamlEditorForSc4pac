@@ -51,11 +51,6 @@ textarea, input[type=text], input[type=url] {
     width: 99%
 }
 
-.valid {
-    border-color: #cf222e;
-    border-color: #1a7f37;
-}
-
 table {
     width: 100%;
 }
