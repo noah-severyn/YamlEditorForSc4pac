@@ -43,13 +43,73 @@ url: "https://community.simtropolis.com/files/file/33379-andisart-sc13-homes-red
 
 
 const cm = document.querySelector('.CodeMirror').CodeMirror;
+var yamlData = null;
 var isEditingPackage = true;
 var countOfPackages = 0;
 var countOfAssets = 0;
-CountItems();
+ParseYaml();
 ClearAssetInputs();
 ClearPackageInputs();
 ToggleEditingView();
+document.getElementById("PkgPropTab").click();
+console.log(yamlData);
+
+
+
+/**
+ * Parse the current YAML input and update the UI accordingly based on the count of packages and assets.
+ */
+function ParseYaml() {
+	yamlData = jsyaml.loadAll(cm.getValue());
+}
+
+/**
+ * Update the UI accordingly based on the count of packages and assets.
+ */
+function CountItems() {
+	countOfAssets = 0;
+	countOfPackages = 0;
+	yamlData.forEach((item) => {
+		if (IsAsset(item)) {
+			countOfAssets++;
+		} else if (IsPackage(item)) {
+			countOfPackages++;
+		}
+	});
+
+	var pkgList = Array(countOfPackages).fill().map((element, index) => index + 1);
+	var pkgElement = document.getElementById('SelectPackageNumber');
+	pkgElement.replaceChildren();
+	pkgElement.appendChild(new Option('New', 0));
+	pkgList.forEach(i => pkgElement.add(new Option(i, i)));
+
+	var astList = Array(countOfAssets).fill().map((element, index) => index + 1);
+	var assetElement = document.getElementById('SelectAssetNumber');
+	assetElement.replaceChildren();
+	assetElement.appendChild(new Option('New', 0));
+	astList.forEach(i => assetElement.add(new Option(i, i)));
+
+	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
+}
+
+
+function UpdateCodePane() {
+	var newValue = '';
+	//TODO - figure out how to retain comments
+
+	for (var idx = 0; idx < yamlData.length; idx++) {
+		newValue = newValue + jsyaml.dump(yamlData[idx], {
+			'lineWidth': -1,
+			'quotingType': '"',
+			'forceQuotes': true
+		});
+		if (idx !== yamlData.length - 1) {
+			newValue = newValue + '\n---\n';
+		}
+	}
+	cm.setValue(newValue);
+	CountItems();
+}
 
 
 async function FetchSc4pacData() {
@@ -91,34 +151,35 @@ function ToggleEditingView(valueToSet) {
 /**
  * Count the number of Packages and Assets in the code pane and updates the UI with this new result.
  */
-function CountItems() {
-	countOfAssets = 0;
-	countOfPackages = 0;
-	var items = cm.getValue().split('---');
-	items.forEach((item) => {
-		if (IsAsset(item)) {
-			countOfAssets++;
-		} else if (IsPackage(item)) {
-			countOfPackages++;
-		}
-	});
-	var pkgList = Array(countOfPackages).fill().map((element, index) => index + 1);
-	var astList = Array(countOfAssets).fill().map((element, index) => index + 1);
+//function CountItems() {
+//	countOfAssets = 0;
+//	countOfPackages = 0;
+//	yamlData.forEach((item) => {
+//		if (IsAsset(item)) {
+//			countOfAssets++;
+//		} else if (IsPackage(item)) {
+//			countOfPackages++;
+//		}
+//	});
 
-	var pkgElement = document.getElementById('SelectPackageNumber');
-	pkgElement.replaceChildren();
-	pkgElement.appendChild(new Option('New', 0));
-	pkgList.forEach(i => pkgElement.add(new Option(i, i)));
+//	var pkgList = Array(countOfPackages).fill().map((element, index) => index + 1);
+//	var pkgElement = document.getElementById('SelectPackageNumber');
+//	pkgElement.replaceChildren();
+//	pkgElement.appendChild(new Option('New', 0));
+//	pkgList.forEach(i => pkgElement.add(new Option(i, i)));
 
-	var assetElement = document.getElementById('SelectAssetNumber');
-	assetElement.replaceChildren();
-	assetElement.appendChild(new Option('New', 0));
-	astList.forEach(i => assetElement.add(new Option(i, i)));
+//	var astList = Array(countOfAssets).fill().map((element, index) => index + 1);
+//	var assetElement = document.getElementById('SelectAssetNumber');
+//	assetElement.replaceChildren();
+//	assetElement.appendChild(new Option('New', 0));
+//	astList.forEach(i => assetElement.add(new Option(i, i)));
 
-	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
-}
+//	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
+//}
 
-
+/**
+ * Navigate to the specified tab.
+ */
 function OpenTab(event, tabName) {
 	var i, tablinks;
 

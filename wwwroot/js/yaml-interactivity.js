@@ -28,28 +28,27 @@ function ClearAssetInputs() {
 }
 
 
-function EntryValidation(itemType, fieldName) {
-	if (fieldName === 'AssetId') {
-		var inputElement = document.getElementById(fieldName);
-	} else {
-		var inputElement = document.getElementById(itemType + fieldName);
+function EntryValidation(elementId) {
+	if (elementId === 'PackageSubfolder' || elementId === 'AssetLastModified') {
+		return;
 	}
+
+	var inputElement = document.getElementById(elementId);
+	var inputText = inputElement.value;
 	var locn = inputElement.selectionStart;
 	
-	var inputText = inputElement.value;
+	var fieldName = elementId.replace('Package', '').replace('Asset', '');
 	if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'AssetId') {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-]'), '');
 	} else if (fieldName === 'Dependencies') {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-:;\n]'), '');
-	} else if (fieldName === 'Website' || fieldName === 'URL') {
+	} else if (fieldName === 'Website' || fieldName === 'Url') {
 
 	}
 	inputElement.value = inputText;
 
 	//The replacement of invalid characters resets cursor position to the end which is undesirable; reset it to where the user was editing
-	if (itemType + fieldName !== 'PackageSubfolder') {
-		inputElement.setSelectionRange(locn, locn);
-	}
+	inputElement.setSelectionRange(locn, locn);
 }
 
 function AddNewPackage() {
@@ -287,7 +286,9 @@ function FirstIndexOf(sourceText) {
 }
 
 
-
+// --------------------------------------------------------------------------------------------
+// ----------------------------------------   Assets   ----------------------------------------
+// --------------------------------------------------------------------------------------------
 /**
  * Fill the Asset input form fields with the values from the currently selected asset number.
  */
@@ -298,15 +299,14 @@ function FillAssetForm() {
 	if (targetIdx === '0') {
 		ClearAssetInputs();
 	} else {
-		var documents = cm.getValue().split('---');
-		documents.forEach(doc => {
+		yamlData.forEach(doc => {
 			if (IsAsset(doc)) {
 				assetIdx++;
 				if (assetIdx == targetIdx) {
-					document.getElementById('AssetUrl').value = ExtractText(doc, '(?<=url: ).*');
-					document.getElementById('AssetId').value = ExtractText(doc, '(?<=assetId: ).*');
-					document.getElementById('AssetVersion').value = ExtractText(doc, '(?<=version: ).*');
-					document.getElementById('AssetLastModified').value = new Date(ExtractText(doc, '(?<=lastModified: ).*')).toISOString().slice(0, 19);
+					document.getElementById('AssetUrl').value = doc.url;
+					document.getElementById('AssetId').value = doc.assetId;
+					document.getElementById('AssetVersion').value = doc.version;
+					document.getElementById('AssetLastModified').value = new Date(doc.lastModified).toISOString().slice(0, 19);
 				}
 			}
 		});
@@ -316,72 +316,38 @@ function FillAssetForm() {
  * Live update the YAML codepane with the values in the current Asset form field as the user types.
  */
 function UpdateAssetItem(itemName) {
-	EntryValidation('Asset', itemName);
+	EntryValidation(itemName);
 	var targetIdx = document.getElementById('SelectAssetNumber').value;
 	var assetIdx = 0;
-	var newValue = '';
 	if (targetIdx !== '0')  {
-		var documents = cm.getValue().split('---');
-		documents.forEach(doc => {
+		yamlData.forEach(doc => {
 			if (IsAsset(doc)) {
 				assetIdx++;
 				if (assetIdx == targetIdx) {
-					var rgx = new RegExp('(?<=' + itemName.charAt(0).toLowerCase() + itemName.slice(1) + ': ).*');
-					if (itemName === 'AssetId') {
-						var inputText = document.getElementById(itemName).value;
-					} else {
-						var inputText = document.getElementById("Asset" + itemName).value;
-					}
-
-					if (itemName === 'LastModified') {
-						inputText = inputText + 'Z'
-					}
-
-					//console.log('rgx: '+ rgx +', found at:' + doc.search(rgx) + ', new val:' + inputText);
-					doc = doc.replace(rgx, '"' + inputText + '"');
+					doc.url = document.getElementById('AssetUrl').value;
+					doc.assetId = document.getElementById('AssetId').value;
+					doc.version = document.getElementById('AssetVersion').value;
+					doc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
 				}
 			}
-			newValue = newValue + doc + '---'
 		});
 	}
-
-	if (newValue.slice(-3) === '---') {
-		newValue = newValue.slice(0, -3);
-	}
-	cm.setValue(newValue);
+	UpdateCodePane();
 }
 /**
- * Add a new asset to the end of this YAML document
+ * Add a new asset to the end of this YAML document.
  */
 function AppendNewAsset() {
-	//Add asset listing to end of file
-	var url = document.getElementById('AssetURL').value;
-	var id = document.getElementById('AssetID').value;
-	var version = document.getElementById('AssetVersion').value;
-	var modified = document.getElementById('AssetLastModified').value;
-	var newAsset =
-		'\r\n---\r\nassetId: "' + id + '"' +
-		'\r\nurl: "' + url + '"' +
-		'\r\nversion: "' + version + '"' +
-		'\r\nlastModified: "' + modified + 'Z"';
-	if (countOfAssets + countOfPackages == 0) {
-		cm.setValue(newAsset);
-	} else {
-		cm.setValue(cm.getValue() + newAsset);
+	var newAsset = {
+		url: document.getElementById('AssetUrl').value,
+		assetId: document.getElementById('AssetId').value,
+		version: document.getElementById('AssetVersion').value,
+		lastModified: document.getElementById('AssetLastModified').value + 'Z'
 	}
+	yamlData.push(newAsset);
 
-	//Add this asset to the package asset list
 	//TODO - ability to add assets to a package
-
-	//var currentContents = cm.getValue();
-	//var assetHeaderLocn = currentContents.indexOf('assets:');
-	//console.log(assetHeaderLocn);
-	//cm.setValue(
-	//	currentContents.slice(0, assetHeaderLocn + 7) +
-	//	'\r\n- assetId: "' + id + '"' +
-	//	currentContents.slice(assetHeaderLocn + 7)
-	//);
-	CountItems();
+	UpdateCodePane();
 }
 
 
@@ -441,18 +407,18 @@ function ExtractText(searchText, pattern) {
 }
 
 /**
- * Determine whether the specified substring includes represents a sc4pac Asset item.
- * @param {string} text The substring to analyze
- * @returns TRUE if the substring represents an Asset; FALSE otherwise
+ * Determine whether the specified object contains the properties of a sc4pac Asset.
+ * @param {Object} obj The object to analyze
+ * @returns TRUE if the object represents an Asset; FALSE otherwise
  */
-function IsAsset(text) {
-	return text.includes('assetId:') && text.includes("\nurl:") && text.includes("\nversion:") && text.includes("\nlastModified:");
+function IsAsset(obj) {
+	return Object.hasOwn(obj, 'assetId') && Object.hasOwn(obj, 'lastModified') && Object.hasOwn(obj, 'url') && Object.hasOwn(obj, 'version');
 }
 /**
- * Determine whether the specified substring includes represents a sc4pac Package item.
- * @param {string} text The substring to analyze
- * @returns TRUE if the substring represents a Package; FALSE otherwise
+ * Determine whether the specified object contains the properties of a sc4pac Package.
+ * @param {Object} obj The object to analyze
+ * @returns TRUE if the object represents a Package; FALSE otherwise
  */
-function IsPackage(text) {
-	return text.includes("group:") && text.includes("\nname:") && text.includes("\nversion:") && text.includes("\nsubfolder:");
+function IsPackage(obj) {
+	return Object.hasOwn(obj, 'group') && Object.hasOwn(obj, 'name') && Object.hasOwn(obj, 'version') && Object.hasOwn(obj, 'subfolder');
 }

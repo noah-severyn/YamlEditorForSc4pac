@@ -9,6 +9,7 @@
 <script type="text/javascript" src="/js/codemirror.js"></script>
 <script type="text/javascript" src="/js/codemirror-yaml.js"></script>
 <script type="text/javascript" src="/js/yaml-interactivity.js"></script>
+<script type="text/javascript" src="/js/js-yaml.js"></script>
 
 
 <div style="display:flex">
@@ -173,7 +174,7 @@
                     <tbody>
                         <tr>
                             <td><label for="AssetUrl">URL</label></td>
-                            <td><input id="AssetUrl" type="url" oninput="UpdateAssetItem('Url')" /></td>
+                            <td><input id="AssetUrl" type="url" oninput="UpdateAssetItem('AssetUrl')" /></td>
                         </tr>
                         <tr>
                             <td><label for="AssetId">Asset ID</label></td>
@@ -181,12 +182,12 @@
                         </tr>
                         <tr>
                             <td><label for="AssetVersion">Version</label></td>
-                            <td><input id="AssetVersion" type="text" oninput="UpdateAssetItem('Version')" /></td>
+                            <td><input id="AssetVersion" type="text" oninput="UpdateAssetItem('AssetVersion')" /></td>
                         </tr>
                         <tr>
                             <td><label for="AssetLastModified">Last Modified</label></td>
                             <td>
-                                <input id="AssetLastModified" type="datetime-local" step="1" oninput="UpdateAssetItem('LastModified')" />
+                                <input id="AssetLastModified" type="datetime-local" step="1" oninput="UpdateAssetItem('AssetLastModified')" />
                                 <input id="AddAssetButton" type="button" value="Add Asset" onclick="AppendNewAsset()" style="margin-left:20px; width:90px" />
                             </td>
                         </tr>
