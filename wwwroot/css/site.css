@@ -86,6 +86,7 @@ table {
         /* Change background color of buttons on hover */
         .tab button:hover {
             background-color: #f0f8ff;
+            border-bottom: 3px solid #0099ff;
         }
 
         /* Create an active/current tablink class */
