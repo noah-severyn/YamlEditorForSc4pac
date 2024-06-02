@@ -156,4 +156,8 @@ function OpenTab(event, tabName) {
 	// Show the current tab, and add an "active" class to the button that opened the tab
 	document.getElementById(tabName).style.display = "block";
 	event.currentTarget.className += " active";
-} 
+}
+
+function CopyToClipboard() {
+	navigator.clipboard.writeText(cm.getValue())
+}
