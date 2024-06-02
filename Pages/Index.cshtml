@@ -18,12 +18,12 @@
         <p>For Dependencies, Include, Exclude, and Images fields add multiple items separated by a semicolon. Variants and options are not yet supported with this tool.</p>
 
         <label for="SelectPackageNumber">Modify Package: </label>
-        <select id="SelectPackageNumber" onfocus="ToggleEditingView('true')" onchange="FillPackageForm()">
+        <select id="SelectPackageNumber" onfocus="SetEditingView('package')" onchange="FillPackageForm()">
             <option value="0">New</option>
         </select>
 
         <label for="SelectAssetNumber">Modify Asset:</label>
-        <select id="SelectAssetNumber" onfocus="ToggleEditingView('false')" onchange="FillAssetForm()">
+        <select id="SelectAssetNumber" onfocus="SetEditingView('asset')" onchange="FillAssetForm()">
             <option value="0">New</option>
         </select>
 
@@ -32,6 +32,7 @@
             <div class="tab" >
                 <button id="PkgPropTab" class="tab-link" onclick="OpenTab(event, 'PackageProperties')">Package Properties</button>
                 <button id="PkgInfoTab" class="tab-link" onclick="OpenTab(event, 'PackageInfo')">Package Info</button>
+                <button id="PkgOptVarTab" class="tab-link" onclick="OpenTab(event, 'PackageOptionsVariants')">Options + Variants</button>
             </div>
 
 
@@ -47,20 +48,20 @@
                     <tbody>
                         <tr>
                             <td><label for="PackageGoup">Group</label></td>
-                            <td><input id="PackageGroup" type="text" oninput="UpdatePackageItem('Group')" required /></td>
+                            <td><input id="PackageGroup" type="text" oninput="UpdatePackageItem('PackageGroup')" required /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageName">Name</label></td>
-                            <td><input id="PackageName" type="text" oninput="UpdatePackageItem('Name')" required /></td>
+                            <td><input id="PackageName" type="text" oninput="UpdatePackageItem('PackageName')" required /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageVersion">Version</label></td>
-                            <td><input id="PackageVersion" type="text" oninput="UpdatePackageItem('Version')" required /></td>
+                            <td><input id="PackageVersion" type="text" oninput="UpdatePackageItem('PackageVersion')" required /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageSubfolder">Subfolder</label></td>
                             <td>
-                                <select id="PackageSubfolder" oninput="UpdatePackageItem('Subfolder')" required>
+                                <select id="PackageSubfolder" oninput="UpdatePackageItem('PackageSubfolder')" required>
                                     <option value="050-early-mods">050-early-mods</option>
                                     <option value="100-props-textures">100-props-textures</option>
                                     <option value="150-mods">150-mods</option>
@@ -87,81 +88,78 @@
                         </tr>
                         <tr>
                             <td><label for="PackageDependencies">Dependencies</label></td>
-                            <td><textarea id="PackageDependencies" rows="2" oninput="UpdatePackageItem('Dependencies')"></textarea></td>
+                            <td><textarea id="PackageDependencies" rows="2" oninput="UpdatePackageItem('PackageDependencies')"></textarea></td>
                         </tr>
-                    </tbody>
-                </table>
-                <br />
-                <br />
-                @* <table id="PackageAssetsTable">
-                    <colgroup>
-                        <col style="width: 120px;">
-                    </colgroup>
-                    <tbody>
+                        <tr>
+                            <td colspan="2"><br />These assets are not part of any variant or option.</td>
+                        </tr>
                         <tr>
                             <td><label for="SelectPackageAsset">Select Asset:</label></td>
                             <td>
-                                <select id="SelectPackageAsset" onchange="FillPackageAssets()">
+                                <select id="SelectPackageAsset" onchange="FillPackageAssetForm()">
                                     <option value="0">New</option>
                                 </select>
                             </td>
                         </tr>
                         <tr>
                             <td><label for="PackageAssetId">Asset ID</label></td>
-                            <td><input id="PackageAssetId" type="text" oninput="UpdatePackageItem('AssetId')" required /></td>
+                            <td><input id="PackageAssetId" type="text" oninput="UpdatePackageItem('PackageAssetId')" required /></td>
                         </tr>
                         <tr>
-                            <td><label for="PackageInclude">Include</label></td>
-                            <td><textarea id="PackageInclude" rows="2" oninput="UpdatePackageItem('Include')"></textarea></td>
+                            <td><label for="PackageAssetInclude">Include</label></td>
+                            <td><textarea id="PackageAssetInclude" rows="2" oninput="UpdatePackageItem('PackageAssetInclude')"></textarea></td>
                         </tr>
                         <tr>
-                            <td><label for="PackageExclude">Exclude</label></td>
-                            <td><textarea id="PackageExclude" rows="2" oninput="UpdatePackageItem('Exclude')"></textarea></td>
+                            <td><label for="PackageAssetExclude">Exclude</label></td>
+                            <td><textarea id="PackageAssetExclude" rows="2" oninput="UpdatePackageItem('PackageAssetExclude')"></textarea></td>
                         </tr>
                     </tbody>
-                </table> *@
+                </table>
+                </table>
             </fieldset>
 
             <fieldset id="PackageInfo" class="tabcontent">
-                <table>
+                <table id="PackageInfoTable">
                     <colgroup>
                         <col style="width: 120px;">
                     </colgroup>
                     <tbody>
                         <tr>
                             <td><label for="PackageSummary">Summary</label></td>
-                            <td><input id="PackageSummary" type="text" oninput="UpdatePackageItem('Summary')" required /></td>
+                            <td><input id="PackageSummary" type="text" oninput="UpdatePackageItem('PackageSummary')" required /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageWarning">Warning</label></td>
-                            <td><input id="PackageWarning" type="text" oninput="UpdatePackageItem('Warning')" /></td>
+                            <td><input id="PackageWarning" type="text" oninput="UpdatePackageItem('PackageWarning')" /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageConflicts">Conflicts</label></td>
-                            <td><input id="PackageConflicts" type="text" oninput="UpdatePackageItem('Conflicts')" /></td>
+                            <td><input id="PackageConflicts" type="text" oninput="UpdatePackageItem('PackageConflicts')" /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageDescription">Description</label></td>
-                            <td><textarea id="PackageDescription" rows="3" oninput="UpdatePackageItem('Description')"></textarea></td>
+                            <td><textarea id="PackageDescription" rows="3" oninput="UpdatePackageItem('PackageDescription')"></textarea></td>
                         </tr>
                         <tr>
                             <td><label for="PackageAuthor">Author</label></td>
-                            <td><input id="PackageAuthor" type="text" oninput="UpdatePackageItem('Author')" /></td>
+                            <td><input id="PackageAuthor" type="text" oninput="UpdatePackageItem('PackageAuthor')" /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageImages">Images</label></td>
-                            <td><textarea id="PackageImages" rows="2" oninput="UpdatePackageItem('Images')"></textarea></td>
+                            <td><textarea id="PackageImages" rows="2" oninput="UpdatePackageItem('PackageImages')"></textarea></td>
                         </tr>
                         <tr>
                             <td><label for="PackageWebsite">Website</label></td>
                             <td>
-                                <input id="PackageWebsite" type="url" oninput="UpdatePackageItem('Website')" required />
-                                <input id="AddPackageButton" type="button" value="Add Package" onclick="AddNewPackage()" style="width:100px" />
+                                <input id="PackageWebsite" type="url" oninput="UpdatePackageItem('PackageWebsite')" required />
+                                <input id="AddPackageButton" type="button" value="Add Package" onclick="AppendNewPackage()" style="width:100px" />
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </fieldset>
+
+            <div id="PackageOptionsVariants" class="tabcontent"></div>
         </div>
         
         <div id="EditingAssetDiv" style="">

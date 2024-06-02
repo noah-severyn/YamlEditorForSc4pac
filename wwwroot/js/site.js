@@ -8,33 +8,23 @@ CodeMirror(document.querySelector('#editor'), {
 	tabSize: 2,
 	lineWrapping: true,
 	value:
-`# Package
-group: "nos17"
-name: "andisart-sc2013-homes-redone"
-version: "1.1.0"
-subfolder: "200-residential"
+`group: "fanta1990"
+name: "hang-glider-makeover"
+version: "1.1-1"
+subfolder: "710-automata"
 assets:
-- assetId: "nos17-andisart-sc2013-homes-redone"
+- assetId: "apeek-hang-glider-makeover"
+  exclude: [ "/Hangglider Generator.DAT" ]
 info:
-  summary: "A remake of AndisArt's SC2013 Inspired Homes"
-  description: >
-    This relotting pack contains 12 lots, including 1x2, 1x3, 1x4, 2x4, 2x3, 2x2, 3x2, and 3x3 lots.
-    Stats were generated with PIMX and all lots range from Stage 1-4 R$$.
-  author: "nos.17"
-  images:
-  - "https://www.simtropolis.com/objects/screens/monthly_2020_01/A1.jpg.2e418ed1c46a0538a1adb03931abb8e9.jpg"
-  - "https://www.simtropolis.com/objects/screens/monthly_2023_10/a3_orig.jpg.203376de7f327292bc2e2f6f74b4b9fd.jpg"
-  - "https://www.simtropolis.com/objects/screens/monthly_2023_10/a4_orig.jpg.6cc2a9e97848e3714db48a76a0789b9a.jpg"
-  - "https://www.simtropolis.com/objects/screens/monthly_2023_10/a5_orig.jpg.d5c93a3b65ddb00fc8e0ba58e5b640d6.jpg"
-  - "https://www.simtropolis.com/objects/screens/monthly_2023_10/a2_orig.jpg.2919f17b395145108e36e55211dcf342.jpg"
-  website: "https://community.simtropolis.com/files/file/33379-andisart-sc13-homes-redone/"
+  summary: "Detailed reskin of the hang-glider"
+  author: "FANTA1990, apeek"
+  website: "https://community.simtropolis.com/files/file/29344-hang-glider-makeover/"
 
 ---
-# Asset
-assetId: "nos17-andisart-sc2013-homes-redone"
-version: "1.1.0"
-lastModified: "2023-10-28T13:17:08Z"
-url: "https://community.simtropolis.com/files/file/33379-andisart-sc13-homes-redone/?do=download"
+assetId: "apeek-hang-glider-makeover"
+version: "1.1"
+lastModified: "2014-03-21T17:54:59Z"
+url: "https://community.simtropolis.com/files/file/29344-hang-glider-makeover/?do=download"
 `,
 	mode: 'yaml'
 });
@@ -44,13 +34,12 @@ url: "https://community.simtropolis.com/files/file/33379-andisart-sc13-homes-red
 
 const cm = document.querySelector('.CodeMirror').CodeMirror;
 var yamlData = null;
-var isEditingPackage = true;
 var countOfPackages = 0;
 var countOfAssets = 0;
 ParseYaml();
 ClearAssetInputs();
 ClearPackageInputs();
-ToggleEditingView();
+SetEditingView('package');
 document.getElementById("PkgPropTab").click();
 console.log(yamlData);
 
@@ -61,10 +50,11 @@ console.log(yamlData);
  */
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
+	CountItems();
 }
 
 /**
- * Update the UI accordingly based on the count of packages and assets.
+ * Count the number of Packages and Assets in the code pane and update the UI with this new result.
  */
 function CountItems() {
 	countOfAssets = 0;
@@ -108,7 +98,6 @@ function UpdateCodePane() {
 		}
 	}
 	cm.setValue(newValue);
-	CountItems();
 }
 
 
@@ -125,16 +114,11 @@ async function FetchSc4EvermoreData() {
 
 
 /**
- * Toggle the editing view between the Package and Asset fieldsets to hide/unhide the appropriate divs.
+ * Set the editing view to the desired state to show/hide the Package and Asset entry forms.
+ * @param {string} viewName View to set. Valid values are 'package' or 'asset' 
  */
-function ToggleEditingView(valueToSet) {
-	if (valueToSet !== undefined) {
-		isEditingPackage = (valueToSet === 'true');
-	} else {
-		isEditingPackage = valueToSet;
-	}
-
-	if (isEditingPackage) {
+function SetEditingView(viewName) {
+	if (viewName.toLowerCase() === 'package') {
 		document.getElementById('EditingPackageDiv').classList.add('visible2');
 		document.getElementById('EditingPackageDiv').classList.remove('invisible2');
 		document.getElementById('EditingAssetDiv').classList.add('invisible2');
@@ -146,36 +130,6 @@ function ToggleEditingView(valueToSet) {
 		document.getElementById('EditingAssetDiv').classList.add('visible2');
 	}
 }
-
-
-/**
- * Count the number of Packages and Assets in the code pane and updates the UI with this new result.
- */
-//function CountItems() {
-//	countOfAssets = 0;
-//	countOfPackages = 0;
-//	yamlData.forEach((item) => {
-//		if (IsAsset(item)) {
-//			countOfAssets++;
-//		} else if (IsPackage(item)) {
-//			countOfPackages++;
-//		}
-//	});
-
-//	var pkgList = Array(countOfPackages).fill().map((element, index) => index + 1);
-//	var pkgElement = document.getElementById('SelectPackageNumber');
-//	pkgElement.replaceChildren();
-//	pkgElement.appendChild(new Option('New', 0));
-//	pkgList.forEach(i => pkgElement.add(new Option(i, i)));
-
-//	var astList = Array(countOfAssets).fill().map((element, index) => index + 1);
-//	var assetElement = document.getElementById('SelectAssetNumber');
-//	assetElement.replaceChildren();
-//	assetElement.appendChild(new Option('New', 0));
-//	astList.forEach(i => assetElement.add(new Option(i, i)));
-
-//	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
-//}
 
 /**
  * Navigate to the specified tab.
