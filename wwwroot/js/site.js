@@ -44,6 +44,10 @@ document.getElementById("PkgPropTab").click();
 console.log(yamlData);
 
 
+//TODO - validate YAML in code pane for valid yaml syntax
+//TODO - validate YAML in code pane for valid sc4pac schema
+//TODO - implement options + variants for packages
+
 
 /**
  * Parse the current YAML input and update the UI accordingly based on the count of packages and assets.

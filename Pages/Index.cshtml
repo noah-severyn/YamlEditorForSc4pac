@@ -14,8 +14,8 @@
 
 <div style="display:flex">
     <div id="Column1" class="column">
-        <h2>Package Data</h2>
-        <p>For Dependencies, Include, Exclude, and Images fields add multiple items separated by a semicolon. Variants and options are not yet supported with this tool.</p>
+        <h2>Data Input</h2>
+        <p>For Dependencies, Image, Include, and Exclude fields add multiple items separated by a semicolon. Variants and options are not yet supported with this tool.</p>
 
         <label for="SelectPackageNumber">Modify Package: </label>
         <select id="SelectPackageNumber" onfocus="SetEditingView('package')" onchange="FillPackageForm()">
@@ -91,7 +91,7 @@
                             <td><textarea id="PackageDependencies" rows="2" oninput="UpdatePackageItem('PackageDependencies')"></textarea></td>
                         </tr>
                         <tr>
-                            <td colspan="2"><br />These assets are not part of any variant or option.</td>
+                            <td colspan="2"><br />These assets are not part of any variant or option and will be installed for every user.</td>
                         </tr>
                         <tr>
                             <td><label for="SelectPackageAsset">Select Asset:</label></td>
