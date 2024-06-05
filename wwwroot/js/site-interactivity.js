@@ -346,6 +346,9 @@ function TextToArray(text) {
  * @returns TRUE if the object represents an Asset; FALSE otherwise
  */
 function IsAsset(obj) {
+	if (obj === null || obj === undefined) {
+		return false;
+	}
 	return Object.hasOwn(obj, 'assetId') && Object.hasOwn(obj, 'lastModified') && Object.hasOwn(obj, 'url') && Object.hasOwn(obj, 'version');
 }
 /**
@@ -354,5 +357,8 @@ function IsAsset(obj) {
  * @returns TRUE if the object represents a Package; FALSE otherwise
  */
 function IsPackage(obj) {
+	if (obj === null || obj === undefined) {
+		return false;
+	}
 	return Object.hasOwn(obj, 'group') && Object.hasOwn(obj, 'name') && Object.hasOwn(obj, 'version') && Object.hasOwn(obj, 'subfolder');
 }

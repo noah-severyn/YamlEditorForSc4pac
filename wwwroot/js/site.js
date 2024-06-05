@@ -8,23 +8,7 @@ CodeMirror(document.querySelector('#editor'), {
 	tabSize: 2,
 	lineWrapping: true,
 	value:
-`group: "fanta1990"
-name: "hang-glider-makeover"
-version: "1.1-1"
-subfolder: "710-automata"
-assets:
-- assetId: "apeek-hang-glider-makeover"
-  exclude: [ "/Hangglider Generator.DAT" ]
-info:
-  summary: "Detailed reskin of the hang-glider"
-  author: "FANTA1990, apeek"
-  website: "https://community.simtropolis.com/files/file/29344-hang-glider-makeover/"
-
----
-assetId: "apeek-hang-glider-makeover"
-version: "1.1"
-lastModified: "2014-03-21T17:54:59Z"
-url: "https://community.simtropolis.com/files/file/29344-hang-glider-makeover/?do=download"
+		`#Start by creating a new YAML document from the inputs on the left, or paste existing YAML here and press the 'Parse YAML' button.
 `,
 	mode: 'yaml'
 });
@@ -70,6 +54,9 @@ function CountItems() {
 			countOfPackages++;
 		}
 	});
+	if (countOfAssets + countOfPackages == 0) {
+		return;
+	}
 
 	var pkgList = Array(countOfPackages).fill().map((element, index) => index + 1);
 	var pkgElement = document.getElementById('SelectPackageNumber');
