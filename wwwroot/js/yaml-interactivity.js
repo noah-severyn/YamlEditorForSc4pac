@@ -28,8 +28,9 @@ function ClearAssetInputs() {
 	document.getElementById('AssetVersion').value = '';
 	document.getElementById('AssetLastModified').value = 0;
 }
-
-
+/**
+ * Apply basic validation rules for the specified entry field.
+ */
 function EntryValidation(elementId) {
 	if (elementId === 'PackageSubfolder' || elementId === 'AssetLastModified') {
 		return;
@@ -39,13 +40,13 @@ function EntryValidation(elementId) {
 	var inputText = inputElement.value;
 	var locn = inputElement.selectionStart;
 	
-	var fieldName = elementId.replace('Package', '').replace('Asset', '');
-	if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'AssetId') {
+	var fieldName = elementId.replaceAll('Package', '').replaceAll('Asset', '');
+	if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'Id') {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-]'), '');
 	} else if (fieldName === 'Dependencies') {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-:;\n]'), '');
 	} else if (fieldName === 'Website' || fieldName === 'Url') {
-
+		inputText = inputText.toLowerCase().replace(new RegExp('[^a-z0-9-:/?=]'), '');
 	}
 	inputElement.value = inputText;
 
@@ -128,14 +129,13 @@ function FillPackageAssetForm() {
 		});
 	}
 }
-
-
 /**
  * Live update the YAML codepane with the values in the current Package form field as the user types.
  */
 function UpdatePackageItem(itemName) {
 	EntryValidation(itemName);
 	var targetIdx = document.getElementById('SelectPackageNumber').value;
+	var pkgAssetIdx = document.getElementById('SelectPackageAsset').value;
 	var pkgIdx = 0;
 	if (targetIdx !== '0') {
 		yamlData.forEach(doc => {
@@ -168,8 +168,8 @@ function UpdatePackageItem(itemName) {
 					}
 					doc.info.website = document.getElementById('PackageWebsite').value;
 
-					if (doc.assets !== undefined) {
-						var pkgAssetIdx = document.getElementById('SelectPackageAsset').value - 1;
+					if (doc.assets !== undefined && pkgAssetIdx !== '0') {
+						pkgAssetIdx--; //The dropdown is 1-based but the array is 0-based
 						doc.assets[pkgAssetIdx].assetId = document.getElementById('PackageAssetId').value;
 						if (document.getElementById('PackageAssetInclude').value !== '') {
 							doc.assets[pkgAssetIdx].include = TextToArray(document.getElementById('PackageAssetInclude').value);
@@ -185,7 +185,9 @@ function UpdatePackageItem(itemName) {
 	}
 	UpdateCodePane();
 }
-
+/**
+ * Add a new package to the end of this YAML document.
+ */
 function AppendNewPackage() {
 	var newPackage = {
 		group: document.getElementById('PackageGroup').value,
@@ -205,7 +207,35 @@ function AppendNewPackage() {
 	};
 	yamlData.push(newPackage);
 
-	//TODO - ability to add assets to a package
+	UpdateCodePane();
+	CountItems();
+}
+/**
+ * Add a new asset to the currently selected package.
+ */
+function AddAssetToPackage() {
+	EntryValidation('PackageAssetId');
+	var targetIdx = document.getElementById('SelectPackageNumber').value;
+	var pkgIdx = 0;
+	if (targetIdx !== '0') {
+		yamlData.forEach(doc => {
+			if (IsPackage(doc)) {
+				pkgIdx++;
+				if (pkgIdx == targetIdx) {
+					var newAsset = {
+						assetId: document.getElementById('PackageAssetId').value
+					}
+					if (document.getElementById('PackageAssetInclude') !== '') {
+						newAsset.include = TextToArray(document.getElementById('PackageAssetInclude').value);
+					}
+					if (document.getElementById('PackageAssetExclude') !== '') {
+						newAsset.exclude = TextToArray(document.getElementById('PackageAssetExclude').value);
+					}
+					doc.assets.push(newAsset);
+				}
+			}
+		});
+	}
 	UpdateCodePane();
 	CountItems();
 }
@@ -280,13 +310,9 @@ function AppendNewAsset() {
 
 
 
-////This function is critical to update the value of the hidden control that gets submitted for validation
-//function SetYamlText() {
-//	document.getElementById('SubmittedYaml').value = cm.getValue();
-//}
-
-
-
+// --------------------------------------------------------------------------------------------
+// -----------------------------------   Helper Functions   -----------------------------------
+// --------------------------------------------------------------------------------------------
 /**
  * Convert an array to the format used in input boxes for user input.
  * @param {Array} itemList List to process
@@ -314,9 +340,6 @@ function TextToArray(text) {
 	}
 	return text.replaceAll('\n', '').replaceAll('"', '').split(';').filter((item) => item !== '');
 }
-
-
-
 /**
  * Determine whether the specified object contains the properties of a sc4pac Asset.
  * @param {Object} obj The object to analyze

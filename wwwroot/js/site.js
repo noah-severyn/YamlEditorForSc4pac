@@ -41,7 +41,7 @@ ClearAssetInputs();
 ClearPackageInputs();
 SetEditingView('package');
 document.getElementById("PkgPropTab").click();
-console.log(yamlData);
+//console.log(yamlData);
 
 
 //TODO - validate YAML in code pane for valid yaml syntax
@@ -73,15 +73,19 @@ function CountItems() {
 
 	var pkgList = Array(countOfPackages).fill().map((element, index) => index + 1);
 	var pkgElement = document.getElementById('SelectPackageNumber');
+	var pkgValue = pkgElement.value;
 	pkgElement.replaceChildren();
 	pkgElement.appendChild(new Option('New', 0));
 	pkgList.forEach(i => pkgElement.add(new Option(i, i)));
+	pkgElement.value = pkgValue;
 
 	var astList = Array(countOfAssets).fill().map((element, index) => index + 1);
 	var assetElement = document.getElementById('SelectAssetNumber');
+	var assetValue = assetElement.value;
 	assetElement.replaceChildren();
 	assetElement.appendChild(new Option('New', 0));
 	astList.forEach(i => assetElement.add(new Option(i, i)));
+	pkgElement.value = assetValue;
 
 	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
 }

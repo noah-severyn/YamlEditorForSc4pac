@@ -111,10 +111,12 @@
                         </tr>
                         <tr>
                             <td><label for="PackageAssetExclude">Exclude</label></td>
-                            <td><textarea id="PackageAssetExclude" rows="2" oninput="UpdatePackageItem('PackageAssetExclude')"></textarea></td>
+                            <td>
+                                <textarea id="PackageAssetExclude" rows="2" oninput="UpdatePackageItem('PackageAssetExclude')"></textarea>
+                                <input id="AddPackageAssetButton" type="button" value="Add Asset" onclick="AddAssetToPackage()" style="width:100px" />
+                            </td>
                         </tr>
                     </tbody>
-                </table>
                 </table>
             </fieldset>
 
