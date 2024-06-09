@@ -77,8 +77,8 @@ table {
         border: none;
         outline: none;
         cursor: pointer;
-        padding: 10px 20px;
-        font-size: 1.5rem;
+        padding: 5px 20px;
+        font-size: 1.25rem;
         border-radius: 1rem 1rem 0 0;
         /*transition: 0.3s;*/
     }

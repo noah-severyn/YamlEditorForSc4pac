@@ -15,7 +15,7 @@
 <div style="display:flex">
     <div id="Column1" class="column">
         <h2>Data Input</h2>
-        <p>For Dependencies, Image, Include, and Exclude fields add multiple items separated by a semicolon. Variants and options are not yet supported with this tool.</p>
+        <p>For Dependencies, Image, Include, and Exclude fields add multiple items separated by a semicolon. Variants and are not yet supported with this tool.</p>
 
         <label for="SelectPackageNumber">Modify Package: </label>
         <select id="SelectPackageNumber" onfocus="SetEditingView('package')" onchange="FillPackageForm()">
@@ -32,14 +32,13 @@
             <div class="tab" >
                 <button id="PkgPropTab" class="tab-link" onclick="OpenTab(event, 'PackageProperties')">Package Properties</button>
                 <button id="PkgInfoTab" class="tab-link" onclick="OpenTab(event, 'PackageInfo')">Package Info</button>
-                <button id="PkgOptVarTab" class="tab-link" onclick="OpenTab(event, 'PackageOptionsVariants')">Options + Variants</button>
+                <button id="PkgAssetsTab" class="tab-link" onclick="OpenTab(event, 'PackageAssets')">Package Assets + Options</button>
+                <button id="PkgVariantsTab" class="tab-link" onclick="OpenTab(event, 'PackageVariants')">Package Variants</button>
             </div>
 
 
 
-
-
-
+            @* Package Properties tab *@
             <fieldset id="PackageProperties" class="tabcontent">
                 <table id="PackagePropertiesTable">
                     <colgroup>
@@ -88,38 +87,13 @@
                         </tr>
                         <tr>
                             <td><label for="PackageDependencies">Dependencies</label></td>
-                            <td><textarea id="PackageDependencies" rows="2" oninput="UpdatePackageItem('PackageDependencies')"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2"><br />These assets are not part of any variant or option and will be installed for every user.</td>
-                        </tr>
-                        <tr>
-                            <td><label for="SelectPackageAsset">Select Asset:</label></td>
-                            <td>
-                                <select id="SelectPackageAsset" onchange="FillPackageAssetForm()">
-                                    <option value="0">New</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageAssetId">Asset ID</label></td>
-                            <td><input id="PackageAssetId" type="text" oninput="UpdatePackageItem('PackageAssetId')" required /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageAssetInclude">Include</label></td>
-                            <td><textarea id="PackageAssetInclude" rows="2" oninput="UpdatePackageItem('PackageAssetInclude')"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageAssetExclude">Exclude</label></td>
-                            <td>
-                                <textarea id="PackageAssetExclude" rows="2" oninput="UpdatePackageItem('PackageAssetExclude')"></textarea>
-                                <input id="AddPackageAssetButton" type="button" value="Add Asset" onclick="AddAssetToPackage()" style="width:100px" />
-                            </td>
+                            <td><textarea id="PackageDependencies" rows="3" oninput="UpdatePackageItem('PackageDependencies')"></textarea></td>
                         </tr>
                     </tbody>
                 </table>
             </fieldset>
 
+            @* Package Info tab *@
             <fieldset id="PackageInfo" class="tabcontent">
                 <table id="PackageInfoTable">
                     <colgroup>
@@ -140,7 +114,7 @@
                         </tr>
                         <tr>
                             <td><label for="PackageDescription">Description</label></td>
-                            <td><textarea id="PackageDescription" rows="3" oninput="UpdatePackageItem('PackageDescription')"></textarea></td>
+                            <td><textarea id="PackageDescription" rows="5" oninput="UpdatePackageItem('PackageDescription')"></textarea></td>
                         </tr>
                         <tr>
                             <td><label for="PackageAuthor">Author</label></td>
@@ -152,16 +126,67 @@
                         </tr>
                         <tr>
                             <td><label for="PackageWebsite">Website</label></td>
+                            <td><input id="PackageWebsite" type="url" oninput="UpdatePackageItem('PackageWebsite')" required /></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
+
+            @* Package Assets + Options tab *@
+            <fieldset id="PackageAssets" class="tabcontent" >
+                <p>These assets are not part of any variant or option and will be installed for every user.</p>
+                <table id="PackageAssetsTable">
+                    <colgroup>
+                        <col style="width: 120px;">
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <td><label for="SelectPackageAsset">Asset in package</label></td>
                             <td>
-                                <input id="PackageWebsite" type="url" oninput="UpdatePackageItem('PackageWebsite')" required />
-                                <input id="AddPackageButton" type="button" value="Add Package" onclick="AppendNewPackage()" style="width:100px" />
+                                <select id="SelectPackageAsset" onchange="FillPackageAssetForm()">
+                                    <option value="0">New</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                Select an asset id in this file or type below.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <label for="SelectPackageAssetId">Asset Id:</label>
+                                <select id="SelectPackageAssetId" onchange="FillPackageAssetId()">
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="PackageAssetId">Asset Id</label></td>
+                            <td><input id="PackageAssetId" type="text" oninput="UpdatePackageItem('PackageAssetId')" required /></td>
+                        </tr>
+                        <tr>
+                            <td><label for="PackageAssetInclude">Include</label></td>
+                            <td><textarea id="PackageAssetInclude" rows="3" oninput="UpdatePackageItem('PackageAssetInclude')"></textarea></td>
+                        </tr>
+                        <tr>
+                            <td><label for="PackageAssetExclude">Exclude</label></td>
+                            <td>
+                                <textarea id="PackageAssetExclude" rows="3" oninput="UpdatePackageItem('PackageAssetExclude')"></textarea>
+                                <input id="AddPackageAssetButton" type="button" value="Add Asset to Package" onclick="AddAssetToPackage()" disabled="disabled" />
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </fieldset>
 
-            <div id="PackageOptionsVariants" class="tabcontent"></div>
+            @* Package Variants tab *@
+            <fieldset id="PackageVariants" class="tabcontent">
+
+            </fieldset>
+
+            <input id="AddPackageButton" type="button" value="Add New Package" onclick="AppendNewPackage()" />
         </div>
         
         <div id="EditingAssetDiv" style="">

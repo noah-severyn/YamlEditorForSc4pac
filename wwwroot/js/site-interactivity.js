@@ -129,6 +129,14 @@ function FillPackageAssetForm() {
 		});
 	}
 }
+
+
+function FillPackageAssetId() {
+	document.getElementById('PackageAssetId').value = document.getElementById('SelectPackageAssetId').value;
+}
+
+
+
 /**
  * Live update the YAML codepane with the values in the current Package form field as the user types.
  */
@@ -158,7 +166,7 @@ function UpdatePackageItem(itemName) {
 						doc.info.conflicts = document.getElementById('PackageConflicts').value
 					}
 					if (document.getElementById('PackageDescription').value !== '') {
-						doc.info.description = document.getElementById('PackageDescription').value
+						doc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
 					}
 					if (document.getElementById('PackageAuthor').value !== '') {
 						doc.info.author = document.getElementById('PackageAuthor').value
@@ -182,8 +190,8 @@ function UpdatePackageItem(itemName) {
 				}
 			}
 		});
+		UpdateCodePane();
 	}
-	UpdateCodePane();
 }
 /**
  * Add a new package to the end of this YAML document.
@@ -225,11 +233,15 @@ function AddAssetToPackage() {
 					var newAsset = {
 						assetId: document.getElementById('PackageAssetId').value
 					}
-					if (document.getElementById('PackageAssetInclude') !== '') {
+
+					if (document.getElementById('PackageAssetInclude').value !== '') {
 						newAsset.include = TextToArray(document.getElementById('PackageAssetInclude').value);
 					}
-					if (document.getElementById('PackageAssetExclude') !== '') {
+					if (document.getElementById('PackageAssetExclude').value !== '') {
 						newAsset.exclude = TextToArray(document.getElementById('PackageAssetExclude').value);
+					}
+					if (doc.assets === undefined) {
+						doc.assets = new Array();
 					}
 					doc.assets.push(newAsset);
 				}
@@ -288,8 +300,8 @@ function UpdateAssetItem(itemName) {
 				}
 			}
 		});
+		UpdateCodePane();
 	}
-	UpdateCodePane();
 }
 /**
  * Add a new asset to the end of this YAML document.
