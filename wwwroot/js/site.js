@@ -8,7 +8,44 @@ CodeMirror(document.querySelector('#editor'), {
 	tabSize: 2,
 	lineWrapping: true,
 	value:
-		`#Start by creating a new YAML document from the inputs on the left, or paste existing YAML here and press the 'Parse YAML' button.
+		`group: "mattb325"
+name: "lafayette-square-homes"
+version: "1.0.0"
+subfolder: "200-residential"
+dependencies:
+  - "bsc:mega-props-cp-vol01"
+  - "bsc:mega-props-cp-vol02"
+  - "bsc:texturepack-cycledogg-vol01"
+
+info:
+  summary: "LaFayette Square St. Louis Row Homes"
+  description: >
+    These old world, colourful row homes hail from LaFayette Square in St. Louis.
+    The houses are 8m wide, medium wealth (R$$) and have a number of colour variations in a family.
+    They grow on 1x2 and 2x2 lots in the Chicago and New York tilesets.
+  author: "mattb325"
+  website: "https://community.simtropolis.com/files/file/34165-lafayette-square-homes-st-louis/"
+
+variants:
+- variant: { nightmode: standard }
+  assets:
+  - assetId: "mattb325-lafayette-square-maxisnite"
+- variant: { nightmode: dark }
+  dependencies: [ "simfox:day-and-nite-mod" ]
+  assets:
+  - assetId: "mattb325-lafayette-square-darknite"
+
+---
+assetId: "mattb325-lafayette-square-darknite"
+version: "1.0.0"
+lastModified: "2021-02-21T20:43:00Z"
+url: "https://community.simtropolis.com/files/file/34165-lafayette-square-homes-st-louis/?do=download&r=185475"
+
+---
+assetId: "mattb325-lafayette-square-maxisnite"
+version: "1.0.0"
+lastModified: "2021-02-21T20:43:00Z"
+url: "https://community.simtropolis.com/files/file/34165-lafayette-square-homes-st-louis/?do=download&r=185476"
 `,
 	mode: 'yaml'
 });
@@ -20,6 +57,7 @@ const cm = document.querySelector('.CodeMirror').CodeMirror;
 var yamlData = null;
 var countOfPackages = 0;
 var countOfAssets = 0;
+var assetIdList = new Array();
 ParseYaml();
 ClearAssetInputs();
 ClearPackageInputs();
@@ -30,7 +68,7 @@ document.getElementById("PkgPropTab").click();
 
 //TODO - validate YAML in code pane for valid yaml syntax
 //TODO - validate YAML in code pane for valid sc4pac schema
-//TODO - implement options + variants for packages
+//TODO - implement variants for packages
 
 
 /**
@@ -50,6 +88,7 @@ function CountItems() {
 	yamlData.forEach((item) => {
 		if (IsAsset(item)) {
 			countOfAssets++;
+			assetIdList.push(item.assetId);
 		} else if (IsPackage(item)) {
 			countOfPackages++;
 		}
@@ -74,25 +113,44 @@ function CountItems() {
 	astList.forEach(i => assetElement.add(new Option(i, i)));
 	pkgElement.value = assetValue;
 
+	var assetIdElement = document.getElementById('SelectPackageAssetId');
+	assetIdElement.replaceChildren();
+	assetIdElement.appendChild(new Option('', ''));
+	assetIdList.forEach(i => assetIdElement.add(new Option(i, i)));
+
+
+
 	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
 }
 
 
 function UpdateCodePane() {
-	var newValue = '';
+	var newYaml = '';
+	var doc = '';
 	//TODO - figure out how to retain comments
+	//TODO - line breaks are not working for the multi-line description. 
 
 	for (var idx = 0; idx < yamlData.length; idx++) {
-		newValue = newValue + jsyaml.dump(yamlData[idx], {
+		doc = jsyaml.dump(yamlData[idx], {
 			'lineWidth': -1,
 			'quotingType': '"',
 			'forceQuotes': true
 		});
+		//The parser blows away the multiline context so we need to rebuild it :(
+		if (doc.indexOf('description: ') > 0) {
+			
+			var rgx = new RegExp('description: \"(.*?)\"');
+			var oldText = doc.match(rgx)[0];
+			var newText = oldText.replace('description: "', "description: >\n    ").replaceAll('\\n', '\n    ').replace('"','');
+			doc = doc.replace(oldText, newText);
+		}
+
+		newYaml = newYaml + doc;
 		if (idx !== yamlData.length - 1) {
-			newValue = newValue + '\n---\n';
+			newYaml = newYaml + '\n---\n';
 		}
 	}
-	cm.setValue(newValue);
+	cm.setValue(newYaml);
 }
 
 
