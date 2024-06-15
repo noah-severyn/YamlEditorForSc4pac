@@ -13,29 +13,63 @@
 
 
 <div style="display:flex">
+    @* Left Column *@
     <div id="Column1" class="column">
         <h2>Data Input</h2>
         <p>For Dependencies, Image, Include, and Exclude fields add multiple items separated by a semicolon. Variants and are not yet supported with this tool.</p>
 
-        <label for="SelectPackageNumber">Modify Package: </label>
-        <select id="SelectPackageNumber" onfocus="SetEditingView('package')" onchange="FillPackageForm()">
-            <option value="0">New</option>
-        </select>
+        <div class="tab">
+            <button id="AssetsTab" class="tab-link" onclick="OpenTab(event, 'AssetProperties')">Asset Properties</button>
+            <button id="PkgPropTab" class="tab-link" onclick="OpenTab(event, 'PackageProperties')">Package Properties</button>
+            <button id="PkgInfoTab" class="tab-link" onclick="OpenTab(event, 'PackageInfo')">Package Info</button>
+            <button id="PkgAssetsTab" class="tab-link" onclick="OpenTab(event, 'PackageAssets')">Package Assets + Options</button>
+            <button id="PkgVariantsTab" class="tab-link" onclick="OpenTab(event, 'PackageVariants')">Package Variants</button>
+        </div>
 
-        <label for="SelectAssetNumber">Modify Asset:</label>
-        <select id="SelectAssetNumber" onfocus="SetEditingView('asset')" onchange="FillAssetForm()">
-            <option value="0">New</option>
-        </select>
+        <div id="EditingAssetDiv" style="" class="invisible2">
+            <label for="SelectAssetNumber">Modify Asset:</label>
+            <select id="SelectAssetNumber" onchange="FillAssetForm()">
+                <option value="0">New</option>
+            </select>
 
-        <div id="EditingPackageDiv">
+            @* Asset Properties tab *@
+            <fieldset id="AssetProperties" class="tabcontent">
+                <legend>Asset Properties</legend>
+                <table class="inputForm">
+                    <colgroup>
+                        <col style="width: 120px;">
+                    </colgroup>
+                    <tbody>
+                        <tr>
+                            <td><label for="AssetUrl">URL</label></td>
+                            <td><input id="AssetUrl" type="url" oninput="UpdateAssetItem('AssetUrl')" /></td>
+                        </tr>
+                        <tr>
+                            <td><label for="AssetId">Asset ID</label></td>
+                            <td><input id="AssetId" type="text" oninput="UpdateAssetItem('AssetId')" /></td>
+                        </tr>
+                        <tr>
+                            <td><label for="AssetVersion">Version</label></td>
+                            <td><input id="AssetVersion" type="text" oninput="UpdateAssetItem('AssetVersion')" /></td>
+                        </tr>
+                        <tr>
+                            <td><label for="AssetLastModified">Last Modified</label></td>
+                            <td><input id="AssetLastModified" type="datetime-local" step="1" oninput="UpdateAssetItem('AssetLastModified')" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </fieldset>
 
-            <div class="tab" >
-                <button id="PkgPropTab" class="tab-link" onclick="OpenTab(event, 'PackageProperties')">Package Properties</button>
-                <button id="PkgInfoTab" class="tab-link" onclick="OpenTab(event, 'PackageInfo')">Package Info</button>
-                <button id="PkgAssetsTab" class="tab-link" onclick="OpenTab(event, 'PackageAssets')">Package Assets + Options</button>
-                <button id="PkgVariantsTab" class="tab-link" onclick="OpenTab(event, 'PackageVariants')">Package Variants</button>
-            </div>
+            <input type="button" id="AddAssetButton" value="Add New Asset" onclick="AppendNewAsset()" />
+        </div>
 
+
+
+        <div id="EditingPackageDiv" class="invisible2">
+            <label for="SelectPackageNumber">Modify Package: </label>
+            <select id="SelectPackageNumber" onchange="FillPackageForm()">
+                <option value="0">New</option>
+            </select>
 
 
             @* Package Properties tab *@
@@ -186,44 +220,11 @@
 
             </fieldset>
 
-            <input id="AddPackageButton" type="button" value="Add New Package" onclick="AppendNewPackage()" />
+            <input type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" />
         </div>
-        
-        <div id="EditingAssetDiv" style="">
-            <fieldset id="AssetProperties">
-                <legend>Asset Properties</legend>
-                <table class="inputForm">
-                    <colgroup>
-                        <col style="width: 120px;">
-                    </colgroup>
-                    <tbody>
-                        <tr>
-                            <td><label for="AssetUrl">URL</label></td>
-                            <td><input id="AssetUrl" type="url" oninput="UpdateAssetItem('AssetUrl')" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="AssetId">Asset ID</label></td>
-                            <td><input id="AssetId" type="text" oninput="UpdateAssetItem('AssetId')" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="AssetVersion">Version</label></td>
-                            <td><input id="AssetVersion" type="text" oninput="UpdateAssetItem('AssetVersion')" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="AssetLastModified">Last Modified</label></td>
-                            <td>
-                                <input id="AssetLastModified" type="datetime-local" step="1" oninput="UpdateAssetItem('AssetLastModified')" />
-                                <input id="AddAssetButton" type="button" value="Add Asset" onclick="AppendNewAsset()" style="margin-left:20px; width:90px" />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </fieldset>
-        </div>
-
     </div>
 
-
+    @* Right Column *@
     <div id="Column2" class="column">
         <h2>YAML Output</h2>
         <h5>Creating <span id="FileName">newfile.yaml</span> &nbsp;&nbsp;&nbsp;&nbsp; <span id="CurrentItemCount"></span></h5>

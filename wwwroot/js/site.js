@@ -8,44 +8,7 @@ CodeMirror(document.querySelector('#editor'), {
 	tabSize: 2,
 	lineWrapping: true,
 	value:
-		`group: "mattb325"
-name: "lafayette-square-homes"
-version: "1.0.0"
-subfolder: "200-residential"
-dependencies:
-  - "bsc:mega-props-cp-vol01"
-  - "bsc:mega-props-cp-vol02"
-  - "bsc:texturepack-cycledogg-vol01"
-
-info:
-  summary: "LaFayette Square St. Louis Row Homes"
-  description: >
-    These old world, colourful row homes hail from LaFayette Square in St. Louis.
-    The houses are 8m wide, medium wealth (R$$) and have a number of colour variations in a family.
-    They grow on 1x2 and 2x2 lots in the Chicago and New York tilesets.
-  author: "mattb325"
-  website: "https://community.simtropolis.com/files/file/34165-lafayette-square-homes-st-louis/"
-
-variants:
-- variant: { nightmode: standard }
-  assets:
-  - assetId: "mattb325-lafayette-square-maxisnite"
-- variant: { nightmode: dark }
-  dependencies: [ "simfox:day-and-nite-mod" ]
-  assets:
-  - assetId: "mattb325-lafayette-square-darknite"
-
----
-assetId: "mattb325-lafayette-square-darknite"
-version: "1.0.0"
-lastModified: "2021-02-21T20:43:00Z"
-url: "https://community.simtropolis.com/files/file/34165-lafayette-square-homes-st-louis/?do=download&r=185475"
-
----
-assetId: "mattb325-lafayette-square-maxisnite"
-version: "1.0.0"
-lastModified: "2021-02-21T20:43:00Z"
-url: "https://community.simtropolis.com/files/file/34165-lafayette-square-homes-st-louis/?do=download&r=185476"
+		`#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.
 `,
 	mode: 'yaml'
 });
@@ -93,9 +56,9 @@ function CountItems() {
 			countOfPackages++;
 		}
 	});
-	if (countOfAssets + countOfPackages == 0) {
-		return;
-	}
+	//if (countOfAssets + countOfPackages == 0) {
+	//	return;
+	//}
 
 	var pkgList = Array(countOfPackages).fill().map((element, index) => index + 1);
 	var pkgElement = document.getElementById('SelectPackageNumber');
@@ -165,25 +128,6 @@ async function FetchSc4EvermoreData() {
 	return await response.json();
 }
 
-
-/**
- * Set the editing view to the desired state to show/hide the Package and Asset entry forms.
- * @param {string} viewName View to set. Valid values are 'package' or 'asset' 
- */
-function SetEditingView(viewName) {
-	if (viewName.toLowerCase() === 'package') {
-		document.getElementById('EditingPackageDiv').classList.add('visible2');
-		document.getElementById('EditingPackageDiv').classList.remove('invisible2');
-		document.getElementById('EditingAssetDiv').classList.add('invisible2');
-		document.getElementById('EditingAssetDiv').classList.remove('visible2');
-	} else {
-		document.getElementById('EditingPackageDiv').classList.add('invisible2');
-		document.getElementById('EditingPackageDiv').classList.remove('visible2');
-		document.getElementById('EditingAssetDiv').classList.remove('invisible2');
-		document.getElementById('EditingAssetDiv').classList.add('visible2');
-	}
-}
-
 /**
  * Navigate to the specified tab.
  */
@@ -205,8 +149,25 @@ function OpenTab(event, tabName) {
 	// Show the current tab, and add an "active" class to the button that opened the tab
 	document.getElementById(tabName).style.display = "block";
 	event.currentTarget.className += " active";
+
+	//Set the editing view to the desired state to show/hide the Package and Asset entry forms.
+	if (tabName === 'AssetProperties') {
+		document.getElementById('EditingPackageDiv').classList.add('invisible2');
+		document.getElementById('EditingPackageDiv').classList.remove('visible2');
+		document.getElementById('EditingAssetDiv').classList.remove('invisible2');
+		document.getElementById('EditingAssetDiv').classList.add('visible2');
+	} else {
+		document.getElementById('EditingPackageDiv').classList.add('visible2');
+		document.getElementById('EditingPackageDiv').classList.remove('invisible2');
+		document.getElementById('EditingAssetDiv').classList.add('invisible2');
+		document.getElementById('EditingAssetDiv').classList.remove('visible2');
+	}
 }
 
 function CopyToClipboard() {
 	navigator.clipboard.writeText(cm.getValue())
+}
+
+function validate() {
+
 }
