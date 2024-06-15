@@ -8,32 +8,113 @@ CodeMirror(document.querySelector('#editor'), {
 	tabSize: 2,
 	lineWrapping: true,
 	value:
-`group: ""
-name: ""
-version: ""
-subfolder: ""
-dependencies: ""
-assets:
-include: ""
-exclude: ""
-
-info:
-  summary: ""
-  warning: ""
-  conflicts: ""
-  description: >
-  author: ""
-  images:
-  website: ""`,
+		`#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.
+`,
 	mode: 'yaml'
 });
-const packages = FetchSc4pacData();
-const sc4edata = FetchSc4EvermoreData();
-console.log(sc4edata);
+//const packages = FetchSc4pacData();
+//const sc4edata = FetchSc4EvermoreData();
+
 
 const cm = document.querySelector('.CodeMirror').CodeMirror;
+var yamlData = null;
+var countOfPackages = 0;
+var countOfAssets = 0;
+var assetIdList = new Array();
+ParseYaml();
+ClearAssetInputs();
+ClearPackageInputs();
+SetEditingView('package');
+document.getElementById("PkgPropTab").click();
+//console.log(yamlData);
 
 
+//TODO - validate YAML in code pane for valid yaml syntax
+//TODO - validate YAML in code pane for valid sc4pac schema
+//TODO - implement variants for packages
+
+
+/**
+ * Parse the current YAML input and update the UI accordingly based on the count of packages and assets.
+ */
+function ParseYaml() {
+	yamlData = jsyaml.loadAll(cm.getValue());
+	CountItems();
+}
+
+/**
+ * Count the number of Packages and Assets in the code pane and update the UI with this new result.
+ */
+function CountItems() {
+	countOfAssets = 0;
+	countOfPackages = 0;
+	yamlData.forEach((item) => {
+		if (IsAsset(item)) {
+			countOfAssets++;
+			assetIdList.push(item.assetId);
+		} else if (IsPackage(item)) {
+			countOfPackages++;
+		}
+	});
+	//if (countOfAssets + countOfPackages == 0) {
+	//	return;
+	//}
+
+	var pkgList = Array(countOfPackages).fill().map((element, index) => index + 1);
+	var pkgElement = document.getElementById('SelectPackageNumber');
+	var pkgValue = pkgElement.value;
+	pkgElement.replaceChildren();
+	pkgElement.appendChild(new Option('New', 0));
+	pkgList.forEach(i => pkgElement.add(new Option(i, i)));
+	pkgElement.value = pkgValue;
+
+	var astList = Array(countOfAssets).fill().map((element, index) => index + 1);
+	var assetElement = document.getElementById('SelectAssetNumber');
+	var assetValue = assetElement.value;
+	assetElement.replaceChildren();
+	assetElement.appendChild(new Option('New', 0));
+	astList.forEach(i => assetElement.add(new Option(i, i)));
+	pkgElement.value = assetValue;
+
+	var assetIdElement = document.getElementById('SelectPackageAssetId');
+	assetIdElement.replaceChildren();
+	assetIdElement.appendChild(new Option('', ''));
+	assetIdList.forEach(i => assetIdElement.add(new Option(i, i)));
+
+
+
+	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
+}
+
+
+function UpdateCodePane() {
+	var newYaml = '';
+	var doc = '';
+	//TODO - figure out how to retain comments
+	//TODO - line breaks are not working for the multi-line description. 
+
+	for (var idx = 0; idx < yamlData.length; idx++) {
+		doc = jsyaml.dump(yamlData[idx], {
+			'lineWidth': -1,
+			'quotingType': '"',
+			'forceQuotes': true
+		});
+		//The parser blows away the multiline context so we need to rebuild it :(
+		if (doc.indexOf('description: ') > 0) {
+			
+			var rgx = new RegExp('description: \"(.*?)\"');
+			var oldText = doc.match(rgx)[0];
+			var newText = oldText.replace('description: "', "description: >\n    ").replaceAll('\\n', '\n    ').replace('"','');
+			doc = doc.replace(oldText, newText);
+		}
+
+		newYaml = newYaml + doc;
+		if (idx !== yamlData.length - 1) {
+			newYaml = newYaml + '\n---\n';
+		}
+	}
+	cm.setValue(newYaml);
+}
 
 
 async function FetchSc4pacData() {
@@ -47,85 +128,46 @@ async function FetchSc4EvermoreData() {
 	return await response.json();
 }
 
+/**
+ * Navigate to the specified tab.
+ */
+function OpenTab(event, tabName) {
+	var i, tablinks;
 
-
-
-function UpdatePkgItem(itemName) {
-	var inputElement = document.getElementById("Package" + itemName);
-	var inputText = inputElement.value;
-	if (itemName === 'Group' || itemName === 'Name' || itemName === 'AssetID') {
-		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-zA-Z0-9-]'), '');
+	// Get all elements with class="tabcontent" and hide them
+	var tabcontent = document.getElementsByClassName("tabcontent");
+	for (i = 0; i < tabcontent.length; i++) {
+		tabcontent[i].style.display = "none";
 	}
 
-	//Special case for Description: it's multiline text while all others are single line
-	if (itemName === 'Description') {
-		var rgx = new RegExp('>(.|\n)*(?=\n  author:)');
-		var newValue = '>\n    ' + inputText.replaceAll('\n', '\n    ');
+	// Get all elements with class="tablinks" and remove the class "active"
+	tablinks = document.getElementsByClassName("tab-link");
+	for (i = 0; i < tablinks.length; i++) {
+		tablinks[i].className = tablinks[i].className.replace(" active", "");
 	}
 
-	//Special case for items entered as an array: parse the multiline into multiple list items
-	else if (['Include', 'Exclude', 'Images'].includes(itemName)) {
-		switch (itemName) {
-			case 'Include':
-				var rgx = new RegExp('(?<=include:)(.|\n)*(?=\nexclude:)');
-				break;
-			case 'Exclude':
-				var rgx = new RegExp('(?<=exclude:)(.|\n)*(?=\n\ninfo:)');
-				break;
-			case 'Images':
-				var rgx = new RegExp('(?<=images:)(.|\n)*(?=\n  website:)');
-				break;
-		}
+	// Show the current tab, and add an "active" class to the button that opened the tab
+	document.getElementById(tabName).style.display = "block";
+	event.currentTarget.className += " active";
 
-		var itemlist = inputText.replaceAll('\n', '').replaceAll('\\', '/').split(';');
-		var newValue = "";
-		if (itemlist.at(-1) === '') {
-			itemlist.pop();
-		}
-		
-		itemlist.forEach((item) => {
-			newValue = newValue + '\n  - "' + item.trim() + '"'
-		});
-	}
-
-	//Default case for other inputs
-	else {
-		var rgx = new RegExp(itemName.toLowerCase() + ': "(.*)"');
-		newValue = itemName.toLowerCase() + ': ' + '"' + inputText + '"'
-	}
-
-	cm.setValue(cm.getValue().replace(rgx, newValue));
-
-	if (itemName === 'Name') {
-		document.getElementById('FileName').innerHTML = inputText + '.yaml'
+	//Set the editing view to the desired state to show/hide the Package and Asset entry forms.
+	if (tabName === 'AssetProperties') {
+		document.getElementById('EditingPackageDiv').classList.add('invisible2');
+		document.getElementById('EditingPackageDiv').classList.remove('visible2');
+		document.getElementById('EditingAssetDiv').classList.remove('invisible2');
+		document.getElementById('EditingAssetDiv').classList.add('visible2');
+	} else {
+		document.getElementById('EditingPackageDiv').classList.add('visible2');
+		document.getElementById('EditingPackageDiv').classList.remove('invisible2');
+		document.getElementById('EditingAssetDiv').classList.add('invisible2');
+		document.getElementById('EditingAssetDiv').classList.remove('visible2');
 	}
 }
 
-
-function AddAnAsset() {
-	//Add asset listing to end of file
-	var url = document.getElementById('AssetURL').value;
-	var id = document.getElementById('AssetID').value;
-	var version = document.getElementById('AssetVersion').value;
-	var modified = document.getElementById('AssetLastModified').value;
-	var newAsset = '\r\n---\r\nassetId: "' + id + '"' +
-		'\r\nurl: "' + url + '"' +
-		'\r\nversion: "' + version + '"' +
-		'\r\nlastModified: "' + modified + 'Z"';
-	cm.setValue(cm.getValue() + newAsset);
-
-	//Add this asset to the package asset list
-	var currentContents = cm.getValue();
-	var assetHeaderLocn = currentContents.indexOf('assets:');
-	console.log(assetHeaderLocn);
-	cm.setValue(
-		currentContents.slice(0, assetHeaderLocn + 7) +
-		'\r\n- assetId: "' + id + '"' +
-		currentContents.slice(assetHeaderLocn + 7)
-	);
+function CopyToClipboard() {
+	navigator.clipboard.writeText(cm.getValue())
 }
 
-//This function is critical to update the value of the hidden control that gets submitted for validation
-function SetYamlText() {
-	document.getElementById('SubmittedYaml').value = cm.getValue();
+function validate() {
+
 }

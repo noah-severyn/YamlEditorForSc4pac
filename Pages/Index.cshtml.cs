@@ -17,14 +17,6 @@ namespace SC4PackMan.Pages {
         public void OnGet() {
             SC4PacPackage Package = new SC4PacPackage();
 
-            
-
-            //Errors = YamlSchema.ValidateYaml();
-        }
-
-        public void ValidateYaml() {
-            //SubmittedYaml.Value
-            
         }
 
         [BindProperty]
@@ -35,7 +27,6 @@ namespace SC4PackMan.Pages {
             }
             Errors = YamlSchema.ValidateYaml(YamlText);
         }
-
 
     }
 }
