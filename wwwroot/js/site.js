@@ -24,7 +24,7 @@ var assetIdList = new Array();
 ParseYaml();
 ClearAssetInputs();
 ClearPackageInputs();
-document.getElementById("AssetsTab").click();
+document.getElementById("PkgPropTab").click();
 //console.log(yamlData);
 
 
