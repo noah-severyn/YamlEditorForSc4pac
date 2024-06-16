@@ -42,25 +42,25 @@
                     <tbody>
                         <tr>
                             <td><label for="AssetUrl">URL</label></td>
-                            <td><input id="AssetUrl" type="url" oninput="UpdateAssetItem('AssetUrl')" /></td>
+                            <td><input id="AssetUrl" type="url" oninput="UpdateAssetItem('AssetUrl')" class="required" /></td>
                         </tr>
                         <tr>
                             <td><label for="AssetId">Asset ID</label></td>
-                            <td><input id="AssetId" type="text" oninput="UpdateAssetItem('AssetId')" /></td>
+                            <td><input id="AssetId" type="text" oninput="UpdateAssetItem('AssetId')" class="required" /></td>
                         </tr>
                         <tr>
                             <td><label for="AssetVersion">Version</label></td>
-                            <td><input id="AssetVersion" type="text" oninput="UpdateAssetItem('AssetVersion')" /></td>
+                            <td><input id="AssetVersion" type="text" oninput="UpdateAssetItem('AssetVersion')" class="required" /></td>
                         </tr>
                         <tr>
                             <td><label for="AssetLastModified">Last Modified</label></td>
-                            <td><input id="AssetLastModified" type="datetime-local" step="1" oninput="UpdateAssetItem('AssetLastModified')" /></td>
+                            <td><input id="AssetLastModified" type="datetime-local" step="1" oninput="UpdateAssetItem('AssetLastModified')" class="required" /><input id="AssetLastModifiedText" type="text" oninput="FillDateTimePicker()" style="width:180px;" /></td>
                         </tr>
                     </tbody>
                 </table>
             </fieldset>
 
-            <input type="button" id="AddAssetButton" value="Add New Asset" onclick="AppendNewAsset()" />
+            <input type="button" id="AddAssetButton" value="Add New Asset" onclick="AppendNewAsset()" disabled="disabled" />
         </div>
 
 
@@ -81,15 +81,15 @@
                     <tbody>
                         <tr>
                             <td><label for="PackageGoup">Group</label></td>
-                            <td><input id="PackageGroup" type="text" oninput="UpdatePackageItem('PackageGroup')" required /></td>
+                            <td><input id="PackageGroup" type="text" oninput="UpdatePackageItem('PackageGroup')" class="required" /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageName">Name</label></td>
-                            <td><input id="PackageName" type="text" oninput="UpdatePackageItem('PackageName')" required /></td>
+                            <td><input id="PackageName" type="text" oninput="UpdatePackageItem('PackageName')" class="required" /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageVersion">Version</label></td>
-                            <td><input id="PackageVersion" type="text" oninput="UpdatePackageItem('PackageVersion')" required /></td>
+                            <td><input id="PackageVersion" type="text" oninput="UpdatePackageItem('PackageVersion')" class="required" /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageSubfolder">Subfolder</label></td>
@@ -136,7 +136,7 @@
                     <tbody>
                         <tr>
                             <td><label for="PackageSummary">Summary</label></td>
-                            <td><input id="PackageSummary" type="text" oninput="UpdatePackageItem('PackageSummary')" required /></td>
+                            <td><input id="PackageSummary" type="text" oninput="UpdatePackageItem('PackageSummary')" class="required" /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageWarning">Warning</label></td>
@@ -160,7 +160,7 @@
                         </tr>
                         <tr>
                             <td><label for="PackageWebsite">Website</label></td>
-                            <td><input id="PackageWebsite" type="url" oninput="UpdatePackageItem('PackageWebsite')" required /></td>
+                            <td><input id="PackageWebsite" type="url" oninput="UpdatePackageItem('PackageWebsite')" class="required" /></td>
                         </tr>
                     </tbody>
                 </table>
@@ -220,7 +220,7 @@
 
             </fieldset>
 
-            <input type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" />
+            <input type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" disabled="disabled" />
         </div>
     </div>
 

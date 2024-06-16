@@ -24,8 +24,7 @@ var assetIdList = new Array();
 ParseYaml();
 ClearAssetInputs();
 ClearPackageInputs();
-SetEditingView('package');
-document.getElementById("PkgPropTab").click();
+document.getElementById("AssetsTab").click();
 //console.log(yamlData);
 
 
@@ -39,6 +38,7 @@ document.getElementById("PkgPropTab").click();
  */
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
+	console.log(yamlData);
 	CountItems();
 }
 
@@ -48,6 +48,7 @@ function ParseYaml() {
 function CountItems() {
 	countOfAssets = 0;
 	countOfPackages = 0;
+	assetIdList.length = 0;
 	yamlData.forEach((item) => {
 		if (IsAsset(item)) {
 			countOfAssets++;
@@ -94,6 +95,9 @@ function UpdateCodePane() {
 	//TODO - line breaks are not working for the multi-line description. 
 
 	for (var idx = 0; idx < yamlData.length; idx++) {
+		if (yamlData[idx] === null) {
+			continue;
+		}
 		doc = jsyaml.dump(yamlData[idx], {
 			'lineWidth': -1,
 			'quotingType': '"',

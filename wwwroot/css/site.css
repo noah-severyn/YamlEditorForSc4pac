@@ -35,12 +35,6 @@ body {
     /*height: 650px;*/
     background-color: azure;
 }
-
-/*fieldset {
-    border-bottom: 1px dashed black;
-    padding-bottom: 10px;
-    padding-top: 10px;
-}*/
 textarea, input[type=text], input[type=url] {
     width: 99%
 }
@@ -57,7 +51,9 @@ table {
     display: none;
 }
 
-
+.required {
+    background-color: lightgoldenrodyellow;
+}
 
 
 
