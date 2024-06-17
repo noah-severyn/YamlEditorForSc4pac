@@ -1,4 +1,14 @@
 ﻿/**
+ * Clears all inputs and the code pane.
+ */
+function ClearAll() {
+	ClearPackageInputs();
+	ClearAssetInputs();
+	yamlData.length = 0;
+	cm.setValue('');
+	CountItems();
+}
+/**
  * Clears all the Package input form fields.
  */
 function ClearPackageInputs() {
@@ -27,6 +37,7 @@ function ClearAssetInputs() {
 	document.getElementById('AssetId').value = '';
 	document.getElementById('AssetVersion').value = '';
 	document.getElementById('AssetLastModified').value = 0;
+	document.getElementById('AssetLastModifiedText').value = '';
 }
 /**
  * Apply basic validation rules for the specified entry field.
@@ -144,13 +155,9 @@ function FillPackageAssetForm() {
 	}
 }
 
-
 function FillPackageAssetId() {
 	document.getElementById('PackageAssetId').value = document.getElementById('SelectPackageAssetId').value;
 }
-
-
-
 /**
  * Live update the YAML codepane with the values in the current Package form field as the user types.
  */
@@ -190,6 +197,11 @@ function UpdatePackageItem(itemName) {
 					}
 					doc.info.website = document.getElementById('PackageWebsite').value;
 
+
+					if (pkgAssetIdx === '0' && document.getElementById('PackageAssetId').value !== '') {
+						AddPackageAssetButton.disabled = false;
+					}
+
 					if (doc.assets !== undefined && pkgAssetIdx !== '0') {
 						pkgAssetIdx--; //The dropdown is 1-based but the array is 0-based
 						doc.assets[pkgAssetIdx].assetId = document.getElementById('PackageAssetId').value;
@@ -211,22 +223,6 @@ function UpdatePackageItem(itemName) {
  * Add a new package to the end of this YAML document.
  */
 function AppendNewPackage() {
-	//var newPackage = {
-	//	group: document.getElementById('PackageGroup').value,
-	//	name: document.getElementById('PackageName').value,
-	//	version: document.getElementById('PackageVersion').value,
-	//	subfolder: document.getElementById('PackageSubfolder').value,
-	//	dependencies: TextToArray(document.getElementById('PackageDependencies').value),
-	//	info: {
-	//		summary: document.getElementById('PackageSummary').value,
-	//		warning: document.getElementById('PackageWarning').value,
-	//		conflicts: document.getElementById('PackageConflicts').value,
-	//		description: document.getElementById('PackageDescription').value,
-	//		author: document.getElementById('PackageAuthor').value,
-	//		images: TextToArray(document.getElementById('PackageImages').value),
-	//		website: document.getElementById('PackageWebsite').value,
-	//	}
-	//};
 	var newPackage = {
 		group: document.getElementById('PackageGroup').value,
 		name: document.getElementById('PackageName').value,
@@ -360,13 +356,18 @@ function AppendNewAsset() {
 	UpdateCodePane();
 	CountItems();
 }
-
+/**
+ * Converts UTC text pasted into the input box for to a valid datetime to populate the datetime picker.
+ */
 function FillDateTimePicker() {
 	//  \d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(Z|-\d\d:\d\d)
 	var inputValue = document.getElementById('AssetLastModifiedText').value.replaceAll('"', '');
 	try {
 		var newDate = new Date(inputValue).toISOString().slice(0, 19);
-		document.getElementById('AssetLastModified').value = newDate
+		document.getElementById('AssetLastModified').value = newDate;
+		if (document.getElementById('AssetUrl').value !== '' && document.getElementById('AssetId').value !== '' && document.getElementById('AssetVersion').value !== '' && document.getElementById('AssetLastModified').value !== '') {
+			document.getElementById('AddAssetButton').disabled = false;
+		}
 	} catch (e) {
 		console.log(e)
 	}

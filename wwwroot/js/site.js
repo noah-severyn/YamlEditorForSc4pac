@@ -49,33 +49,37 @@ function CountItems() {
 	countOfAssets = 0;
 	countOfPackages = 0;
 	assetIdList.length = 0;
-	yamlData.forEach((item) => {
-		if (IsAsset(item)) {
-			countOfAssets++;
-			assetIdList.push(item.assetId);
-		} else if (IsPackage(item)) {
-			countOfPackages++;
-		}
-	});
+
+	if (yamlData !== null) {
+		yamlData.forEach((item) => {
+			if (IsAsset(item)) {
+				countOfAssets++;
+				assetIdList.push(item.assetId);
+			} else if (IsPackage(item)) {
+				countOfPackages++;
+			}
+		});
+	}
+	
 	//if (countOfAssets + countOfPackages == 0) {
 	//	return;
 	//}
 
 	var pkgList = Array(countOfPackages).fill().map((element, index) => index + 1);
 	var pkgElement = document.getElementById('SelectPackageNumber');
-	var pkgValue = pkgElement.value;
+	var currentValue = pkgElement.value;
 	pkgElement.replaceChildren();
 	pkgElement.appendChild(new Option('New', 0));
 	pkgList.forEach(i => pkgElement.add(new Option(i, i)));
-	pkgElement.value = pkgValue;
+	pkgElement.value = currentValue;
 
 	var astList = Array(countOfAssets).fill().map((element, index) => index + 1);
 	var assetElement = document.getElementById('SelectAssetNumber');
-	var assetValue = assetElement.value;
+	currentValue = assetElement.value;
 	assetElement.replaceChildren();
 	assetElement.appendChild(new Option('New', 0));
 	astList.forEach(i => assetElement.add(new Option(i, i)));
-	pkgElement.value = assetValue;
+	pkgElement.value = currentValue;
 
 	var assetIdElement = document.getElementById('SelectPackageAssetId');
 	assetIdElement.replaceChildren();
@@ -101,6 +105,7 @@ function UpdateCodePane() {
 		doc = jsyaml.dump(yamlData[idx], {
 			'lineWidth': -1,
 			'quotingType': '"',
+			'noArrayIndent': true,
 			'forceQuotes': true
 		});
 		//The parser blows away the multiline context so we need to rebuild it :(
