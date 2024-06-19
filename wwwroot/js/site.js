@@ -12,20 +12,29 @@ CodeMirror(document.querySelector('#editor'), {
 `,
 	mode: 'yaml'
 });
-//const packages = FetchSc4pacData();
-//const sc4edata = FetchSc4EvermoreData();
+
+var pacAssets = new Array();
+var pacPackages = new Array();
+var sc4pacdata = FetchSc4pacData().then(result => {
+	sc4pacdata = result.contents;
+	pacAssets = result.contents.filter((item) => item.group === 'sc4pacAsset');
+	pacPackages = result.contents.filter((item) => item.group !== 'sc4pacAsset');
+});
+
+
+
 
 
 const cm = document.querySelector('.CodeMirror').CodeMirror;
 var yamlData = null;
 var countOfPackages = 0;
 var countOfAssets = 0;
-var assetIdList = new Array();
+var listOfAssets = new Array();
+var listOfPackages = new Array();
 ParseYaml();
 ClearAssetInputs();
 ClearPackageInputs();
 document.getElementById("PkgPropTab").click();
-//console.log(yamlData);
 
 
 //TODO - validate YAML in code pane for valid yaml syntax
@@ -33,12 +42,24 @@ document.getElementById("PkgPropTab").click();
 //TODO - implement variants for packages
 
 
+async function FetchSc4pacData() {
+	const request = new Request('https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json');
+	const response = await fetch(request);
+	return await response.json();
+}
+async function FetchSc4EvermoreData() {
+	const request = new Request('https://www.sc4evermore.com/latest-modified-downloads.php');
+	const response = await fetch(request);
+	return await response.json();
+}
+
+
+
 /**
  * Parse the current YAML input and update the UI accordingly based on the count of packages and assets.
  */
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
-	console.log(yamlData);
 	CountItems();
 }
 
@@ -48,15 +69,17 @@ function ParseYaml() {
 function CountItems() {
 	countOfAssets = 0;
 	countOfPackages = 0;
-	assetIdList.length = 0;
+	listOfAssets.length = 0;
+	listOfPackages.length = 0;
 
 	if (yamlData !== null) {
 		yamlData.forEach((item) => {
 			if (IsAsset(item)) {
 				countOfAssets++;
-				assetIdList.push(item.assetId);
+				listOfAssets.push(item);
 			} else if (IsPackage(item)) {
 				countOfPackages++;
+				listOfPackages.push(item);
 			}
 		});
 	}
@@ -65,28 +88,37 @@ function CountItems() {
 	//	return;
 	//}
 
-	var pkgList = Array(countOfPackages).fill().map((element, index) => index + 1);
+	//Package selection dropdown
 	var pkgElement = document.getElementById('SelectPackageNumber');
 	var currentValue = pkgElement.value;
 	pkgElement.replaceChildren();
-	pkgElement.appendChild(new Option('New', 0));
-	pkgList.forEach(i => pkgElement.add(new Option(i, i)));
+	pkgElement.appendChild(new Option('Create New Package', 0));
+	for (var idx = 0; idx < listOfPackages.length; idx++) {
+		pkgElement.add(new Option(idx + 1 + ' - ' + listOfPackages[idx].group + ":" + listOfPackages[idx].name, idx + 1));
+	}
 	pkgElement.value = currentValue;
 
-	var astList = Array(countOfAssets).fill().map((element, index) => index + 1);
+	//Asset selection dropdown
 	var assetElement = document.getElementById('SelectAssetNumber');
 	currentValue = assetElement.value;
 	assetElement.replaceChildren();
-	assetElement.appendChild(new Option('New', 0));
-	astList.forEach(i => assetElement.add(new Option(i, i)));
-	pkgElement.value = currentValue;
+	assetElement.appendChild(new Option('Create New Asset', 0));
+	for (var idx = 0; idx < listOfAssets.length; idx++) {
+		assetElement.add(new Option(idx + 1 + ' - ' + listOfAssets[idx].assetId, idx + 1));
+	}
+	assetElement.value = currentValue;
 
-	var assetIdElement = document.getElementById('SelectPackageAssetId');
-	assetIdElement.replaceChildren();
-	assetIdElement.appendChild(new Option('', ''));
-	assetIdList.forEach(i => assetIdElement.add(new Option(i, i)));
+	//Package:asset selection for local assets
+	var localAssetChoice = document.getElementById('SelectLocalPackageAssets');
+	localAssetChoice.replaceChildren();
+	localAssetChoice.appendChild(new Option('', ''));
+	listOfAssets.forEach(i => localAssetChoice.add(new Option(i.assetId, i.assetId)));
 
-
+	//Package:asset selection for existing sc4pac assets
+	var sc4pacAssetChoice = document.getElementById('SelectPacPackageAssets');
+	sc4pacAssetChoice.replaceChildren();
+	sc4pacAssetChoice.appendChild(new Option('', ''));
+	pacAssets.forEach(i => sc4pacAssetChoice.add(new Option(i.name, i.name)));
 
 	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
 }
@@ -96,7 +128,6 @@ function UpdateCodePane() {
 	var newYaml = '';
 	var doc = '';
 	//TODO - figure out how to retain comments
-	//TODO - line breaks are not working for the multi-line description. 
 
 	for (var idx = 0; idx < yamlData.length; idx++) {
 		if (yamlData[idx] === null) {
@@ -123,18 +154,6 @@ function UpdateCodePane() {
 		}
 	}
 	cm.setValue(newYaml);
-}
-
-
-async function FetchSc4pacData() {
-	const request = new Request('https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json');
-	const response = await fetch(request);
-	return await response.json();
-}
-async function FetchSc4EvermoreData() {
-	const request = new Request('https://www.sc4evermore.com/latest-modified-downloads.php');
-	const response = await fetch(request);
-	return await response.json();
 }
 
 /**
@@ -170,6 +189,10 @@ function OpenTab(event, tabName) {
 		document.getElementById('EditingPackageDiv').classList.remove('invisible2');
 		document.getElementById('EditingAssetDiv').classList.add('invisible2');
 		document.getElementById('EditingAssetDiv').classList.remove('visible2');
+	}
+	if (tabName === 'PackageAssets') {
+		//have to recount the items so we get the pacAssets/pacPackages arrays to fill
+		CountItems();
 	}
 }
 

@@ -123,11 +123,12 @@ function FillPackageForm() {
 	}
 
 	//Fill in the direct asset form, if any
-	var assetList = Array(assetCount).fill().map((element, index) => index + 1);
 	var assetListElement = document.getElementById('SelectPackageAsset');
 	assetListElement.replaceChildren();
-	assetListElement.appendChild(new Option('New', 0));
-	assetList.forEach(i => assetListElement.add(new Option(i, i)));
+	assetListElement.appendChild(new Option('Add An Asset', 0));
+	for (var idx = 0; idx < listOfAssets.length; idx++) {
+		assetListElement.add(new Option(idx + 1 + ' - ' + listOfAssets[idx].assetId, idx + 1));
+	}
 }
 /**
  * Fill the Package Asset input form fields with the values from the currently selected package and asset number.
@@ -156,7 +157,14 @@ function FillPackageAssetForm() {
 }
 
 function FillPackageAssetId() {
-	document.getElementById('PackageAssetId').value = document.getElementById('SelectPackageAssetId').value;
+	var selectedValue = document.getElementById('SelectLocalPackageAssets').value;
+	document.getElementById('PackageAssetId').value = selectedValue;
+	document.getElementById('SelectPacPackageAssets').value = '';
+}
+function FillPackageAssetId2() {
+	var selectedValue = document.getElementById('SelectPacPackageAssets').value;
+	document.getElementById('PackageAssetId').value = selectedValue;
+	document.getElementById('SelectLocalPackageAssets').value = '';
 }
 /**
  * Live update the YAML codepane with the values in the current Package form field as the user types.

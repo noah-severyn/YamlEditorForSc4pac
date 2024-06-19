@@ -27,7 +27,7 @@
         </div>
 
         <div id="EditingAssetDiv" style="" class="invisible2">
-            <label for="SelectAssetNumber">Modify Asset:</label>
+            <label for="SelectAssetNumber">Modify Asset &nbsp;&nbsp;</label>
             <select id="SelectAssetNumber" onchange="FillAssetForm()">
                 <option value="0">New</option>
             </select>
@@ -66,7 +66,7 @@
 
 
         <div id="EditingPackageDiv" class="invisible2">
-            <label for="SelectPackageNumber">Modify Package: </label>
+            <label for="SelectPackageNumber">Modify Package &nbsp;&nbsp;</label>
             <select id="SelectPackageNumber" onchange="FillPackageForm()">
                 <option value="0">New</option>
             </select>
@@ -178,27 +178,31 @@
                             <td><label for="SelectPackageAsset">Asset in package</label></td>
                             <td>
                                 <select id="SelectPackageAsset" onchange="FillPackageAssetForm()">
-                                    <option value="0">New</option>
+                                    <option value="0">Add Asset</option>
                                 </select>
                             </td>
                         </tr>
                         <tr>
                             <td></td>
                             <td>
-                                Select an asset id in this file or type below.
+                                Select an asset id from one of the dropdowns below
                             </td>
                         </tr>
                         <tr>
                             <td></td>
                             <td>
-                                <label for="SelectPackageAssetId">Asset Id:</label>
-                                <select id="SelectPackageAssetId" onchange="FillPackageAssetId()">
+                                <label for="SelectLocalPackageAssets">Assets in this file &nbsp;&nbsp;</label>
+                                <select id="SelectLocalPackageAssets" onchange="FillPackageAssetId()">
+                                </select>
+                                <br />
+                                <label for="SelectPacPackageAssets">Existing assets in sc4pac &nbsp;&nbsp;</label>
+                                <select id="SelectPacPackageAssets" onchange="FillPackageAssetId2()">
                                 </select>
                             </td>
                         </tr>
                         <tr>
                             <td><label for="PackageAssetId">Asset Id</label></td>
-                            <td><input id="PackageAssetId" type="text" oninput="UpdatePackageItem('PackageAssetId')" required /></td>
+                            <td><input id="PackageAssetId" type="text" oninput="UpdatePackageItem('PackageAssetId')" disabled="disabled"  /></td>
                         </tr>
                         <tr>
                             <td><label for="PackageAssetInclude">Include</label></td>
@@ -227,7 +231,7 @@
     @* Right Column *@
     <div id="Column2" class="column">
         <h2>YAML Output</h2>
-        <h5>Creating <span id="FileName">newfile.yaml</span> &nbsp;&nbsp;&nbsp;&nbsp; <span id="CurrentItemCount"></span></h5>
+        <h5><span id="CurrentItemCount"></span></h5>
         <p>The contents in this code pane are automatically generated from inputs on the left, but is also able to be customized manually. Beware, manual changes may be overriden if any of the input values are changed!</p>
         @* <p>
 
