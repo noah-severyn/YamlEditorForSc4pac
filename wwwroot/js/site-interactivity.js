@@ -166,6 +166,27 @@ function FillPackageAssetId2() {
 	document.getElementById('PackageAssetId').value = selectedValue;
 	document.getElementById('SelectLocalPackageAssets').value = '';
 }
+function AddPackageDependencies() {
+	var selectedPkg = document.getElementById('SelectLocalPackages').value;
+	var currentDependencies = document.getElementById('PackageDependencies').value;
+	if (currentDependencies === '') {
+		document.getElementById('PackageDependencies').value = selectedPkg
+	} else {
+		document.getElementById('PackageDependencies').value = currentDependencies + ';\n' + selectedPkg;
+	}
+	
+	document.getElementById('SelectPacPackages').value = '';
+}
+function AddPackageDependencies2() {
+	var selectedPkg = document.getElementById('SelectPacPackages').value;
+	var currentDependencies = document.getElementById('PackageDependencies').value;
+	if (currentDependencies === '') {
+		document.getElementById('PackageDependencies').value = selectedPkg
+	} else {
+		document.getElementById('PackageDependencies').value = currentDependencies + ';\n' + selectedPkg;
+	}
+	document.getElementById('SelectLocalPackages').value = '';
+}
 /**
  * Live update the YAML codepane with the values in the current Package form field as the user types.
  */

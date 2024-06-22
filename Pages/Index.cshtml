@@ -120,6 +120,24 @@
                             </td>
                         </tr>
                         <tr>
+                            <td></td>
+                            <td>
+                                Select a package to add as a dependency from one of the dropdowns below
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <label for="SelectLocalPackages">Packages in this file &nbsp;&nbsp;</label>
+                                <select id="SelectLocalPackages" onchange="AddPackageDependencies()">
+                                </select>
+                                <br />
+                                <label for="SelectPacPackages">Existing packages in sc4pac &nbsp;&nbsp;</label>
+                                <select id="SelectPacPackages" onchange="AddPackageDependencies2()">
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
                             <td><label for="PackageDependencies">Dependencies</label></td>
                             <td><textarea id="PackageDependencies" rows="3" oninput="UpdatePackageItem('PackageDependencies')"></textarea></td>
                         </tr>

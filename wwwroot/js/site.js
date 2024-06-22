@@ -9,6 +9,53 @@ CodeMirror(document.querySelector('#editor'), {
 	lineWrapping: true,
 	value:
 		`#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.
+url: "https://community.simtropolis.com/files/file/31109-flunight-props-vol-01-flora/?do=download"
+assetId: "flunight-flora-props-vol01"
+version: "1"
+lastModified: "2020-11-02T05:09:46Z"
+
+---
+group: "flunight"
+name: "flora-props-vol01"
+version: "1"
+subfolder: "100-props-textures"
+assets:
+- assetId: "flunight-flora-props-vol01"
+  include:
+  - "/Flunight Props Vol 01 - Flora.dat"
+info:
+  summary: "Tropical plant, palm and tree props"
+  website: "https://community.simtropolis.com/files/file/31109-flunight-props-vol-01-flora/"
+  author: "flunight"
+  images:
+  - "https://www.simtropolis.com/objects/screens/monthly_2016_05/Props_Vol-01a.jpg.21205d937019b4e2eec2949f28b8484a.jpg"
+  - "https://www.simtropolis.com/objects/screens/monthly_2016_05/Props_Vol-01b.jpg.3fd2bc57710b37179f3772bfd76ad67c.jpg"
+  - "https://www.simtropolis.com/objects/screens/monthly_2016_05/Props_Vol-01c.jpg.ee1f3f3c497f1de8f4fd023bf1daee69.jpg"
+  - "https://www.simtropolis.com/objects/screens/monthly_2016_05/Props_Vol-01d.jpg.e507546b2a80b49ebe47251e9baec718.jpg"
+  - "https://www.simtropolis.com/objects/screens/monthly_2016_05/Props_Vol-01e.jpg.bd40e20a23566dafe1ef956bb74a64bd.jpg"
+
+---
+group: "flunight"
+name: "flora-mmp"
+version: "1"
+subfolder: "180-flora"
+dependencies:
+- "flunight:flora-props-vol01"
+assets:
+- assetId: "flunight-flora-props-vol01"
+  include:
+  - "/Flunight Props Vol 01 - Flora MM.dat"
+info:
+  summary: "Tropical plant, palm and tree MMPs"
+  website: "https://community.simtropolis.com/files/file/31109-flunight-props-vol-01-flora/"
+  author: "flunight"
+  images:
+  - "https://www.simtropolis.com/objects/screens/monthly_2016_05/Props_Vol-01a.jpg.21205d937019b4e2eec2949f28b8484a.jpg"
+  - "https://www.simtropolis.com/objects/screens/monthly_2016_05/Props_Vol-01b.jpg.3fd2bc57710b37179f3772bfd76ad67c.jpg"
+  - "https://www.simtropolis.com/objects/screens/monthly_2016_05/Props_Vol-01c.jpg.ee1f3f3c497f1de8f4fd023bf1daee69.jpg"
+  - "https://www.simtropolis.com/objects/screens/monthly_2016_05/Props_Vol-01d.jpg.e507546b2a80b49ebe47251e9baec718.jpg"
+  - "https://www.simtropolis.com/objects/screens/monthly_2016_05/Props_Vol-01e.jpg.bd40e20a23566dafe1ef956bb74a64bd.jpg"
+
 `,
 	mode: 'yaml'
 });
@@ -88,6 +135,7 @@ function CountItems() {
 	//	return;
 	//}
 
+
 	//Package selection dropdown
 	var pkgElement = document.getElementById('SelectPackageNumber');
 	var currentValue = pkgElement.value;
@@ -97,6 +145,7 @@ function CountItems() {
 		pkgElement.add(new Option(idx + 1 + ' - ' + listOfPackages[idx].group + ":" + listOfPackages[idx].name, idx + 1));
 	}
 	pkgElement.value = currentValue;
+
 
 	//Asset selection dropdown
 	var assetElement = document.getElementById('SelectAssetNumber');
@@ -108,11 +157,33 @@ function CountItems() {
 	}
 	assetElement.value = currentValue;
 
+
+	//Pachage dependency selection for local packages
+	var localpackageChoice = document.getElementById('SelectLocalPackages');
+	localpackageChoice.replaceChildren();
+	localpackageChoice.appendChild(new Option('', ''));
+	for (var idx = 0; idx < listOfPackages.length; idx++) {
+		var pkgName = listOfPackages[idx].group + ":" + listOfPackages[idx].name;
+		localpackageChoice.add(new Option(pkgName, pkgName));
+	}
+
+
+	//Package dependency selection for existing sc4pac packages
+	var sc4pacPackageChoice = document.getElementById('SelectPacPackages');
+	sc4pacPackageChoice.replaceChildren();
+	sc4pacPackageChoice.appendChild(new Option('', ''));
+	pacPackages.forEach(i => {
+		var pkgName = i.group + ':' + i.name
+		sc4pacPackageChoice.add(new Option(pkgName, pkgName))
+	});
+
+
 	//Package:asset selection for local assets
 	var localAssetChoice = document.getElementById('SelectLocalPackageAssets');
 	localAssetChoice.replaceChildren();
 	localAssetChoice.appendChild(new Option('', ''));
 	listOfAssets.forEach(i => localAssetChoice.add(new Option(i.assetId, i.assetId)));
+
 
 	//Package:asset selection for existing sc4pac assets
 	var sc4pacAssetChoice = document.getElementById('SelectPacPackageAssets');
@@ -190,7 +261,7 @@ function OpenTab(event, tabName) {
 		document.getElementById('EditingAssetDiv').classList.add('invisible2');
 		document.getElementById('EditingAssetDiv').classList.remove('visible2');
 	}
-	if (tabName === 'PackageAssets') {
+	if (tabName === 'PackageAssets' || tabName === 'PackageProperties') {
 		//have to recount the items so we get the pacAssets/pacPackages arrays to fill
 		CountItems();
 	}
