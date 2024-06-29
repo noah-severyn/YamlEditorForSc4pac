@@ -160,6 +160,12 @@ function FillPackageAssetId() {
 	var selectedValue = document.getElementById('SelectLocalPackageAssets').value;
 	document.getElementById('PackageAssetId').value = selectedValue;
 	document.getElementById('SelectPacPackageAssets').value = '';
+
+	if (document.getElementById('SelectPackageNumber').value != 0 && document.getElementById('SelectPackageAsset').value == 0 && document.getElementById('PackageAssetId').value !== '') {
+		document.getElementById('AddPackageAssetButton').disabled = false;
+	} else {
+		document.getElementById('AddPackageAssetButton').disabled = true;
+	}
 }
 function FillPackageAssetId2() {
 	var selectedValue = document.getElementById('SelectPacPackageAssets').value;
