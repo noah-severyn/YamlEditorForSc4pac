@@ -68,7 +68,7 @@
         <div id="EditingPackageDiv" class="invisible2">
             <label for="SelectPackageNumber">Modify Package &nbsp;&nbsp;</label>
             <select id="SelectPackageNumber" onchange="FillPackageForm()">
-                <option value="0">New</option>
+                <option value="0">Create New Package</option>
             </select>
 
 
@@ -129,17 +129,17 @@
                             <td></td>
                             <td>
                                 <label for="SelectLocalPackages">Packages in this file &nbsp;&nbsp;</label>
-                                <select id="SelectLocalPackages" onchange="AddPackageDependencies()">
+                                <select id="SelectLocalPackages" onchange="PopulateLocalPackageDropdown()">
                                 </select>
                                 <br />
                                 <label for="SelectPacPackages">Existing packages in sc4pac &nbsp;&nbsp;</label>
-                                <select id="SelectPacPackages" onchange="AddPackageDependencies2()">
+                                <select id="SelectPacPackages" onchange="PopulatePacPackageDropdown()">
                                 </select>
                             </td>
                         </tr>
                         <tr>
                             <td><label for="PackageDependencies">Dependencies</label></td>
-                            <td><textarea id="PackageDependencies" rows="3" oninput="UpdatePackageItem('PackageDependencies')"></textarea></td>
+                            <td><textarea id="PackageDependencies" rows="5" oninput="UpdatePackageItem('PackageDependencies')"></textarea></td>
                         </tr>
                     </tbody>
                 </table>
@@ -166,7 +166,7 @@
                         </tr>
                         <tr>
                             <td><label for="PackageDescription">Description</label></td>
-                            <td><textarea id="PackageDescription" rows="5" oninput="UpdatePackageItem('PackageDescription')"></textarea></td>
+                            <td><textarea id="PackageDescription" rows="7" oninput="UpdatePackageItem('PackageDescription')"></textarea></td>
                         </tr>
                         <tr>
                             <td><label for="PackageAuthor">Author</label></td>
@@ -174,7 +174,7 @@
                         </tr>
                         <tr>
                             <td><label for="PackageImages">Images</label></td>
-                            <td><textarea id="PackageImages" rows="2" oninput="UpdatePackageItem('PackageImages')"></textarea></td>
+                            <td><textarea id="PackageImages" rows="5" oninput="UpdatePackageItem('PackageImages')"></textarea></td>
                         </tr>
                         <tr>
                             <td><label for="PackageWebsite">Website</label></td>
@@ -210,11 +210,11 @@
                             <td></td>
                             <td>
                                 <label for="SelectLocalPackageAssets">Assets in this file &nbsp;&nbsp;</label>
-                                <select id="SelectLocalPackageAssets" onchange="FillPackageAssetId()">
+                                <select id="SelectLocalPackageAssets" onchange="FillLocalPackageAssetDropdown()">
                                 </select>
                                 <br />
                                 <label for="SelectPacPackageAssets">Existing assets in sc4pac &nbsp;&nbsp;</label>
-                                <select id="SelectPacPackageAssets" onchange="FillPackageAssetId2()">
+                                <select id="SelectPacPackageAssets" onchange="FillPacPackageAssetDropdown()">
                                 </select>
                             </td>
                         </tr>

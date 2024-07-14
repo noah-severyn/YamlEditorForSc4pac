@@ -218,6 +218,12 @@ function OpenTab(event, tabName) {
 		//have to recount the items so we get the pacAssets/pacPackages arrays to fill
 		CountItems();
 	}
+
+	//If the selected package is blank then select the first one if available
+	if (document.getElementById('SelectPackageNumber').value == 0 && countOfPackages > 0) {
+		document.getElementById('SelectPackageNumber').value = "1";
+		FillPackageForm();
+	}
 }
 
 function CopyToClipboard() {

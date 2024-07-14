@@ -156,7 +156,7 @@ function FillPackageAssetForm() {
 	}
 }
 
-function FillPackageAssetId() {
+function FillLocalPackageAssetDropdown() {
 	var selectedValue = document.getElementById('SelectLocalPackageAssets').value;
 	document.getElementById('PackageAssetId').value = selectedValue;
 	document.getElementById('SelectPacPackageAssets').value = '';
@@ -167,12 +167,12 @@ function FillPackageAssetId() {
 		document.getElementById('AddPackageAssetButton').disabled = true;
 	}
 }
-function FillPackageAssetId2() {
+function FillPacPackageAssetDropdown() {
 	var selectedValue = document.getElementById('SelectPacPackageAssets').value;
 	document.getElementById('PackageAssetId').value = selectedValue;
 	document.getElementById('SelectLocalPackageAssets').value = '';
 }
-function AddPackageDependencies() {
+function PopulateLocalPackageDropdown() {
 	var selectedPkg = document.getElementById('SelectLocalPackages').value;
 	var currentDependencies = document.getElementById('PackageDependencies').value;
 	if (currentDependencies === '') {
@@ -183,7 +183,7 @@ function AddPackageDependencies() {
 	
 	document.getElementById('SelectPacPackages').value = '';
 }
-function AddPackageDependencies2() {
+function PopulatePacPackageDropdown() {
 	var selectedPkg = document.getElementById('SelectPacPackages').value;
 	var currentDependencies = document.getElementById('PackageDependencies').value;
 	if (currentDependencies === '') {
@@ -263,11 +263,12 @@ function AppendNewPackage() {
 		name: document.getElementById('PackageName').value,
 		version: document.getElementById('PackageVersion').value,
 		subfolder: document.getElementById('PackageSubfolder').value,
-		info: {
-			summary: document.getElementById('PackageSummary').value,
-			website: document.getElementById('PackageWebsite').value,
-		}
+		info: {}
 	};
+	if (document.getElementById('PackageDependencies').value !== '') {
+		newPackage.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
+	}
+	newPackage.info.summary = document.getElementById('PackageSummary').value;
 	if (document.getElementById('PackageWarning').value !== '') {
 		newPackage.info.warning = document.getElementById('PackageWarning').value;
 	}
@@ -283,9 +284,7 @@ function AppendNewPackage() {
 	if (document.getElementById('PackageImages').value !== '') {
 		newPackage.info.images = TextToArray(document.getElementById('PackageImages').value);
 	}
-	if (document.getElementById('PackageDependencies').value !== '') {
-		newPackage.info.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
-	}
+	newPackage.info.website = document.getElementById('PackageWebsite').value;
 	yamlData.push(newPackage);
 
 	UpdateCodePane();
