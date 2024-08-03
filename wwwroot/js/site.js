@@ -23,8 +23,6 @@ var sc4pacdata = FetchSc4pacData().then(result => {
 
 
 
-
-
 const cm = document.querySelector('.CodeMirror').CodeMirror;
 var yamlData = null;
 var countOfPackages = 0;
@@ -35,6 +33,46 @@ ParseYaml();
 ClearAssetInputs();
 ClearPackageInputs();
 document.getElementById("PkgPropTab").click();
+
+new TomSelect('#PacPackageList', {
+	valueField: 'name',
+	labelField: 'name',
+	searchField: ['name'],
+
+	// fetch remote data
+	load: function (query, callback) {
+		var self = this;
+		if (self.loading > 1) {
+			callback();
+			return;
+		}
+
+		var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
+		fetch(url)
+			.then(response => response.json())
+			.then(json => {
+				//Filter the response to remove assets and add a new field combining the group and name
+				callback(json.contents
+					.filter((item) => item.group !== 'sc4pacAsset')
+					
+				);
+				console.log(json.contents
+					.filter((item) => item.group !== 'sc4pacAsset')
+					
+				);
+				self.settings.load = null;
+			}).catch(() => {
+				callback();
+			});
+	},
+	// custom rendering function for options
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.group + ":" + item.name)+ '</div>';
+		}
+	},
+});
+
 
 
 //TODO - validate YAML in code pane for valid yaml syntax
@@ -83,11 +121,6 @@ function CountItems() {
 			}
 		});
 	}
-	
-	//if (countOfAssets + countOfPackages == 0) {
-	//	return;
-	//}
-
 
 	//Package selection dropdown
 	var pkgElement = document.getElementById('SelectPackageNumber');
@@ -98,7 +131,6 @@ function CountItems() {
 		pkgElement.add(new Option(idx + 1 + ' - ' + listOfPackages[idx].group + ":" + listOfPackages[idx].name, idx + 1));
 	}
 	pkgElement.value = currentValue;
-
 
 	//Asset selection dropdown
 	var assetElement = document.getElementById('SelectAssetNumber');
@@ -111,38 +143,40 @@ function CountItems() {
 	assetElement.value = currentValue;
 
 
+
 	//Pachage dependency selection for local packages
-	var localpackageChoice = document.getElementById('SelectLocalPackages');
-	localpackageChoice.replaceChildren();
-	localpackageChoice.appendChild(new Option('', ''));
+	var localPkgList = document.getElementById('LocalPackageList');
+	localPkgList.replaceChildren();
+	localPkgList.appendChild(new Option('', ''));
 	for (var idx = 0; idx < listOfPackages.length; idx++) {
 		var pkgName = listOfPackages[idx].group + ":" + listOfPackages[idx].name;
-		localpackageChoice.add(new Option(pkgName, pkgName));
+		localPkgList.add(new Option(pkgName, pkgName));
 	}
 
-
 	//Package dependency selection for existing sc4pac packages
-	var sc4pacPackageChoice = document.getElementById('SelectPacPackages');
-	sc4pacPackageChoice.replaceChildren();
-	sc4pacPackageChoice.appendChild(new Option('', ''));
-	pacPackages.forEach(i => {
-		var pkgName = i.group + ':' + i.name
-		sc4pacPackageChoice.add(new Option(pkgName, pkgName))
-	});
+	//var pacPkgList = document.getElementById('PacPackageList');
+	//pacPkgList.replaceChildren();
+	//pacPkgList.appendChild(new Option('', ''));
+	//console.log("pacPackages: " + pacPackages.length);
+	//pacPackages.forEach(i => {
+	//	var pkgName = i.group + ':' + i.name;
+	//	pacPkgList.add(new Option(pkgName, pkgName));
+	//});
 
 
 	//Package:asset selection for local assets
-	var localAssetChoice = document.getElementById('SelectLocalPackageAssets');
-	localAssetChoice.replaceChildren();
-	localAssetChoice.appendChild(new Option('', ''));
-	listOfAssets.forEach(i => localAssetChoice.add(new Option(i.assetId, i.assetId)));
-
+	var localAssetList = document.getElementById('SelectLocalPackageAssets');
+	localAssetList.replaceChildren();
+	localAssetList.appendChild(new Option('', ''));
+	listOfAssets.forEach(i => localAssetList.add(new Option(i.assetId, i.assetId)));
 
 	//Package:asset selection for existing sc4pac assets
-	var sc4pacAssetChoice = document.getElementById('SelectPacPackageAssets');
-	sc4pacAssetChoice.replaceChildren();
-	sc4pacAssetChoice.appendChild(new Option('', ''));
-	pacAssets.forEach(i => sc4pacAssetChoice.add(new Option(i.name, i.name)));
+	var pacAssetList = document.getElementById('SelectPacPackageAssets');
+	pacAssetList.replaceChildren();
+	pacAssetList.appendChild(new Option('', ''));
+	pacAssets.forEach(i => pacAssetList.add(new Option(i.name, i.name)));
+
+
 
 	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
 }

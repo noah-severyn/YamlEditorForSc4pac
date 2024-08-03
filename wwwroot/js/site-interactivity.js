@@ -17,6 +17,8 @@ function ClearPackageInputs() {
 	document.getElementById('PackageVersion').value = '';
 	document.getElementById('PackageSubfolder').value = '050-early-mods';
 	document.getElementById('PackageDependencies').value = '';
+	document.getElementById('LocalPackageList').value = '';
+	document.getElementById('PacPackageList').value = '';
 	document.getElementById('PackageSummary').value = '';
 	document.getElementById('PackageConflicts').value = '';
 	document.getElementById('PackageWarning').value = '';
@@ -172,26 +174,25 @@ function FillPacPackageAssetDropdown() {
 	document.getElementById('PackageAssetId').value = selectedValue;
 	document.getElementById('SelectLocalPackageAssets').value = '';
 }
-function PopulateLocalPackageDropdown() {
-	var selectedPkg = document.getElementById('SelectLocalPackages').value;
+function AddDependencyFromLocalList() {
+	var selectedPkg = document.getElementById('SelectLocalPackage').value;
 	var currentDependencies = document.getElementById('PackageDependencies').value;
 	if (currentDependencies === '') {
 		document.getElementById('PackageDependencies').value = selectedPkg
 	} else {
 		document.getElementById('PackageDependencies').value = currentDependencies + ';\n' + selectedPkg;
 	}
-	
-	document.getElementById('SelectPacPackages').value = '';
+	document.getElementById('SelectLocalPackage').value = '';
 }
-function PopulatePacPackageDropdown() {
-	var selectedPkg = document.getElementById('SelectPacPackages').value;
+function AddDepencencyFromPacList() {
+	var selectedPkg = document.getElementById('PacPackageList').value;
 	var currentDependencies = document.getElementById('PackageDependencies').value;
 	if (currentDependencies === '') {
 		document.getElementById('PackageDependencies').value = selectedPkg
 	} else {
 		document.getElementById('PackageDependencies').value = currentDependencies + ';\n' + selectedPkg;
 	}
-	document.getElementById('SelectLocalPackages').value = '';
+	document.getElementById('SelectPacPackage').value = '';
 }
 /**
  * Live update the YAML codepane with the values in the current Package form field as the user types.
