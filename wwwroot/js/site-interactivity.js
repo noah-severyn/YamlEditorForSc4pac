@@ -188,11 +188,11 @@ function AddDepencencyFromPacList() {
 	var selectedPkg = document.getElementById('PacPackageList').value;
 	var currentDependencies = document.getElementById('PackageDependencies').value;
 	if (currentDependencies === '') {
-		document.getElementById('PackageDependencies').value = selectedPkg
+		document.getElementById('PackageDependencies').value = selectedPkg + ';\n'
 	} else {
-		document.getElementById('PackageDependencies').value = currentDependencies + ';\n' + selectedPkg;
+		document.getElementById('PackageDependencies').value = currentDependencies+ selectedPkg + ';\n';
 	}
-	document.getElementById('SelectPacPackage').value = '';
+	document.getElementById('PacPackageList').value = '';
 }
 /**
  * Live update the YAML codepane with the values in the current Package form field as the user types.

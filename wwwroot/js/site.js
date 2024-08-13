@@ -35,9 +35,9 @@ ClearPackageInputs();
 document.getElementById("PkgPropTab").click();
 
 new TomSelect('#PacPackageList', {
-	valueField: 'name',
-	labelField: 'name',
-	searchField: ['name'],
+	valueField: 'id',
+	labelField: 'id',
+	searchField: ['id'],
 
 	// fetch remote data
 	load: function (query, callback) {
@@ -54,11 +54,11 @@ new TomSelect('#PacPackageList', {
 				//Filter the response to remove assets and add a new field combining the group and name
 				callback(json.contents
 					.filter((item) => item.group !== 'sc4pacAsset')
-					
+					.map(i => ({ id: i.group + ":" + i.name, ...i }))
 				);
 				console.log(json.contents
 					.filter((item) => item.group !== 'sc4pacAsset')
-					
+					.map(i => ({ id: i.group + ":" + i.name, ...i }))
 				);
 				self.settings.load = null;
 			}).catch(() => {
