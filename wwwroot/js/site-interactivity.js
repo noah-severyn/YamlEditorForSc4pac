@@ -72,8 +72,8 @@ function EntryValidation(elementId) {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-]'), '');
 	} else if (fieldName === 'Dependencies') {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-:;\n]'), '');
-	} else if (fieldName === 'Website' || fieldName === 'Url') {
-		inputText = inputText.toLowerCase().replace(new RegExp('[^a-z0-9-:/?=.]'), '');
+	} else if (fieldName === 'Website' || fieldName === 'AssetUrl') {
+		inputText = inputText.toLowerCase().replace(new RegExp('[^a-z0-9-&_:/?=.]'), '');
 	}
 	inputElement.value = inputText;
 
@@ -361,7 +361,13 @@ function UpdateAssetItem(itemName) {
 	EntryValidation(itemName);
 	var targetIdx = document.getElementById('SelectAssetNumber').value;
 	var assetIdx = 0;
-	if (targetIdx !== '0')  {
+	if (targetIdx !== '0') {
+		if (itemName === 'AssetUrl') {
+
+		}
+
+
+
 		yamlData.forEach(doc => {
 			if (IsAsset(doc)) {
 				assetIdx++;
