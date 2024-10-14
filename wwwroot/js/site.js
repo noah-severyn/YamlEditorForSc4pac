@@ -8,11 +8,103 @@ CodeMirror(document.querySelector('#editor'), {
 	tabSize: 2,
 	lineWrapping: true,
 	value:
-		`#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.
+		`
+group: "b62"
+name: "lowes-home-improvement"
+version: "3"
+subfolder: "300-commercial"
+info:
+  summary: "Ploppable and growable home improvement and hardware store"
+  description: |
+    Lowe's Companies, Inc. is an American company that operates a chain of retail home improvement and appliance store. Founded in 1946 in North Wilkesboro, North Carolina, the chain has 1,840 stores in the United States, Canada, and Mexico. Lowe's is the second-largest hardware chain in the United States behind The Home Depot and ahead of Menards. Globally, Lowe's is also the second-largest hardware chain, again behind The Home Depot but ahead of the European stores B&Q and OBI.
+
+    This BAT was originally created by Bobbo662 (aka B62). Unfortunately, due to real life circumstances, he was unable to finish the lot and was just sitting around on his hard drive. After talking with him, he graciously handed his work over to me to finish and subsequently upload for yall.
+
+    Lowes Home Improvement: 12x12 CS$ Plop & Grow
+         Jobs : 2968 CS$, 744 CS$
+         Plop Cost : $65000
+         Bulldoze Cost : $6500
+         Power Consumed : 60
+         Water Consumed : 716
+         Air Pollution : 37 over 5 tiles
+         Water Pollution : 18 over 6 tiles
+         Garbage Pollution : 37 over 0 tiles
+         Flammability : 40
+  author: "Bobbo662, nos.17"
+  images:
+  - "http://nos17.weebly.com/uploads/2/6/0/3/26032074/a1_2_orig.png"
+  - "http://nos17.weebly.com/uploads/2/6/0/3/26032074/a0_orig.png"
+  - "http://nos17.weebly.com/uploads/2/6/0/3/26032074/a4_orig.png"
+  - "http://nos17.weebly.com/uploads/2/6/0/3/26032074/a6_orig.png"
+  - "http://nos17.weebly.com/uploads/2/6/0/3/26032074/a7_orig.png"
+  - "http://nos17.weebly.com/uploads/2/6/0/3/26032074/a8_orig.png"
+  - "http://nos17.weebly.com/uploads/2/6/0/3/26032074/a9_orig.png"
+  - "http://nos17.weebly.com/uploads/2/6/0/3/26032074/b4_2_orig.png"
+  website: "https://community.simtropolis.com/files/file/30942-b62-remastered-lowes-home-improvement-distribution-centers/"
+dependencies:
+- "bsc:textures-vol01"
+- "bsc:mega-props-sg-vol01"
+- "shk:parking-pack"
+- "bsc:mega-props-jes-vol01"
+- "bsc:mega-props-jes-vol02"
+assets:
+- assetId: "b62-lowes-home-improvement-and-distribution"
+
+---
+group: "b62"
+name: "lowes-distribution-center"
+version: "3"
+subfolder: "400-industrial"
+info:
+  summary: "Ploppable and growable industrial distribtion warehouse"
+  description: >
+    Lowe's Companies, Inc. is an American company that operates a chain of retail home improvement and appliance store. Founded in 1946 in North Wilkesboro, North Carolina, the chain has 1,840 stores in the United States, Canada, and Mexico. Lowe's is the second-largest hardware chain in the United States behind The Home Depot and ahead of Menards. Globally, Lowe's is also the second-largest hardware chain, again behind The Home Depot but ahead of the European stores B&Q and OBI.
+
+    This BAT was originally created by Bobbo662 (aka B62). Unfortunately, due to real life circumstances, he was unable to finish the lot and was just sitting around on his hard drive. After talking with him, he graciously handed his work over to me to finish and subsequently upload for yall.
+
+    Lowes Distribution Center: 13x11 IM Plop & Grow
+         Jobs : 808 IM
+         Plop Cost : $55000
+         Bulldoze Cost : $5500
+         Power Consumed : 39
+         Water Consumed : 572
+         Air Pollution : 38 over 9 tiles
+         Water Pollution : 25 over 13 tiles
+         Garbage Pollution : Minimal
+         Flammability : 70
+  author: "Bobbo662, nos.17"
+  images:
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/lowes-wh-0.png.8fbeebc5acfd7daa6d15d951e6251be3.png"
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/lowes-wh-1.png.c6695d7477596ade473e8e920bde5bc6.png"
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/lowes-wh-2.png.cef3048823f8088baca909a828876dc5.png"
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/lowes-wh-3.png.1a594b2b1b764e8f3aed899ff7c9785b.png"
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/lowes-wh-4.png.c2320085f956edf67dbc4ceb7e818d05.png"
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/lowes-wh-5.png.0ef1ea62065a2aa1fbea37f0405aa982.png"
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/lowes-dist-0.png.36e6e7f01022aa60c753b86461a838cd.png"
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/lowes-dist-1.png.4cbc21724343dea181bbc84fc298a32f.png"
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/lowes-dist-2.png.47e501fe741b8a13448c34e8576fd4aa.png"
+  website: "https://community.simtropolis.com/files/file/30942-b62-remastered-lowes-home-improvement-distribution-centers/"
+dependencies:
+- "bsc:textures-vol01"
+- "bsc:mega-props-sg-vol01"
+- "shk:parking-pack"
+- "bsc:mega-props-jes-vol01"
+- "bsc:mega-props-jes-vol02"
+assets:
+- assetId: "b62-lowes-home-improvement-and-distribution"
+
+
+---
+url: "https://community.simtropolis.com/files/file/30942-b62-remastered-lowes-home-improvement-distribution-centers/?do=download&r=202555"
+assetId: "b62-lowes-home-improvement-and-distribution"
+version: "3"
+lastModified: "2017-06-21T01:53:11Z"
 `,
 	mode: 'yaml'
 });
 
+var currPackageIdx = '0';
+var currAssetIdx = '0';
 var pacAssets = new Array();
 var pacPackages = new Array();
 var sc4pacdata = FetchSc4pacData().then(result => {
@@ -20,9 +112,13 @@ var sc4pacdata = FetchSc4pacData().then(result => {
 	pacAssets = result.contents.filter((item) => item.group === 'sc4pacAsset');
 	pacPackages = result.contents.filter((item) => item.group !== 'sc4pacAsset');
 });
+//fetch('/config.json').then(function (config) {
+//    console.log('API key:', config.apiKey);
+//});
 
 
 
+var tv; //Tree View
 const cm = document.querySelector('.CodeMirror').CodeMirror;
 var yamlData = null;
 var countOfPackages = 0;
@@ -99,7 +195,84 @@ async function FetchSc4EvermoreData() {
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
 	CountItems();
+	UpdateTree();
 }
+
+
+
+function UpdateTree() {
+	var idx = 1;
+	var astList = [];
+	listOfAssets.forEach((asset) => {
+		astList.push({ name: idx + ' - ' + asset.assetId, children: [] });
+		idx++;
+	});
+
+	idx = 1;
+	var pkgList = [];
+	var pkgParts = [];
+	var pkgAstList = [];
+	var pkgVarList = [];
+	var pkgOptList = [];
+	listOfPackages.forEach((pkg) => {
+		console.log(pkg.assets);
+
+		pkgParts.push({
+			name: 'Assets (' + pkg.assets.length + ')',
+			expanded: true,
+			children: pkg.assets.map(i => ({ name: i.assetId, children: [] }))
+		});
+		pkgParts.push({ name: 'Variants (' + 0 + ')', expanded: true, children: [] });
+		pkgParts.push({ name: 'Options (' + 0 + ')', expanded: true, children: [] });
+
+		pkgList.push({ name: idx + ' - ' + pkg.group + ":" + pkg.name, children: pkgParts });
+		idx++;
+
+		//pkgAstList.length = 0;
+	});
+
+	var newData = [
+		{ name: 'Packages (' + pkgList.length + ')', expanded: true, children: pkgList },
+		{ name: 'Assets (' + astList.length + ')', expanded: true, children: astList }
+	];
+
+	tv = new TreeView(newData, 'TreeView');
+	tv.on("select", function (t) {
+		if (t.data.name.indexOf(' - ') > 0) {
+			if (t.data.name.indexOf(':' > 0)) {
+				currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+				FillPackageForm();
+			} else {
+				currAssetIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+				FillAssetForm();
+			}
+		}
+		
+		
+	});
+	tv.on("collapse", function (target) {
+		ExpandCollapseEvent(target);
+	});
+	tv.on("expand", function (target) {
+		ExpandCollapseEvent(target);
+	});
+}
+
+function ExpandCollapseEvent(target) {
+	var title = target.target.textContent.substring(1);
+	if (title.indexOf(' - ') > 0) {
+		if (title.indexOf(':' > 0)) {
+			currPackageIdx = title.slice(0, title.indexOf(' '));
+			FillPackageForm();
+		} else {
+			currAssetIdx = title.slice(0, title.indexOf(' '));
+			FillAssetForm();
+		}
+	}
+	console.log('pkg:' + currPackageIdx + " asset:" + currAssetIdx);
+}
+
+
 
 /**
  * Count the number of Packages and Assets in the code pane and update the UI with this new result.
@@ -123,24 +296,24 @@ function CountItems() {
 	}
 
 	//Package selection dropdown
-	var pkgElement = document.getElementById('SelectPackageNumber');
-	var currentValue = pkgElement.value;
-	pkgElement.replaceChildren();
-	pkgElement.appendChild(new Option('Create New Package', 0));
-	for (var idx = 0; idx < listOfPackages.length; idx++) {
-		pkgElement.add(new Option(idx + 1 + ' - ' + listOfPackages[idx].group + ":" + listOfPackages[idx].name, idx + 1));
-	}
-	pkgElement.value = currentValue;
+	//var pkgElement = document.getElementById('SelectPackageNumber');
+	//var currentValue = pkgElement.value;
+	//pkgElement.replaceChildren();
+	//pkgElement.appendChild(new Option('Create New Package', 0));
+	//for (var idx = 0; idx < listOfPackages.length; idx++) {
+	//	pkgElement.add(new Option(idx + 1 + ' - ' + listOfPackages[idx].group + ":" + listOfPackages[idx].name, idx + 1));
+	//}
+	//pkgElement.value = currentValue;
 
 	//Asset selection dropdown
-	var assetElement = document.getElementById('SelectAssetNumber');
-	currentValue = assetElement.value;
-	assetElement.replaceChildren();
-	assetElement.appendChild(new Option('Create New Asset', 0));
-	for (var idx = 0; idx < listOfAssets.length; idx++) {
-		assetElement.add(new Option(idx + 1 + ' - ' + listOfAssets[idx].assetId, idx + 1));
-	}
-	assetElement.value = currentValue;
+	//var assetElement = document.getElementById('SelectAssetNumber');
+	//currentValue = assetElement.value;
+	//assetElement.replaceChildren();
+	//assetElement.appendChild(new Option('Create New Asset', 0));
+	//for (var idx = 0; idx < listOfAssets.length; idx++) {
+	//	assetElement.add(new Option(idx + 1 + ' - ' + listOfAssets[idx].assetId, idx + 1));
+	//}
+	//assetElement.value = currentValue;
 
 
 
@@ -254,10 +427,10 @@ function OpenTab(event, tabName) {
 	}
 
 	//If the selected package is blank then select the first one if available
-	if (document.getElementById('SelectPackageNumber').value == 0 && countOfPackages > 0) {
-		document.getElementById('SelectPackageNumber').value = "1";
-		FillPackageForm();
-	}
+	//if (document.getElementById('SelectPackageNumber').value == 0 && countOfPackages > 0) {
+	//	document.getElementById('SelectPackageNumber').value = "1";
+	//	FillPackageForm();
+	//}
 }
 
 function CopyToClipboard() {
@@ -265,5 +438,5 @@ function CopyToClipboard() {
 }
 
 function validate() {
-
+	//ensure any manually typed yaml (as opposed to generated yaml) is syntactically valid
 }

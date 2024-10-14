@@ -81,8 +81,14 @@ function EntryValidation(elementId) {
 	inputElement.setSelectionRange(locn, locn);
 }
 
-
-
+function StartNewPackage() {
+	ClearPackageInputs();
+	currPackageIdx = '0';
+}
+function StartNewAsset() {
+	ClearAssetInputs();
+	currAssetIdx = '0';
+}
 
 // --------------------------------------------------------------------------------------------
 // ---------------------------------------   Packages   ---------------------------------------
@@ -92,17 +98,15 @@ function EntryValidation(elementId) {
  * Fill the Package input form fields with the values from the currently selected package number.
  */
 function FillPackageForm() {
-	var targetIdx = document.getElementById('SelectPackageNumber').value;
-	document.getElementById('AddPackageButton').disabled = (document.getElementById('SelectPackageNumber').value != '0');
+	document.getElementById('AddPackageButton').disabled = (currPackageIdx != '0');
 	var pkgIdx = 0;
-	var assetCount = 0;
-	if (targetIdx === '0') {
+	if (currPackageIdx === '0') {
 		ClearPackageInputs();
 	} else {
 		yamlData.forEach(doc => {
 			if (IsPackage(doc)) {
 				pkgIdx++;
-				if (pkgIdx == targetIdx) {
+				if (pkgIdx == currPackageIdx) {
 					document.getElementById('PackageGroup').value = doc.group;
 					document.getElementById('PackageName').value = doc.name;
 					document.getElementById('PackageVersion').value = doc.version;
@@ -122,14 +126,6 @@ function FillPackageForm() {
 				}
 			}
 		});
-	}
-
-	//Fill in the direct asset form, if any
-	var assetListElement = document.getElementById('SelectPackageAsset');
-	assetListElement.replaceChildren();
-	assetListElement.appendChild(new Option('Add An Asset', 0));
-	for (var idx = 0; idx < listOfAssets.length; idx++) {
-		assetListElement.add(new Option(idx + 1 + ' - ' + listOfAssets[idx].assetId, idx + 1));
 	}
 }
 /**
@@ -163,7 +159,7 @@ function FillLocalPackageAssetDropdown() {
 	document.getElementById('PackageAssetId').value = selectedValue;
 	document.getElementById('SelectPacPackageAssets').value = '';
 
-	if (document.getElementById('SelectPackageNumber').value != 0 && document.getElementById('SelectPackageAsset').value == 0 && document.getElementById('PackageAssetId').value !== '') {
+	if (currPackageIdx != '0' && document.getElementById('SelectPackageAsset').value == 0 && document.getElementById('PackageAssetId').value !== '') {
 		document.getElementById('AddPackageAssetButton').disabled = false;
 	} else {
 		document.getElementById('AddPackageAssetButton').disabled = true;
@@ -197,16 +193,15 @@ function AddDepencencyFromPacList() {
 /**
  * Live update the YAML codepane with the values in the current Package form field as the user types.
  */
-function UpdatePackageItem(itemName) {
-	EntryValidation(itemName);
-	var targetIdx = document.getElementById('SelectPackageNumber').value;
+function UpdatePackageData(fieldName) {
+	EntryValidation(fieldName);
 	var pkgAssetIdx = document.getElementById('SelectPackageAsset').value;
 	var pkgIdx = 0;
-	if (targetIdx !== '0') {
+	if (currPackageIdx !== '0') {
 		yamlData.forEach(doc => {
 			if (IsPackage(doc)) {
 				pkgIdx++;
-				if (pkgIdx == targetIdx) {
+				if (pkgIdx == currPackageIdx) {
 					doc.group = document.getElementById('PackageGroup').value;
 					doc.name = document.getElementById('PackageName').value;
 					doc.version = document.getElementById('PackageVersion').value;
