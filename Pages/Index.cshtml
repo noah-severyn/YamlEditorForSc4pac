@@ -18,6 +18,7 @@
     <div id="Column1" class="column">
         <h2>Data Input</h2>
         <p>For Dependencies, Image, Include, and Exclude fields add multiple items separated by a semicolon. Variants and are not yet supported with this tool.</p>
+        <p>Fields with an asterisk (*) are required.</p>
 
         <div class="tab">
             <button id="PkgPropTab" class="tab-link" onclick="OpenTab(event, 'PackageProperties')">Package Properties</button>
@@ -44,19 +45,19 @@
                     </colgroup>
                     <tbody>
                         <tr>
-                            <td><label for="PackageGoup">Group</label></td>
+                            <td><label for="PackageGoup" class="required-label">Group</label></td>
                             <td><input id="PackageGroup" type="text" oninput="UpdatePackageItem('PackageGroup')" class="required" /></td>
                         </tr>
                         <tr>
-                            <td><label for="PackageName">Name</label></td>
+                            <td><label for="PackageName" class="required-label">Name</label></td>
                             <td><input id="PackageName" type="text" oninput="UpdatePackageItem('PackageName')" class="required" /></td>
                         </tr>
                         <tr>
-                            <td><label for="PackageVersion">Version</label></td>
+                            <td><label for="PackageVersion" class="required-label">Version</label></td>
                             <td><input id="PackageVersion" type="text" oninput="UpdatePackageItem('PackageVersion')" class="required" /></td>
                         </tr>
                         <tr>
-                            <td><label for="PackageSubfolder">Subfolder</label></td>
+                            <td><label for="PackageSubfolder" class="required-label">Subfolder</label></td>
                             <td>
                                 <select id="PackageSubfolder" oninput="UpdatePackageItem('PackageSubfolder')" required>
                                     <option value="050-early-mods">050-early-mods</option>
@@ -115,7 +116,7 @@
                     </colgroup>
                     <tbody>
                         <tr>
-                            <td><label for="PackageSummary">Summary</label></td>
+                            <td><label for="PackageSummary" class="required-label">Summary</label></td>
                             <td><input id="PackageSummary" type="text" oninput="UpdatePackageItem('PackageSummary')" class="required" /></td>
                         </tr>
                         <tr>
@@ -139,7 +140,7 @@
                             <td><textarea id="PackageImages" rows="5" oninput="UpdatePackageItem('PackageImages')"></textarea></td>
                         </tr>
                         <tr>
-                            <td><label for="PackageWebsite">Website</label></td>
+                            <td><label for="PackageWebsite" class="required-label">Website</label></td>
                             <td><input id="PackageWebsite" type="url" oninput="UpdatePackageItem('PackageWebsite')" class="required" /></td>
                         </tr>
                     </tbody>
@@ -222,19 +223,19 @@
                     </colgroup>
                     <tbody>
                         <tr>
-                            <td><label for="AssetUrl">URL</label></td>
+                            <td><label for="AssetUrl" class="required-label">URL</label></td>
                             <td><input id="AssetUrl" type="url" oninput="UpdateAssetItem('AssetUrl')" class="required" /></td>
                         </tr>
                         <tr>
-                            <td><label for="AssetId">Asset ID</label></td>
+                            <td><label for="AssetId" class="required-label">Asset ID</label></td>
                             <td><input id="AssetId" type="text" oninput="UpdateAssetItem('AssetId')" class="required" /></td>
                         </tr>
                         <tr>
-                            <td><label for="AssetVersion">Version</label></td>
+                            <td><label for="AssetVersion" class="required-label">Version</label></td>
                             <td><input id="AssetVersion" type="text" oninput="UpdateAssetItem('AssetVersion')" class="required" /></td>
                         </tr>
                         <tr>
-                            <td><label for="AssetLastModified">Last Modified</label></td>
+                            <td><label for="AssetLastModified" class="required-label">Last Modified</label></td>
                             <td><input id="AssetLastModified" type="datetime-local" step="1" oninput="UpdateAssetItem('AssetLastModified')" class="required" /><input id="AssetLastModifiedText" type="text" oninput="FillDateTimePicker()" style="width:180px;" /></td>
                         </tr>
                     </tbody>
