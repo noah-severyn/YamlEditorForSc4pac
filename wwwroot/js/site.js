@@ -117,8 +117,14 @@ var sc4pacdata = FetchSc4pacData().then(result => {
 //});
 
 
-
-var tv; //Tree View
+/**
+ * Main Tree View
+ */
+var mtv;
+/**
+ * Asset Tree View
+ */
+var atv;
 const cm = document.querySelector('.CodeMirror').CodeMirror;
 var yamlData = null;
 var countOfPackages = 0;
@@ -210,25 +216,9 @@ function UpdateTree() {
 
 	idx = 1;
 	var pkgList = [];
-	var pkgParts = [];
-	var pkgAstList = [];
-	var pkgVarList = [];
-	var pkgOptList = [];
 	listOfPackages.forEach((pkg) => {
-		console.log(pkg.assets);
-
-		pkgParts.push({
-			name: 'Assets (' + pkg.assets.length + ')',
-			expanded: true,
-			children: pkg.assets.map(i => ({ name: i.assetId, children: [] }))
-		});
-		pkgParts.push({ name: 'Variants (' + 0 + ')', expanded: true, children: [] });
-		pkgParts.push({ name: 'Options (' + 0 + ')', expanded: true, children: [] });
-
-		pkgList.push({ name: idx + ' - ' + pkg.group + ":" + pkg.name, children: pkgParts });
+		pkgList.push({ name: idx + ' - ' + pkg.group + ":" + pkg.name, children: [] });
 		idx++;
-
-		//pkgAstList.length = 0;
 	});
 
 	var newData = [
@@ -236,8 +226,8 @@ function UpdateTree() {
 		{ name: 'Assets (' + astList.length + ')', expanded: true, children: astList }
 	];
 
-	tv = new TreeView(newData, 'TreeView');
-	tv.on("select", function (t) {
+	mtv = new TreeView(newData, 'MainTreeView');
+	mtv.on("select", function (t) {
 		if (t.data.name.indexOf(' - ') > 0) {
 			if (t.data.name.indexOf(':' > 0)) {
 				currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
@@ -248,28 +238,17 @@ function UpdateTree() {
 			}
 		}
 		
-		
 	});
-	tv.on("collapse", function (target) {
-		ExpandCollapseEvent(target);
-	});
-	tv.on("expand", function (target) {
-		ExpandCollapseEvent(target);
-	});
-}
 
-function ExpandCollapseEvent(target) {
-	var title = target.target.textContent.substring(1);
-	if (title.indexOf(' - ') > 0) {
-		if (title.indexOf(':' > 0)) {
-			currPackageIdx = title.slice(0, title.indexOf(' '));
-			FillPackageForm();
-		} else {
-			currAssetIdx = title.slice(0, title.indexOf(' '));
-			FillAssetForm();
+	atc = new TreeView([
+		{ name: 'Item 1', children: [] },
+		{
+			name: 'Item 2', expanded: true, children: [
+				{ name: 'Sub Item 1', children: [] },
+				{ name: 'Sub Item 2', children: [] }
+			]
 		}
-	}
-	console.log('pkg:' + currPackageIdx + " asset:" + currAssetIdx);
+	], 'AssetTreeView');
 }
 
 

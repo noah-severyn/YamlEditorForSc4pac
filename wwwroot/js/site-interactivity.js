@@ -195,7 +195,7 @@ function AddDepencencyFromPacList() {
  */
 function UpdatePackageData(fieldName) {
 	EntryValidation(fieldName);
-	var pkgAssetIdx = document.getElementById('SelectPackageAsset').value;
+	//var pkgAssetIdx = document.getElementById('SelectPackageAsset').value;
 	var pkgIdx = 0;
 	if (currPackageIdx !== '0') {
 		yamlData.forEach(doc => {
@@ -229,21 +229,21 @@ function UpdatePackageData(fieldName) {
 					doc.info.website = document.getElementById('PackageWebsite').value;
 
 
-					if (pkgAssetIdx === '0' && document.getElementById('PackageAssetId').value !== '') {
-						AddPackageAssetButton.disabled = false;
-					}
+					//if (pkgAssetIdx === '0' && document.getElementById('PackageAssetId').value !== '') {
+					//	AddPackageAssetButton.disabled = false;
+					//}
 
-					if (doc.assets !== undefined && pkgAssetIdx !== '0') {
-						pkgAssetIdx--; //The dropdown is 1-based but the array is 0-based
-						doc.assets[pkgAssetIdx].assetId = document.getElementById('PackageAssetId').value;
-						if (document.getElementById('PackageAssetInclude').value !== '') {
-							doc.assets[pkgAssetIdx].include = TextToArray(document.getElementById('PackageAssetInclude').value);
-						}
-						if (document.getElementById('PackageAssetExclude').value !== '') {
-							doc.assets[pkgAssetIdx].exclude = TextToArray(document.getElementById('PackageAssetExclude').value);
-						}
+					//if (doc.assets !== undefined && pkgAssetIdx !== '0') {
+					//	pkgAssetIdx--; //The dropdown is 1-based but the array is 0-based
+					//	doc.assets[pkgAssetIdx].assetId = document.getElementById('PackageAssetId').value;
+					//	if (document.getElementById('PackageAssetInclude').value !== '') {
+					//		doc.assets[pkgAssetIdx].include = TextToArray(document.getElementById('PackageAssetInclude').value);
+					//	}
+					//	if (document.getElementById('PackageAssetExclude').value !== '') {
+					//		doc.assets[pkgAssetIdx].exclude = TextToArray(document.getElementById('PackageAssetExclude').value);
+					//	}
 
-					}
+					//}
 				}
 			}
 		});
