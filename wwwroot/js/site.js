@@ -1,4 +1,4 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 // for details on configuring this project to bundle and minify static web assets.
 
 
@@ -71,6 +71,45 @@ new TomSelect('#PacPackageList', {
 			return '<div class="py-2 d-flex">' + escape(item.group + ":" + item.name)+ '</div>';
 		}
 	},
+});
+
+new TomSelect('#PackageGroup', {
+    valueField: 'group',
+    labelField: 'group',
+    searchField: ['group'],
+	maxItems: 1,
+	create: true,
+
+    // fetch remote data
+    load: function (query, callback) {
+        var self = this;
+        if (self.loading > 1) {
+            callback();
+            return;
+        }
+
+        var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
+		fetch(url)
+            .then(response => response.json())
+            .then(json => {
+                //Filter the response to remove assets
+				callback(json.contents
+					.filter((item) => item.group !== 'sc4pacAsset')
+				);
+				console.log(json.contents
+					.filter((item) => item.group !== 'sc4pacAsset')
+				);
+                self.settings.load = null;
+            }).catch(() => {
+                callback();
+            });
+    },
+    // custom rendering function for options
+    render: {
+        option: function (item, escape) {
+            return '<div class="py-2 d-flex">' + escape(item.group)+ '</div>';
+        }
+    },
 });
 
 
