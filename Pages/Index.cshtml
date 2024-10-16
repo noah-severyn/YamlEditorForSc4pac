@@ -164,15 +164,15 @@
                         <p>These assets will be installed for every user, regardless of the chosen variant or option. Choose an asset from one of the dropdowns below.</p>
                         <form>
                             <div class="mb-2 input-group">
-                                <span class="input-group-text font-monospace">this file</span>
-                                <select id="SelectLocalPackageAssets" class="form-select" onchange="FillLocalPackageAssetDropdown()"></select>
+                                <span class="input-group-text">this file</span>
+                                <select id="SelectLocalPackageAssets" class="form-select" onchange="FillPkgAssetId(this)"></select>
                             </div>
                             <div class="mb-2 input-group">
-                                <span class="input-group-text font-monospace">sc4pac&nbsp;&nbsp;&nbsp;</span>
-                                <select id="SelectPacPackageAssets" class="form-select" onchange="FillPacPackageAssetDropdown()"></select>
+                                <span class="input-group-text">sc4pac</span>
+                                <select id="SelectPacPackageAssets" class="form-select" onchange="FillPkgAssetId(this)"></select>
                             </div>
                             <div class="mb-2 input-group">
-                                <span class="input-group-text font-monospace">asset id&nbsp;</span>
+                                <span class="input-group-text">asset id</span>
                                 <input id="PackageAssetId" class="form-control" type="text" disabled="disabled" />
                             </div>
                             <div class="mb-2 input-group">

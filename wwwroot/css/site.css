@@ -99,4 +99,9 @@ table {
     padding: 6px 12px;
     /*border: 1px solid #ccc;*/
     border-top: none;
-} 
+}
+
+/*https://stackoverflow.com/a/50478244/10802255*/
+.input-group-text {
+    width: 70px; /*adjust as needed*/
+}
