@@ -79,6 +79,9 @@ new TomSelect('#PackageGroup', {
     searchField: ['group'],
 	maxItems: 1,
 	create: true,
+	preload: true,
+	persist: false,
+	maxOptions: null,
 
     // fetch remote data
     load: function (query, callback) {
