@@ -1,4 +1,4 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 // for details on configuring this project to bundle and minify static web assets.
 
 
@@ -69,6 +69,47 @@ new TomSelect('#PacPackageList', {
 	render: {
 		option: function (item, escape) {
 			return '<div class="py-2 d-flex">' + escape(item.group + ":" + item.name)+ '</div>';
+		}
+	},
+});
+
+new TomSelect('#PackageSubfolder', {
+	valueField: 'name',
+	labelField: 'name',
+	searchField: ['name'],
+	maxItems: 1,
+	preload: true,
+	maxOptions: null,
+
+	// fetch remote data
+	load: function (query, callback) {
+		var self = this;
+		if (self.loading > 1) {
+			callback();
+			return;
+		}
+
+		var url = 'https://raw.githubusercontent.com/memo33/sc4pac/45fc116576044e73ff50b257fc1fcef381f96714/.github/sc4pac-yaml-schema.py' // Use data @ commit 45fc11 to prevent any failure if file is ever changed.
+		fetch(url)
+			.then(response => response.text())
+			.then(responseText => {
+				subfolders = responseText
+					.split('### [subfolders-docsify]')[1] // Keep content between delimiters.
+					.split('\n') // Split by line return.
+					.filter(n => n) // Remove empty entries (first and last).
+					.map(i => ({name: i}))
+				;
+				callback(subfolders);
+				console.log(subfolders)
+				self.settings.load = null;
+			}).catch(() => {
+				callback();
+			});
+	},
+	// custom rendering function for options
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.name)+ '</div>';
 		}
 	},
 });
