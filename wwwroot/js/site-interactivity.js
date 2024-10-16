@@ -15,7 +15,7 @@ function ClearPackageInputs() {
 	document.getElementById('PackageGroup').value = '';
 	document.getElementById('PackageName').value = '';
 	document.getElementById('PackageVersion').value = '';
-	document.getElementById('PackageSubfolder').value = '050-early-mods';
+	document.getElementById('PackageSubfolder').value = '';
 	document.getElementById('PackageDependencies').value = '';
 	document.getElementById('LocalPackageList').value = '';
 	document.getElementById('PacPackageList').value = '';
@@ -27,6 +27,18 @@ function ClearPackageInputs() {
 	document.getElementById('PackageImages').value = '';
 	document.getElementById('PackageWebsite').value = '';
 
+	document.getElementById('SelectLocalPackageAssets').value = '';
+	document.getElementById('SelectPacPackageAssets').value = '';
+	document.getElementById('PackageAssetId').value = '';
+	document.getElementById('PackageAssetInclude').value = '';
+	document.getElementById('PackageAssetExclude').value = '';
+}
+/**
+ * Clears all the Package Asset input form fields.
+ */
+function ClearPackageAssetInputs() {
+	document.getElementById('SelectLocalPackageAssets').value = '';
+	document.getElementById('SelectPacPackageAssets').value = '';
 	document.getElementById('PackageAssetId').value = '';
 	document.getElementById('PackageAssetInclude').value = '';
 	document.getElementById('PackageAssetExclude').value = '';
@@ -131,45 +143,45 @@ function FillPackageForm() {
 /**
  * Fill the Package Asset input form fields with the values from the currently selected package and asset number.
  */
-function FillPackageAssetForm() {
-	var pkgIdx = 0;
-	var targetPkgIdx = document.getElementById('SelectPackageNumber').value;
-	var assetIdx = document.getElementById('SelectPackageAsset').value;
-	if (assetIdx === '0') {
-		document.getElementById('PackageAssetId').value = '';
-		document.getElementById('PackageAssetInclude').value = '';
-		document.getElementById('PackageAssetExclude').value = '';
-	} else {
-		assetIdx--; //Arrays are zero-based but the dropdown is 1-based
-		yamlData.forEach(doc => {
-			if (IsPackage(doc)) {
-				pkgIdx++;
-				if (pkgIdx == targetPkgIdx) {
-					document.getElementById('PackageAssetId').value = doc.assets[assetIdx].assetId;
-					document.getElementById('PackageAssetInclude').value = ArrayToText(doc.assets[assetIdx].include);
-					document.getElementById('PackageAssetExclude').value = ArrayToText(doc.assets[assetIdx].exclude);
-				}
-			}
-		});
-	}
+function FillPackageAssetForm(assetName) {
+	//var pkgIdx = 0;
+	//var targetPkgIdx = document.getElementById('SelectPackageNumber').value;
+	//var assetIdx = document.getElementById('SelectPackageAsset').value;
+	//if (currAssetIdx === '0') {
+	//	ClearPackageAssetInputs();
+	//} else {
+		var pkgAsset = GetCurrentDocument('p').assets.find((i) => i.assetId = assetName)
+		document.getElementById('PackageAssetId').value = pkgAsset.assetId;
+		document.getElementById('PackageAssetInclude').value = ArrayToText(pkgAsset.include);
+		document.getElementById('PackageAssetExclude').value = ArrayToText(pkgAsset.exclude);
+		//assetIdx--; //Arrays are zero-based but the dropdown is 1-based
+		//yamlData.forEach(doc => {
+		//	if (IsPackage(doc)) {
+		//		pkgIdx++;
+		//		if (pkgIdx == targetPkgIdx) {
+		//			document.getElementById('PackageAssetId').value = doc.assets[assetIdx].assetId;
+		//			document.getElementById('PackageAssetInclude').value = ArrayToText(doc.assets[assetIdx].include);
+		//			document.getElementById('PackageAssetExclude').value = ArrayToText(doc.assets[assetIdx].exclude);
+		//		}
+		//	}
+		//});
+	//}
 }
+function FillPkgAssetId(obj) {
+	if (obj.id === 'SelectLocalPackageAssets') {
+		document.getElementById('SelectPacPackageAssets').value = '';
+	} else {
+		document.getElementById('SelectLocalPackageAssets').value = '';
+	}
 
-function FillLocalPackageAssetDropdown() {
-	var selectedValue = document.getElementById('SelectLocalPackageAssets').value;
-	document.getElementById('PackageAssetId').value = selectedValue;
-	document.getElementById('SelectPacPackageAssets').value = '';
-
-	if (currPackageIdx != '0' && document.getElementById('SelectPackageAsset').value == 0 && document.getElementById('PackageAssetId').value !== '') {
+	document.getElementById('PackageAssetId').value = obj.value;
+	if (currPackageIdx != '0') {
 		document.getElementById('AddPackageAssetButton').disabled = false;
 	} else {
 		document.getElementById('AddPackageAssetButton').disabled = true;
 	}
 }
-function FillPacPackageAssetDropdown() {
-	var selectedValue = document.getElementById('SelectPacPackageAssets').value;
-	document.getElementById('PackageAssetId').value = selectedValue;
-	document.getElementById('SelectLocalPackageAssets').value = '';
-}
+
 function AddDependencyFromLocalList() {
 	var selectedPkg = document.getElementById('SelectLocalPackage').value;
 	var currentDependencies = document.getElementById('PackageDependencies').value;
@@ -195,58 +207,33 @@ function AddDepencencyFromPacList() {
  */
 function UpdatePackageData(fieldName) {
 	EntryValidation(fieldName);
-	//var pkgAssetIdx = document.getElementById('SelectPackageAsset').value;
-	var pkgIdx = 0;
 	if (currPackageIdx !== '0') {
-		yamlData.forEach(doc => {
-			if (IsPackage(doc)) {
-				pkgIdx++;
-				if (pkgIdx == currPackageIdx) {
-					doc.group = document.getElementById('PackageGroup').value;
-					doc.name = document.getElementById('PackageName').value;
-					doc.version = document.getElementById('PackageVersion').value;
-					doc.subfolder = document.getElementById('PackageSubfolder').value;
-					if (document.getElementById('PackageDependencies').value !== '') {
-						doc.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
-					}
+		var doc = GetCurrentDocument('p');
+		doc.group = document.getElementById('PackageGroup').value;
+		doc.name = document.getElementById('PackageName').value;
+		doc.version = document.getElementById('PackageVersion').value;
+		doc.subfolder = document.getElementById('PackageSubfolder').value;
+		if (document.getElementById('PackageDependencies').value !== '') {
+			doc.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
+		}
 
-					doc.info.summary = document.getElementById('PackageSummary').value;
-					if (document.getElementById('PackageWarning').value !== '') {
-						doc.info.warning = document.getElementById('PackageWarning').value
-					}
-					if (document.getElementById('PackageConflicts').value !== '') {
-						doc.info.conflicts = document.getElementById('PackageConflicts').value
-					}
-					if (document.getElementById('PackageDescription').value !== '') {
-						doc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
-					}
-					if (document.getElementById('PackageAuthor').value !== '') {
-						doc.info.author = document.getElementById('PackageAuthor').value
-					}
-					if (document.getElementById('PackageImages').value !== '') {
-						doc.info.images = TextToArray(document.getElementById('PackageImages').value);
-					}
-					doc.info.website = document.getElementById('PackageWebsite').value;
-
-
-					//if (pkgAssetIdx === '0' && document.getElementById('PackageAssetId').value !== '') {
-					//	AddPackageAssetButton.disabled = false;
-					//}
-
-					//if (doc.assets !== undefined && pkgAssetIdx !== '0') {
-					//	pkgAssetIdx--; //The dropdown is 1-based but the array is 0-based
-					//	doc.assets[pkgAssetIdx].assetId = document.getElementById('PackageAssetId').value;
-					//	if (document.getElementById('PackageAssetInclude').value !== '') {
-					//		doc.assets[pkgAssetIdx].include = TextToArray(document.getElementById('PackageAssetInclude').value);
-					//	}
-					//	if (document.getElementById('PackageAssetExclude').value !== '') {
-					//		doc.assets[pkgAssetIdx].exclude = TextToArray(document.getElementById('PackageAssetExclude').value);
-					//	}
-
-					//}
-				}
-			}
-		});
+		doc.info.summary = document.getElementById('PackageSummary').value;
+		if (document.getElementById('PackageWarning').value !== '') {
+			doc.info.warning = document.getElementById('PackageWarning').value
+		}
+		if (document.getElementById('PackageConflicts').value !== '') {
+			doc.info.conflicts = document.getElementById('PackageConflicts').value
+		}
+		if (document.getElementById('PackageDescription').value !== '') {
+			doc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
+		}
+		if (document.getElementById('PackageAuthor').value !== '') {
+			doc.info.author = document.getElementById('PackageAuthor').value
+		}
+		if (document.getElementById('PackageImages').value !== '') {
+			doc.info.images = TextToArray(document.getElementById('PackageImages').value);
+		}
+		doc.info.website = document.getElementById('PackageWebsite').value;
 		UpdateCodePane();
 	}
 }
@@ -291,13 +278,12 @@ function AppendNewPackage() {
  */
 function AddAssetToPackage() {
 	EntryValidation('PackageAssetId');
-	var targetIdx = document.getElementById('SelectPackageNumber').value;
 	var pkgIdx = 0;
-	if (targetIdx !== '0') {
+	if (currPackageIdx !== '0') {
 		yamlData.forEach(doc => {
 			if (IsPackage(doc)) {
 				pkgIdx++;
-				if (pkgIdx == targetIdx) {
+				if (pkgIdx == currPackageIdx) {
 					var newAsset = {
 						assetId: document.getElementById('PackageAssetId').value
 					}
@@ -316,6 +302,10 @@ function AddAssetToPackage() {
 			}
 		});
 	}
+	document.getElementById('PackageAssetId').value = '';
+	document.getElementById('PackageAssetInclude').value = '';
+	document.getElementById('PackageAssetExclude').value = '';
+	document.getElementById('AddPackageAssetButton').disabled = true;
 	UpdateCodePane();
 	CountItems();
 }
@@ -410,7 +400,7 @@ function FillDateTimePicker() {
 }
 
 
-
+//TODO - move these functions to a new util class
 
 // --------------------------------------------------------------------------------------------
 // -----------------------------------   Helper Functions   -----------------------------------
@@ -463,4 +453,22 @@ function IsPackage(obj) {
 		return false;
 	}
 	return Object.hasOwn(obj, 'group') && Object.hasOwn(obj, 'name') && Object.hasOwn(obj, 'version') && Object.hasOwn(obj, 'subfolder');
+}
+
+/**
+ * Return the currently selected package or asset document object.
+ * @param {string} type The type of document to return. 'p' for packages and 'a' for assets.
+ * @returns The currently selected document object of the specified type
+ */
+function GetCurrentDocument(type) {
+	if (type.toLowerCase().charAt(0) === 'p') {
+		if (currPackageIdx !== '0') {
+			return yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
+		}
+	} else {
+		if (currAssetIdx !== '0') {
+			return yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
+		}
+	}
+	return null;
 }

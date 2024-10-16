@@ -201,12 +201,12 @@ async function FetchSc4EvermoreData() {
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
 	CountItems();
-	UpdateTree();
+	UpdateMainTree();
 }
 
 
 
-function UpdateTree() {
+function UpdateMainTree() {
 	var idx = 1;
 	var astList = [];
 	listOfAssets.forEach((asset) => {
@@ -221,34 +221,40 @@ function UpdateTree() {
 		idx++;
 	});
 
-	var newData = [
+	var mainTreeData = [
 		{ name: 'Packages (' + pkgList.length + ')', expanded: true, children: pkgList },
 		{ name: 'Assets (' + astList.length + ')', expanded: true, children: astList }
 	];
-
-	mtv = new TreeView(newData, 'MainTreeView');
+	mtv = new TreeView(mainTreeData, 'MainTreeView');
 	mtv.on("select", function (t) {
 		if (t.data.name.indexOf(' - ') > 0) {
 			if (t.data.name.indexOf(':' > 0)) {
 				currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 				FillPackageForm();
+				UpdateAssetTree();
 			} else {
 				currAssetIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 				FillAssetForm();
 			}
 		}
-		
 	});
+}
 
-	atc = new TreeView([
-		{ name: 'Item 1', children: [] },
-		{
-			name: 'Item 2', expanded: true, children: [
-				{ name: 'Sub Item 1', children: [] },
-				{ name: 'Sub Item 2', children: [] }
-			]
-		}
-	], 'AssetTreeView');
+function UpdateAssetTree() {
+	var pkgAssets;
+	var doc = GetCurrentDocument('p');
+	if (doc == null) {
+		pkgAssets = [];
+	} else {
+		pkgAssets = doc.assets.map((i) => ({ name: i.assetId, children: [] }));
+	}
+
+	var pkgAssetData = [{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }]
+	atc = new TreeView(pkgAssetData, 'AssetTreeView');
+	atc.on("select", function (t) {
+		console.log(t);
+		FillPackageAssetForm(t.data.name);
+	});
 }
 
 
