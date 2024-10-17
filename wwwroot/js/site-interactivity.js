@@ -144,43 +144,14 @@ function FillPackageForm() {
  * Fill the Package Asset input form fields with the values from the currently selected package and asset number.
  */
 function FillPackageAssetForm(assetName) {
-	//var pkgIdx = 0;
-	//var targetPkgIdx = document.getElementById('SelectPackageNumber').value;
-	//var assetIdx = document.getElementById('SelectPackageAsset').value;
-	//if (currAssetIdx === '0') {
-	//	ClearPackageAssetInputs();
-	//} else {
-		var pkgAsset = GetCurrentDocument('p').assets.find((i) => i.assetId = assetName)
-		document.getElementById('PackageAssetId').value = pkgAsset.assetId;
-		document.getElementById('PackageAssetInclude').value = ArrayToText(pkgAsset.include);
-		document.getElementById('PackageAssetExclude').value = ArrayToText(pkgAsset.exclude);
-		//assetIdx--; //Arrays are zero-based but the dropdown is 1-based
-		//yamlData.forEach(doc => {
-		//	if (IsPackage(doc)) {
-		//		pkgIdx++;
-		//		if (pkgIdx == targetPkgIdx) {
-		//			document.getElementById('PackageAssetId').value = doc.assets[assetIdx].assetId;
-		//			document.getElementById('PackageAssetInclude').value = ArrayToText(doc.assets[assetIdx].include);
-		//			document.getElementById('PackageAssetExclude').value = ArrayToText(doc.assets[assetIdx].exclude);
-		//		}
-		//	}
-		//});
-	//}
+	var pkgAsset = GetCurrentDocument('p').assets.find((i) => i.assetId === assetName);
+	console.log(GetCurrentDocument('p').assets);
+	console.log(pkgAsset);
+	document.getElementById('PackageAssetId').value = pkgAsset.assetId;
+	document.getElementById('PackageAssetInclude').value = ArrayToText(pkgAsset.include);
+	document.getElementById('PackageAssetExclude').value = ArrayToText(pkgAsset.exclude);
 }
-function FillPkgAssetId(obj) {
-	if (obj.id === 'SelectLocalPackageAssets') {
-		document.getElementById('SelectPacPackageAssets').value = '';
-	} else {
-		document.getElementById('SelectLocalPackageAssets').value = '';
-	}
 
-	document.getElementById('PackageAssetId').value = obj.value;
-	if (currPackageIdx != '0') {
-		document.getElementById('AddPackageAssetButton').disabled = false;
-	} else {
-		document.getElementById('AddPackageAssetButton').disabled = true;
-	}
-}
 
 function AddDependencyFromLocalList() {
 	var selectedPkg = document.getElementById('SelectLocalPackage').value;
@@ -276,38 +247,51 @@ function AppendNewPackage() {
 /**
  * Add a new asset to the currently selected package.
  */
-function AddAssetToPackage() {
-	EntryValidation('PackageAssetId');
-	var pkgIdx = 0;
-	if (currPackageIdx !== '0') {
-		yamlData.forEach(doc => {
-			if (IsPackage(doc)) {
-				pkgIdx++;
-				if (pkgIdx == currPackageIdx) {
-					var newAsset = {
-						assetId: document.getElementById('PackageAssetId').value
-					}
 
-					if (document.getElementById('PackageAssetInclude').value !== '') {
-						newAsset.include = TextToArray(document.getElementById('PackageAssetInclude').value);
-					}
-					if (document.getElementById('PackageAssetExclude').value !== '') {
-						newAsset.exclude = TextToArray(document.getElementById('PackageAssetExclude').value);
-					}
-					if (doc.assets === undefined) {
-						doc.assets = new Array();
-					}
-					doc.assets.push(newAsset);
-				}
-			}
-		});
+
+
+function FillPkgAssetId(obj) {
+	if (obj.id === 'SelectLocalPackageAssets') {
+		document.getElementById('SelectPacPackageAssets').value = '';
+	} else {
+		document.getElementById('SelectLocalPackageAssets').value = '';
 	}
-	document.getElementById('PackageAssetId').value = '';
-	document.getElementById('PackageAssetInclude').value = '';
-	document.getElementById('PackageAssetExclude').value = '';
-	document.getElementById('AddPackageAssetButton').disabled = true;
-	UpdateCodePane();
-	CountItems();
+
+	document.getElementById('PackageAssetId').value = obj.value;
+	if (currPackageIdx != '0') {
+		document.getElementById('AddPackageAssetButton').disabled = false;
+	} else {
+		document.getElementById('AddPackageAssetButton').disabled = true;
+	}
+}
+function NewIncludedAsset() {
+	ClearPackageAssetInputs();
+}
+function AddIncludedAsset() {
+	EntryValidation('PackageAssetId');
+	if (currPackageIdx !== '0') {
+		var doc = GetCurrentDocument('p');
+		var newAsset = {
+			assetId: document.getElementById('PackageAssetId').value
+		}
+
+		if (document.getElementById('PackageAssetInclude').value !== '') {
+			newAsset.include = TextToArray(document.getElementById('PackageAssetInclude').value);
+		}
+		if (document.getElementById('PackageAssetExclude').value !== '') {
+			newAsset.exclude = TextToArray(document.getElementById('PackageAssetExclude').value);
+		}
+		if (doc.assets === undefined) {
+			doc.assets = new Array();
+		}
+		doc.assets.push(newAsset);
+
+		ClearPackageAssetInputs();
+		document.getElementById('AddPackageAssetButton').disabled = true;
+		UpdateCodePane();
+		CountItems();
+		UpdateAssetTree();
+	}
 }
 
 
