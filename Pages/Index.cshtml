@@ -31,20 +31,17 @@
         <h2>Data Input</h2>
         <p>For Dependencies, Image, Include, and Exclude fields add multiple items separated by a semicolon. Variants and are not yet supported with this tool.</p>
 
-        <div class="tab">
-            <button id="PkgPropTab" class="tab-link" onclick="OpenTab(event, 'PackageProperties')">Package Properties</button>
-            <button id="PkgInfoTab" class="tab-link" onclick="OpenTab(event, 'PackageInfo')">Package Info</button>
-            <button id="PkgAssetsTab" class="tab-link" onclick="OpenTab(event, 'PackageAssets')">Package Assets</button>
-            <button id="PkgVariantsTab" class="tab-link" onclick="OpenTab(event, 'PackageVariants')">Package Variants</button>
-            <button id="AssetsTab" class="tab-link" onclick="OpenTab(event, 'AssetProperties')">Asset Properties</button>
-        </div>
+        <nav class="nav nav-tabs" id="nav-tab" role="tablist">
+            <button id="PackagePropertiesTab" class="nav-link active" data-bs-toggle="tab" data-bs-target="#PackagePropertiesContent" type="button" role="tab">Package Properties</button>
+            <button id="PackageInfoTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageInfoContent" type="button" role="tab">Package Info</button>
+            <button id="PackageAssetsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageAssetsContent" type="button" role="tab">Package Variants</button>
+            <button id="PackageVaraintsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageVariantsContent" type="button" role="tab">Package Variants</button>
+            <button id="AssetPropertiesTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#AssetPropertiesContent" type="button" role="tab">Asset Properties</button>
+        </nav>
 
-
-
-        <div id="EditingPackageDiv" class="invisible2">
-
+        <div class="tab-content" id="nav-tabContent">
             @* Package Properties tab *@
-            <fieldset id="PackageProperties" class="tabcontent">
+            <fieldset id="PackagePropertiesContent" class="tab-pane active mt-3" tabindex="0">
                 <table id="PackagePropertiesTable">
                     <colgroup>
                         <col style="width: 120px;">
@@ -115,7 +112,7 @@
             </fieldset>
 
             @* Package Info tab *@
-            <fieldset id="PackageInfo" class="tabcontent">
+            <fieldset id="PackageInfoContent" class="tab-pane mt-3" tabindex="0">
                 <table id="PackageInfoTable">
                     <colgroup>
                         <col style="width: 120px;">
@@ -154,9 +151,10 @@
             </fieldset>
 
             @* Package Assets + Options tab *@
-            <fieldset id="PackageAssets" class="tabcontent" >
+            <fieldset id="PackageAssetsContent" class="tab-pane mt-3" tabindex="0">
                 <div style="display:flex">
                     <div class="col-2">
+                        <input id="NewPackageAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="+ Include New" onclick="NewIncludedAsset()" />
                         <div id="AssetTreeView"></div>
                     </div>
 
@@ -184,7 +182,7 @@
                                 <textarea id="PackageAssetExclude" class="form-control" rows="3" oninput="UpdatePackageData('PackageAssetExclude')"></textarea>
                             </div>
                             <div class="mb-2">
-                                <input id="AddPackageAssetButton" class="btn btn-primary" type="button" value="Add Asset to Package" onclick="AddAssetToPackage()" disabled="disabled" />
+                                <input id="AddPackageAssetButton" class="btn btn-primary" type="button" value="Add Asset to Package" onclick="AddIncludedAsset()" disabled="disabled" />
                             </div>
                         </form>
                     </div>
@@ -192,7 +190,7 @@
             </fieldset>
 
             @* Package Variants tab *@
-            <fieldset id="PackageVariants" class="tabcontent">
+            <fieldset id="PackageVariantsContent" class="tab-pane mt-3" tabindex="0">
                 <table id="PackageVariantsTable">
                     <colgroup>
                         <col style="width: 120px;">
@@ -233,14 +231,8 @@
                 </table>
             </fieldset>
 
-            <input type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" disabled="disabled" />
-        </div>
-
-        <div id="EditingAssetDiv" style="" class="invisible2">
-
             @* Asset Properties tab *@
-            <fieldset id="AssetProperties" class="tabcontent">
-                <legend>Asset Properties</legend>
+            <fieldset id="AssetPropertiesContent" class="tab-pane mt-3" tabindex="0">
                 <table class="inputForm">
                     <colgroup>
                         <col style="width: 120px;">
@@ -264,10 +256,12 @@
                         </tr>
                     </tbody>
                 </table>
+                <input type="button" id="AddAssetButton" value="Add New Asset" onclick="AppendNewAsset()" disabled="disabled" />
             </fieldset>
-
-            <input type="button" id="AddAssetButton" value="Add New Asset" onclick="AppendNewAsset()" disabled="disabled" />
         </div>
+
+
+        <input type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" disabled="disabled" />
     </div>
 
     @* Right Column *@

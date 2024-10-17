@@ -145,8 +145,6 @@ function FillPackageForm() {
  */
 function FillPackageAssetForm(assetName) {
 	var pkgAsset = GetCurrentDocument('p').assets.find((i) => i.assetId === assetName);
-	console.log(GetCurrentDocument('p').assets);
-	console.log(pkgAsset);
 	document.getElementById('PackageAssetId').value = pkgAsset.assetId;
 	document.getElementById('PackageAssetInclude').value = ArrayToText(pkgAsset.include);
 	document.getElementById('PackageAssetExclude').value = ArrayToText(pkgAsset.exclude);
@@ -247,26 +245,6 @@ function AppendNewPackage() {
 /**
  * Add a new asset to the currently selected package.
  */
-
-
-
-function FillPkgAssetId(obj) {
-	if (obj.id === 'SelectLocalPackageAssets') {
-		document.getElementById('SelectPacPackageAssets').value = '';
-	} else {
-		document.getElementById('SelectLocalPackageAssets').value = '';
-	}
-
-	document.getElementById('PackageAssetId').value = obj.value;
-	if (currPackageIdx != '0') {
-		document.getElementById('AddPackageAssetButton').disabled = false;
-	} else {
-		document.getElementById('AddPackageAssetButton').disabled = true;
-	}
-}
-function NewIncludedAsset() {
-	ClearPackageAssetInputs();
-}
 function AddIncludedAsset() {
 	EntryValidation('PackageAssetId');
 	if (currPackageIdx !== '0') {
@@ -293,6 +271,27 @@ function AddIncludedAsset() {
 		UpdateAssetTree();
 	}
 }
+
+
+
+function FillPkgAssetId(obj) {
+	if (obj.id === 'SelectLocalPackageAssets') {
+		document.getElementById('SelectPacPackageAssets').value = '';
+	} else {
+		document.getElementById('SelectLocalPackageAssets').value = '';
+	}
+
+	document.getElementById('PackageAssetId').value = obj.value;
+	if (currPackageIdx != '0') {
+		document.getElementById('AddPackageAssetButton').disabled = false;
+	} else {
+		document.getElementById('AddPackageAssetButton').disabled = true;
+	}
+}
+function NewIncludedAsset() {
+	ClearPackageAssetInputs();
+}
+
 
 
 

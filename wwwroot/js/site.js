@@ -134,7 +134,6 @@ var listOfPackages = new Array();
 ParseYaml();
 ClearAssetInputs();
 ClearPackageInputs();
-document.getElementById("PkgPropTab").click();
 
 new TomSelect('#PacPackageList', {
 	valueField: 'id',
@@ -252,7 +251,6 @@ function UpdateAssetTree() {
 	var pkgAssetData = [{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }]
 	atc = new TreeView(pkgAssetData, 'AssetTreeView');
 	atc.on("select", function (t) {
-		console.log(t);
 		FillPackageAssetForm(t.data.name);
 	});
 }
@@ -280,28 +278,6 @@ function CountItems() {
 		});
 	}
 
-	//Package selection dropdown
-	//var pkgElement = document.getElementById('SelectPackageNumber');
-	//var currentValue = pkgElement.value;
-	//pkgElement.replaceChildren();
-	//pkgElement.appendChild(new Option('Create New Package', 0));
-	//for (var idx = 0; idx < listOfPackages.length; idx++) {
-	//	pkgElement.add(new Option(idx + 1 + ' - ' + listOfPackages[idx].group + ":" + listOfPackages[idx].name, idx + 1));
-	//}
-	//pkgElement.value = currentValue;
-
-	//Asset selection dropdown
-	//var assetElement = document.getElementById('SelectAssetNumber');
-	//currentValue = assetElement.value;
-	//assetElement.replaceChildren();
-	//assetElement.appendChild(new Option('Create New Asset', 0));
-	//for (var idx = 0; idx < listOfAssets.length; idx++) {
-	//	assetElement.add(new Option(idx + 1 + ' - ' + listOfAssets[idx].assetId, idx + 1));
-	//}
-	//assetElement.value = currentValue;
-
-
-
 	//Pachage dependency selection for local packages
 	var localPkgList = document.getElementById('LocalPackageList');
 	localPkgList.replaceChildren();
@@ -310,17 +286,6 @@ function CountItems() {
 		var pkgName = listOfPackages[idx].group + ":" + listOfPackages[idx].name;
 		localPkgList.add(new Option(pkgName, pkgName));
 	}
-
-	//Package dependency selection for existing sc4pac packages
-	//var pacPkgList = document.getElementById('PacPackageList');
-	//pacPkgList.replaceChildren();
-	//pacPkgList.appendChild(new Option('', ''));
-	//console.log("pacPackages: " + pacPackages.length);
-	//pacPackages.forEach(i => {
-	//	var pkgName = i.group + ':' + i.name;
-	//	pacPkgList.add(new Option(pkgName, pkgName));
-	//});
-
 
 	//Package:asset selection for local assets
 	var localAssetList = document.getElementById('SelectLocalPackageAssets');
@@ -333,7 +298,6 @@ function CountItems() {
 	pacAssetList.replaceChildren();
 	pacAssetList.appendChild(new Option('', ''));
 	pacAssets.forEach(i => pacAssetList.add(new Option(i.name, i.name)));
-
 
 
 	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
@@ -372,51 +336,6 @@ function UpdateCodePane() {
 	cm.setValue(newYaml);
 }
 
-/**
- * Navigate to the specified tab.
- */
-function OpenTab(event, tabName) {
-	var i, tablinks;
-
-	// Get all elements with class="tabcontent" and hide them
-	var tabcontent = document.getElementsByClassName("tabcontent");
-	for (i = 0; i < tabcontent.length; i++) {
-		tabcontent[i].style.display = "none";
-	}
-
-	// Get all elements with class="tablinks" and remove the class "active"
-	tablinks = document.getElementsByClassName("tab-link");
-	for (i = 0; i < tablinks.length; i++) {
-		tablinks[i].className = tablinks[i].className.replace(" active", "");
-	}
-
-	// Show the current tab, and add an "active" class to the button that opened the tab
-	document.getElementById(tabName).style.display = "block";
-	event.currentTarget.className += " active";
-
-	//Set the editing view to the desired state to show/hide the Package and Asset entry forms.
-	if (tabName === 'AssetProperties') {
-		document.getElementById('EditingPackageDiv').classList.add('invisible2');
-		document.getElementById('EditingPackageDiv').classList.remove('visible2');
-		document.getElementById('EditingAssetDiv').classList.remove('invisible2');
-		document.getElementById('EditingAssetDiv').classList.add('visible2');
-	} else {
-		document.getElementById('EditingPackageDiv').classList.add('visible2');
-		document.getElementById('EditingPackageDiv').classList.remove('invisible2');
-		document.getElementById('EditingAssetDiv').classList.add('invisible2');
-		document.getElementById('EditingAssetDiv').classList.remove('visible2');
-	}
-	if (tabName === 'PackageAssets' || tabName === 'PackageProperties') {
-		//have to recount the items so we get the pacAssets/pacPackages arrays to fill
-		CountItems();
-	}
-
-	//If the selected package is blank then select the first one if available
-	//if (document.getElementById('SelectPackageNumber').value == 0 && countOfPackages > 0) {
-	//	document.getElementById('SelectPackageNumber').value = "1";
-	//	FillPackageForm();
-	//}
-}
 
 function CopyToClipboard() {
 	navigator.clipboard.writeText(cm.getValue())
