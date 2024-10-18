@@ -241,8 +241,8 @@ function UpdateAssetTree() {
 	}
 
 	var pkgAssetData = [{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }]
-	atc = new TreeView(pkgAssetData, 'AssetTreeView');
-	atc.on("select", function (t) {
+	atv = new TreeView(pkgAssetData, 'AssetTreeView');
+	atv.on("select", function (t) {
 		FillPackageAssetForm(t.data.name);
 	});
 }
