@@ -13,6 +13,8 @@ CodeMirror(document.querySelector('#editor'), {
 	mode: 'yaml'
 });
 
+var currPackageIdx = '0';
+var currAssetIdx = '0';
 var pacAssets = new Array();
 var pacPackages = new Array();
 var sc4pacdata = FetchSc4pacData().then(result => {
@@ -20,9 +22,19 @@ var sc4pacdata = FetchSc4pacData().then(result => {
 	pacAssets = result.contents.filter((item) => item.group === 'sc4pacAsset');
 	pacPackages = result.contents.filter((item) => item.group !== 'sc4pacAsset');
 });
+//fetch('/config.json').then(function (config) {
+//    console.log('API key:', config.apiKey);
+//});
 
 
-
+/**
+ * Main Tree View
+ */
+var mtv;
+/**
+ * Asset Tree View
+ */
+var atv;
 const cm = document.querySelector('.CodeMirror').CodeMirror;
 var yamlData = null;
 var countOfPackages = 0;
@@ -32,7 +44,6 @@ var listOfPackages = new Array();
 ParseYaml();
 ClearAssetInputs();
 ClearPackageInputs();
-document.getElementById("PkgPropTab").click();
 
 new TomSelect('#PacPackageList', {
 	valueField: 'id',
@@ -113,6 +124,47 @@ new TomSelect('#PackageSubfolder', {
 		}
 	},
 });
+new TomSelect('#PackageGroup', {
+    valueField: 'group',
+    labelField: 'group',
+    searchField: ['group'],
+	maxItems: 1,
+	create: true,
+	preload: true,
+	persist: false,
+	maxOptions: null,
+
+    // fetch remote data
+    load: function (query, callback) {
+        var self = this;
+        if (self.loading > 1) {
+            callback();
+            return;
+        }
+
+        var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
+		fetch(url)
+            .then(response => response.json())
+            .then(json => {
+                //Filter the response to remove assets
+				callback(json.contents
+					.filter((item) => item.group !== 'sc4pacAsset')
+				);
+				console.log(json.contents
+					.filter((item) => item.group !== 'sc4pacAsset')
+				);
+                self.settings.load = null;
+            }).catch(() => {
+                callback();
+            });
+    },
+    // custom rendering function for options
+    render: {
+        option: function (item, escape) {
+            return '<div class="py-2 d-flex">' + escape(item.group)+ '</div>';
+        }
+    },
+});
 
 
 
@@ -140,7 +192,62 @@ async function FetchSc4EvermoreData() {
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
 	CountItems();
+	UpdateMainTree();
 }
+
+
+//https://github.com/justinchmura/js-treeview
+function UpdateMainTree() {
+	var idx = 1;
+	var astList = [];
+	listOfAssets.forEach((asset) => {
+		astList.push({ name: idx + ' - ' + asset.assetId, children: [] });
+		idx++;
+	});
+
+	idx = 1;
+	var pkgList = [];
+	listOfPackages.forEach((pkg) => {
+		pkgList.push({ name: idx + ' - ' + pkg.group + ":" + pkg.name, children: [] });
+		idx++;
+	});
+
+	var mainTreeData = [
+		{ name: 'Packages (' + pkgList.length + ')', expanded: true, children: pkgList },
+		{ name: 'Assets (' + astList.length + ')', expanded: true, children: astList }
+	];
+	mtv = new TreeView(mainTreeData, 'MainTreeView');
+	mtv.on("select", function (t) {
+		if (t.data.name.indexOf(' - ') > 0) {
+			if (t.data.name.indexOf(':' > 0)) {
+				currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+				FillPackageForm();
+				UpdateAssetTree();
+			} else {
+				currAssetIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+				FillAssetForm();
+			}
+		}
+	});
+}
+
+function UpdateAssetTree() {
+	var pkgAssets;
+	var doc = GetCurrentDocument('p');
+	if (doc == null) {
+		pkgAssets = [];
+	} else {
+		pkgAssets = doc.assets.map((i) => ({ name: i.assetId, children: [] }));
+	}
+
+	var pkgAssetData = [{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }]
+	atc = new TreeView(pkgAssetData, 'AssetTreeView');
+	atc.on("select", function (t) {
+		FillPackageAssetForm(t.data.name);
+	});
+}
+
+
 
 /**
  * Count the number of Packages and Assets in the code pane and update the UI with this new result.
@@ -163,28 +270,6 @@ function CountItems() {
 		});
 	}
 
-	//Package selection dropdown
-	var pkgElement = document.getElementById('SelectPackageNumber');
-	var currentValue = pkgElement.value;
-	pkgElement.replaceChildren();
-	pkgElement.appendChild(new Option('Create New Package', 0));
-	for (var idx = 0; idx < listOfPackages.length; idx++) {
-		pkgElement.add(new Option(idx + 1 + ' - ' + listOfPackages[idx].group + ":" + listOfPackages[idx].name, idx + 1));
-	}
-	pkgElement.value = currentValue;
-
-	//Asset selection dropdown
-	var assetElement = document.getElementById('SelectAssetNumber');
-	currentValue = assetElement.value;
-	assetElement.replaceChildren();
-	assetElement.appendChild(new Option('Create New Asset', 0));
-	for (var idx = 0; idx < listOfAssets.length; idx++) {
-		assetElement.add(new Option(idx + 1 + ' - ' + listOfAssets[idx].assetId, idx + 1));
-	}
-	assetElement.value = currentValue;
-
-
-
 	//Pachage dependency selection for local packages
 	var localPkgList = document.getElementById('LocalPackageList');
 	localPkgList.replaceChildren();
@@ -193,17 +278,6 @@ function CountItems() {
 		var pkgName = listOfPackages[idx].group + ":" + listOfPackages[idx].name;
 		localPkgList.add(new Option(pkgName, pkgName));
 	}
-
-	//Package dependency selection for existing sc4pac packages
-	//var pacPkgList = document.getElementById('PacPackageList');
-	//pacPkgList.replaceChildren();
-	//pacPkgList.appendChild(new Option('', ''));
-	//console.log("pacPackages: " + pacPackages.length);
-	//pacPackages.forEach(i => {
-	//	var pkgName = i.group + ':' + i.name;
-	//	pacPkgList.add(new Option(pkgName, pkgName));
-	//});
-
 
 	//Package:asset selection for local assets
 	var localAssetList = document.getElementById('SelectLocalPackageAssets');
@@ -216,7 +290,6 @@ function CountItems() {
 	pacAssetList.replaceChildren();
 	pacAssetList.appendChild(new Option('', ''));
 	pacAssets.forEach(i => pacAssetList.add(new Option(i.name, i.name)));
-
 
 
 	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
@@ -255,56 +328,11 @@ function UpdateCodePane() {
 	cm.setValue(newYaml);
 }
 
-/**
- * Navigate to the specified tab.
- */
-function OpenTab(event, tabName) {
-	var i, tablinks;
-
-	// Get all elements with class="tabcontent" and hide them
-	var tabcontent = document.getElementsByClassName("tabcontent");
-	for (i = 0; i < tabcontent.length; i++) {
-		tabcontent[i].style.display = "none";
-	}
-
-	// Get all elements with class="tablinks" and remove the class "active"
-	tablinks = document.getElementsByClassName("tab-link");
-	for (i = 0; i < tablinks.length; i++) {
-		tablinks[i].className = tablinks[i].className.replace(" active", "");
-	}
-
-	// Show the current tab, and add an "active" class to the button that opened the tab
-	document.getElementById(tabName).style.display = "block";
-	event.currentTarget.className += " active";
-
-	//Set the editing view to the desired state to show/hide the Package and Asset entry forms.
-	if (tabName === 'AssetProperties') {
-		document.getElementById('EditingPackageDiv').classList.add('invisible2');
-		document.getElementById('EditingPackageDiv').classList.remove('visible2');
-		document.getElementById('EditingAssetDiv').classList.remove('invisible2');
-		document.getElementById('EditingAssetDiv').classList.add('visible2');
-	} else {
-		document.getElementById('EditingPackageDiv').classList.add('visible2');
-		document.getElementById('EditingPackageDiv').classList.remove('invisible2');
-		document.getElementById('EditingAssetDiv').classList.add('invisible2');
-		document.getElementById('EditingAssetDiv').classList.remove('visible2');
-	}
-	if (tabName === 'PackageAssets' || tabName === 'PackageProperties') {
-		//have to recount the items so we get the pacAssets/pacPackages arrays to fill
-		CountItems();
-	}
-
-	//If the selected package is blank then select the first one if available
-	if (document.getElementById('SelectPackageNumber').value == 0 && countOfPackages > 0) {
-		document.getElementById('SelectPackageNumber').value = "1";
-		FillPackageForm();
-	}
-}
 
 function CopyToClipboard() {
 	navigator.clipboard.writeText(cm.getValue())
 }
 
 function validate() {
-
+	//ensure any manually typed yaml (as opposed to generated yaml) is syntactically valid
 }
