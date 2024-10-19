@@ -6,7 +6,7 @@ function ClearAll() {
 	ClearAssetInputs();
 	yamlData.length = 0;
 	cm.setValue('');
-	CountItems();
+	ParseYaml();
 }
 /**
  * Clears all the Package input form fields.
