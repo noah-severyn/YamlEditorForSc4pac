@@ -234,7 +234,7 @@ function UpdateMainTree() {
 function UpdateAssetTree() {
 	var pkgAssets;
 	var doc = GetCurrentDocument('p');
-	if (doc == null) {
+	if (doc == null || doc.assets == null) {
 		pkgAssets = [];
 	} else {
 		pkgAssets = doc.assets.map((i) => ({ name: i.assetId, children: [] }));
