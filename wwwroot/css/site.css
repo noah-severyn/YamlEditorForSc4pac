@@ -52,11 +52,12 @@ table {
 }
 
 .required {
-    background-color: lightgoldenrodyellow;
+    border-color:dodgerblue;
 }
 
 .required-label:after {
-    content: " *"
+    content: " *";
+    color:red;
 }
 
 /*Tab Styles*/

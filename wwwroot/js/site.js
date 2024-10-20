@@ -42,7 +42,7 @@ var countOfAssets = 0;
 var listOfAssets = new Array();
 var listOfPackages = new Array();
 ParseYaml();
-ClearAssetInputs();
+ResetAssetInputs();
 ClearPackageInputs();
 
 new TomSelect('#PacPackageList', {
@@ -219,7 +219,7 @@ function UpdateMainTree() {
 	mtv = new TreeView(mainTreeData, 'MainTreeView');
 	mtv.on("select", function (t) {
 		if (t.data.name.indexOf(' - ') > 0) {
-			if (t.data.name.indexOf(':' > 0)) {
+			if (t.data.name.indexOf(':') > 0) {
 				currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 				FillPackageForm();
 				UpdateAssetTree();

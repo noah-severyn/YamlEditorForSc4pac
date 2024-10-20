@@ -3,7 +3,7 @@
  */
 function ClearAll() {
 	ClearPackageInputs();
-	ClearAssetInputs();
+	ResetAssetInputs();
 	yamlData.length = 0;
 	cm.setValue('');
 	ParseYaml();
@@ -48,12 +48,14 @@ function ClearPackageAssetInputs() {
 /**
  * Clears all the Asset input form fields.
  */
-function ClearAssetInputs() {
+function ResetAssetInputs() {
 	document.getElementById('AssetUrl').value = '';
 	document.getElementById('AssetId').value = '';
 	document.getElementById('AssetVersion').value = '';
 	document.getElementById('AssetLastModified').value = 0;
 	document.getElementById('AssetLastModifiedText').value = '';
+	document.getElementById('AddAssetButton').disabled = true;
+	currAssetIdx = '0';
 }
 /**
  * Apply basic validation rules for the specified entry field.
@@ -91,17 +93,15 @@ function EntryValidation(elementId) {
 	}
 	inputElement.value = inputText;
 
-	//The replacement of invalid characters resets cursor position to the end which is undesirable; reset it to where the user was editing
-	inputElement.setSelectionRange(locn, locn);
+	//The replacement of invalid characters resets cursor position to the end which is undesirable; reset it to where the user was editing. This is only valid for non-dropdown inputs
+	if (!["PackageGroup", "Subfolder"].includes(elementId)) {
+		inputElement.setSelectionRange(locn, locn);
+	}
 }
 
 function StartNewPackage() {
 	ClearPackageInputs();
 	currPackageIdx = '0';
-}
-function StartNewAsset() {
-	ClearAssetInputs();
-	currAssetIdx = '0';
 }
 
 // --------------------------------------------------------------------------------------------
@@ -113,7 +113,6 @@ function StartNewAsset() {
  */
 function FillPackageForm() {
 	document.getElementById('AddPackageButton').disabled = (currPackageIdx != '0');
-	var pkgIdx = 0;
 	if (currPackageIdx === '0') {
 		ClearPackageInputs();
 	} else {
@@ -308,23 +307,13 @@ function NewIncludedAsset() {
  * Fill the Asset input form fields with the values from the currently selected asset number.
  */
 function FillAssetForm() {
-	var targetIdx = document.getElementById('SelectAssetNumber').value;
-	document.getElementById('AddAssetButton').disabled = (document.getElementById('SelectAssetNumber').value != '0');
-	var assetIdx = 0;
-	if (targetIdx === '0') {
-		ClearAssetInputs();
-	} else {
-		yamlData.forEach(doc => {
-			if (IsAsset(doc)) {
-				assetIdx++;
-				if (assetIdx == targetIdx) {
-					document.getElementById('AssetUrl').value = doc.url;
-					document.getElementById('AssetId').value = doc.assetId;
-					document.getElementById('AssetVersion').value = doc.version;
-					document.getElementById('AssetLastModified').value = new Date(doc.lastModified).toISOString().slice(0, 19);
-				}
-			}
-		});
+	document.getElementById('AddAssetButton').disabled = (currAssetIdx != '0');
+	if (currAssetIdx !== '0') {
+		var doc = GetCurrentDocument('a');
+		document.getElementById('AssetUrl').value = doc.url;
+		document.getElementById('AssetId').value = doc.assetId;
+		document.getElementById('AssetVersion').value = doc.version;
+		document.getElementById('AssetLastModified').value = new Date(doc.lastModified).toISOString().slice(0, 19);
 	}
 }
 /**
@@ -332,26 +321,12 @@ function FillAssetForm() {
  */
 function UpdateAssetItem(itemName) {
 	EntryValidation(itemName);
-	var targetIdx = document.getElementById('SelectAssetNumber').value;
-	var assetIdx = 0;
-	if (targetIdx !== '0') {
-		if (itemName === 'AssetUrl') {
-
-		}
-
-
-
-		yamlData.forEach(doc => {
-			if (IsAsset(doc)) {
-				assetIdx++;
-				if (assetIdx == targetIdx) {
-					doc.url = document.getElementById('AssetUrl').value;
-					doc.assetId = document.getElementById('AssetId').value;
-					doc.version = document.getElementById('AssetVersion').value;
-					doc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
-				}
-			}
-		});
+	if (currAssetIdx !== '0') {
+		var doc = GetCurrentDocument('a');
+		doc.url = document.getElementById('AssetUrl').value;
+		doc.assetId = document.getElementById('AssetId').value;
+		doc.version = document.getElementById('AssetVersion').value;
+		doc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
 		UpdateCodePane();
 	}
 }
@@ -369,6 +344,7 @@ function AppendNewAsset() {
 
 	UpdateCodePane();
 	CountItems();
+	ResetAssetInputs();
 }
 /**
  * Converts UTC text pasted into the input box for to a valid datetime to populate the datetime picker.
@@ -460,3 +436,17 @@ function GetCurrentDocument(type) {
 	}
 	return null;
 }
+
+//Array.prototype.removeItem = function (item) {
+//	//https://stackoverflow.com/a/5767357/10802255
+//	const index = this.indexOf(item);
+//	if (index > -1) {
+//		return this.splice(index, 1);
+//	} else {
+//		return this;
+//	}
+//}
+
+//Array.prototype.remove = function (index) {
+//	this.splice(index, 1);
+//}

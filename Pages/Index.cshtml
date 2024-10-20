@@ -20,7 +20,7 @@
     <div id="Column0" class="col-2">
         <h2>File Structure</h2>
         <input type="button" onclick="ClearAll()" value="New Package" />
-        <input type="button" onclick="ClearAll()" value="New Asset" />
+        <input type="button" class="btn btn-primary"  onclick="ResetAssetInputs()" value="New Asset" />
         <div id="MainTreeView"></div>
     </div>
 
@@ -50,7 +50,7 @@
                     <tbody>
                         <tr>
                             <td><label for="PackageGoup" class="required-label">Group</label></td>
-                            <td><input id="PackageGroup" type="text" oninput="UpdatePackageData('PackageGroup')" class="required" /></td>
+                            <td><select id="PackageGroup" oninput="UpdatePackageData('PackageGroup')" class="required"></select></td>
                         </tr>
                         <tr>
                             <td><label for="PackageName" class="required-label">Name</label></td>
@@ -181,30 +181,32 @@
 
             @* Asset Properties tab *@
             <fieldset id="AssetPropertiesContent" class="tab-pane m-3" tabindex="0">
-                <table class="inputForm">
-                    <colgroup>
-                        <col style="width: 120px;">
-                    </colgroup>
-                    <tbody>
-                        <tr>
-                            <td><label for="AssetUrl" class="required-label">URL</label></td>
-                            <td><input id="AssetUrl" type="url" oninput="UpdateAssetItem('AssetUrl')" class="required" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="AssetId" class="required-label">Asset ID</label></td>
-                            <td><input id="AssetId" type="text" oninput="UpdateAssetItem('AssetId')" class="required" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="AssetVersion" class="required-label">Version</label></td>
-                            <td><input id="AssetVersion" type="text" oninput="UpdateAssetItem('AssetVersion')" class="required" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="AssetLastModified" class="required-label">Last Modified</label></td>
-                            <td><input id="AssetLastModified" type="datetime-local" step="1" oninput="UpdateAssetItem('AssetLastModified')" class="required" /><input id="AssetLastModifiedText" type="text" oninput="FillDateTimePicker()" style="width:180px;" /></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <input type="button" id="AddAssetButton" value="Add New Asset" onclick="AppendNewAsset()" disabled="disabled" />
+                <form>
+                    <div class="form-floating mb-2">
+                        <input id="AssetUrl" type="url" class="form-control required" oninput="UpdateAssetItem('AssetUrl')" required />
+                        <label for="AssetUrl" class="required-label">Url</label>
+                    </div>
+                    <div class="form-floating mb-2">
+                        <input id="AssetId" type="text" class="form-control required" oninput="UpdateAssetItem('AssetId')" required />
+                        <label for="AssetId" class="required-label">Id</label>
+                    </div>
+                    <div class="form-floating mb-2">
+                        <input id="AssetVersion" type="text" class="form-control required" oninput="UpdateAssetItem('AssetVersion')" required />
+                        <label for="AssetVersion" class="required-label">Version</label>
+                    </div>
+                    <div class="input-group mb-2">
+                        <div class="form-floating">
+                            <input id="AssetLastModified" type="datetime-local" class="form-control required" step="1" oninput="UpdateAssetItem('AssetLastModified')" required />
+                            <label for="AssetLastModified" class="required-label">Last Modified</label>
+                        </div>
+                        <div class="form-floating">
+                            <input id="AssetLastModifiedText" type="text" class="form-control" oninput="FillDateTimePicker()" required />
+                            <label for="AssetLastModifiedText">(raw date time value)</label>
+                        </div>
+                    </div>
+                </form>
+                <input type="button" id="AddAssetButton" class="btn btn-primary" value="Add New Asset" onclick="AppendNewAsset()" disabled="disabled" />
+                <input type="button" id="ClearAssetFormButton" class="btn btn-secondary" value="Clear Inputs" onclick="ResetAssetInputs()" />
             </fieldset>
         </div>
 
