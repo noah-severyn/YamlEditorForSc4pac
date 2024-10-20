@@ -112,36 +112,26 @@ function StartNewPackage() {
  * Fill the Package input form fields with the values from the currently selected package number.
  */
 function FillPackageForm() {
-	document.getElementById('AddPackageButton').disabled = (currPackageIdx != '0');
-	if (currPackageIdx === '0') {
-		ClearPackageInputs();
-	} else {
-		yamlData.forEach(doc => {
-			if (IsPackage(doc)) {
-				pkgIdx++;
-				if (pkgIdx == currPackageIdx) {
-					document.getElementById('PackageGroup').value = doc.group;
-					document.getElementById('PackageGroup').tomselect.createItem(doc.group) 
-						|| document.getElementById('PackageGroup').tomselect.addItem(doc.group);
-					document.getElementById('PackageName').value = doc.name;
-					document.getElementById('PackageVersion').value = doc.version;
-					document.getElementById('PackageSubfolder').value = doc.subfolder;
-					document.getElementById('PackageSubfolder').tomselect.addItem(doc.subfolder);
-					document.getElementById('PackageDependencies').value = ArrayToText(doc.dependencies);
+	if (currPackageIdx != '0') {
+		var doc = GetCurrentDocument('p');
 
-					document.getElementById('PackageSummary').value = doc.info.summary;
-					document.getElementById('PackageConflicts').value = doc.info.conflicts ?? '';
-					document.getElementById('PackageWarning').value = doc.info.warning ?? '';
+		document.getElementById('PackageGroup').value = doc.group;
+		document.getElementById('PackageName').value = doc.name;
+		document.getElementById('PackageVersion').value = doc.version;
+		document.getElementById('PackageSubfolder').value = doc.subfolder;
+		document.getElementById('PackageDependencies').value = ArrayToText(doc.dependencies);
 
-					document.getElementById('PackageDescription').value = doc.info.description ?? '';
+		document.getElementById('PackageSummary').value = doc.info.summary;
+		document.getElementById('PackageConflicts').value = doc.info.conflicts ?? '';
+		document.getElementById('PackageWarning').value = doc.info.warning ?? '';
+		document.getElementById('PackageDescription').value = doc.info.description ?? '';
+		document.getElementById('PackageAuthor').value = doc.info.author ?? '';
+		document.getElementById('PackageImages').value = ArrayToText(doc.info.images);
+		document.getElementById('PackageWebsite').value = doc.info.website;
 
-					document.getElementById('PackageAuthor').value = doc.info.author ?? '';
-					document.getElementById('PackageImages').value = ArrayToText(doc.info.images);
-					document.getElementById('PackageWebsite').value = doc.info.website;
-					assetCount = doc.assets === undefined ? 0 : doc.assets.length;
-				}
-			}
-		});
+		//For some reason these must be last otherwise the regular text inputs will not populate correctly
+		(pkgGroupSelect.createItem(doc.group) || pkgGroupSelect.addItem(doc.group));
+		pkgSubfolderSelect.addItem(doc.subfolder);
 	}
 }
 /**

@@ -9,6 +9,38 @@ CodeMirror(document.querySelector('#editor'), {
 	lineWrapping: true,
 	value:
 		`#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.
+group: "b62"
+name: "albertsons-retro-grocery"
+version: "3"
+subfolder: "300-commercial"
+info:
+  summary: "A retro grocery store presented as a CS$ and Landmark"
+  website: "https://community.simtropolis.com/files/file/29961-b62-remastered-albertsons-60s-retro-grocery/"
+  description: >
+    Albertsons LLC is an American grocery company founded and based in Boise, Idaho in 1939. It is the second largest supermarket chain in North America after The Kroger Company.
+
+    This package contains a 6x6 CS$ growable and ploppable lot.
+    It utilizes the timed props contained in SHK parking pack. These items may take a day or so to appear.
+  author: "Bobbo662, nos.17"
+  images:
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/albertsons-1.png.0e04fdbc77eef773f8cb8cd8934ecef7.png"
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/albertsons-2.png.1a6f057d9312f324f5333fc1123d9766.png"
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/albertsons-3.png.4f4c4e7b379e0256c50926fa5af92ede.png"
+  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/albertsons-4.png.0a405c7188883317d7c38929ec430e68.png"
+assets:
+- assetId: "b62-albertsons-retro-grocery"
+dependencies:
+- "bsc:texturepack-cycledogg-vol01"
+- "shk:parking-pack"
+- "bsc:mega-props-sg-vol01"
+- "lbt:mega-prop-pack-vol01"
+- "supershk:mega-parking-textures"
+
+---
+url: "https://community.simtropolis.com/files/file/29961-b62-remastered-albertsons-60s-retro-grocery/?do=download&r=202438"
+assetId: "b62-albertsons-retro-grocery"
+version: "3"
+lastModified: "2024-08-14T23:01:22Z"
 `,
 	mode: 'yaml'
 });
@@ -41,9 +73,12 @@ var countOfPackages = 0;
 var countOfAssets = 0;
 var listOfAssets = new Array();
 var listOfPackages = new Array();
+var listOfGroups = new Array();
 ParseYaml();
 ResetAssetInputs();
 ClearPackageInputs();
+
+
 
 new TomSelect('#PacPackageList', {
 	valueField: 'id',
@@ -67,10 +102,10 @@ new TomSelect('#PacPackageList', {
 					.filter((item) => item.group !== 'sc4pacAsset')
 					.map(i => ({ id: i.group + ":" + i.name, ...i }))
 				);
-				console.log(json.contents
-					.filter((item) => item.group !== 'sc4pacAsset')
-					.map(i => ({ id: i.group + ":" + i.name, ...i }))
-				);
+				//console.log(json.contents
+				//	.filter((item) => item.group !== 'sc4pacAsset')
+				//	.map(i => ({ id: i.group + ":" + i.name, ...i }))
+				//);
 				self.settings.load = null;
 			}).catch(() => {
 				callback();
@@ -84,7 +119,7 @@ new TomSelect('#PacPackageList', {
 	},
 });
 
-new TomSelect('#PackageSubfolder', {
+var pkgSubfolderSelect = new TomSelect('#PackageSubfolder', {
 	valueField: 'name',
 	labelField: 'name',
 	searchField: ['name'],
@@ -111,7 +146,7 @@ new TomSelect('#PackageSubfolder', {
 					.map(i => ({name: i}))
 				;
 				callback(subfolders);
-				console.log(subfolders)
+				//console.log(subfolders)
 				self.settings.load = null;
 			}).catch(() => {
 				callback();
@@ -124,7 +159,8 @@ new TomSelect('#PackageSubfolder', {
 		}
 	},
 });
-new TomSelect('#PackageGroup', {
+
+var pkgGroupSelect = new TomSelect('#PackageGroup', {
     valueField: 'group',
     labelField: 'group',
     searchField: ['group'],
@@ -147,12 +183,21 @@ new TomSelect('#PackageGroup', {
             .then(response => response.json())
             .then(json => {
                 //Filter the response to remove assets
+				//let pkgs = json.contents.filter((item) => item.group !== 'sc4pacAsset');
 				callback(json.contents
 					.filter((item) => item.group !== 'sc4pacAsset')
 				);
-				console.log(json.contents
-					.filter((item) => item.group !== 'sc4pacAsset')
-				);
+				//let groups = json.contents.map(item => item.group).filter(item => item !== 'sc4pacAsset');
+				//let uniqueGroups = [...new Set(groups)];
+				//let finalitems = uniqueGroups.map(i => ({ name: i }));
+				//console.log(uniqueGroups);
+				//console.log(finalitems);
+
+				////callback(json.contents.filter((item) => item.group !== 'sc4pacAsset'));
+				//callback(finalitems);
+				////console.log(json.contents.filter((item) => item.group !== 'sc4pacAsset'));
+
+				////console.log(listOfGroups);
                 self.settings.load = null;
             }).catch(() => {
                 callback();
