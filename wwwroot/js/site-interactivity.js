@@ -13,9 +13,11 @@ function ClearAll() {
  */
 function ClearPackageInputs() {
 	document.getElementById('PackageGroup').value = '';
+	if (groupTomSelect = document.getElementById('PackageGroup').tomselect) groupTomSelect.clear();
 	document.getElementById('PackageName').value = '';
 	document.getElementById('PackageVersion').value = '';
 	document.getElementById('PackageSubfolder').value = '';
+	if (subfolderTomSelect = document.getElementById('PackageSubfolder').tomselect) subfolderTomSelect.clear();
 	document.getElementById('PackageDependencies').value = '';
 	document.getElementById('LocalPackageList').value = '';
 	document.getElementById('PacPackageList').value = '';
@@ -120,9 +122,12 @@ function FillPackageForm() {
 				pkgIdx++;
 				if (pkgIdx == currPackageIdx) {
 					document.getElementById('PackageGroup').value = doc.group;
+					document.getElementById('PackageGroup').tomselect.createItem(doc.group) 
+						|| document.getElementById('PackageGroup').tomselect.addItem(doc.group);
 					document.getElementById('PackageName').value = doc.name;
 					document.getElementById('PackageVersion').value = doc.version;
 					document.getElementById('PackageSubfolder').value = doc.subfolder;
+					document.getElementById('PackageSubfolder').tomselect.addItem(doc.subfolder);
 					document.getElementById('PackageDependencies').value = ArrayToText(doc.dependencies);
 
 					document.getElementById('PackageSummary').value = doc.info.summary;
