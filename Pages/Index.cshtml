@@ -76,41 +76,34 @@
 
             @* Package Info tab *@
             <fieldset id="PackageInfoContent" class="tab-pane m-3" tabindex="0">
-                <table id="PackageInfoTable">
-                    <colgroup>
-                        <col style="width: 120px;">
-                    </colgroup>
-                    <tbody>
-                        <tr>
-                            <td><label for="PackageSummary" class="required-label">Summary</label></td>
-                            <td><input id="PackageSummary" type="text" oninput="UpdatePackageData('PackageSummary')" class="required" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageWarning">Warning</label></td>
-                            <td><input id="PackageWarning" type="text" oninput="UpdatePackageData('PackageWarning')" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageConflicts">Conflicts</label></td>
-                            <td><input id="PackageConflicts" type="text" oninput="UpdatePackageData('PackageConflicts')" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageDescription">Description</label></td>
-                            <td><textarea id="PackageDescription" rows="9" oninput="UpdatePackageData('PackageDescription')"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageAuthor">Author</label></td>
-                            <td><input id="PackageAuthor" type="text" oninput="UpdatePackageData('PackageAuthor')" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageImages">Images</label></td>
-                            <td><textarea id="PackageImages" rows="5" oninput="UpdatePackageData('PackageImages')"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageWebsite" class="required-label">Website</label></td>
-                            <td><input id="PackageWebsite" type="url" oninput="UpdatePackageData('PackageWebsite')" class="required" /></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="form-floating mb-2">
+                    <input id="PackageSummary" type="text" oninput="UpdatePackageData('PackageSummary')" class="form-control required" required>
+                    <label for="PackageSummary" class="required-label">Summary</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <input id="PackageWarning" type="text" oninput="UpdatePackageData('PackageWarning')" class="form-control">
+                    <label for="PackageWarning">Warning</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <input id="PackageConflicts" type="text" oninput="UpdatePackageData('PackageConflicts')" class="form-control">
+                    <label for="PackageConflicts">Conflicts</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <textarea id="PackageDescription" rows="9" oninput="UpdatePackageData('PackageDescription')" class="form-control"></textarea>
+                    <label for="PackageDescription">Description</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <input id="PackageAuthor" type="text" oninput="UpdatePackageData('PackageAuthor')" class="form-control">
+                    <label for="PackageAuthor">Author(s)</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <textarea id="PackageImages" rows="5" oninput="UpdatePackageData('PackageImages')" class="form-control"></textarea>
+                    <label for="PackageImages">Images</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <input id="PackageWebsite" type="url" oninput="UpdatePackageData('PackageWebsite')" class="form-control required" required>
+                    <label for="PackageWebsite" class="required-label">Website</label>
+                </div>
             </fieldset>
 
             @* Package Assets + Options tab *@
