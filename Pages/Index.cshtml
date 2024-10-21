@@ -19,7 +19,7 @@
 <div style="display:flex">
     <div id="Column0" class="col-2">
         <h2>File Structure</h2>
-        <input type="button" onclick="ClearAll()" value="New Package" />
+        <input type="button" class="btn btn-primary" onclick="ClearAll()" value="New Package" />
         <input type="button" class="btn btn-primary"  onclick="ResetAssetInputs()" value="New Asset" />
         <div id="MainTreeView"></div>
     </div>
@@ -206,12 +206,12 @@
                     </div>
                 </form>
                 <input type="button" id="AddAssetButton" class="btn btn-primary" value="Add New Asset" onclick="AppendNewAsset()" disabled="disabled" />
-                <input type="button" id="ClearAssetFormButton" class="btn btn-secondary" value="Clear Inputs" onclick="ResetAssetInputs()" />
+                <input type="button" id="ClearAssetFormButton" class="btn btn-danger" value="Clear Inputs" onclick="ResetAssetInputs()" />
             </fieldset>
         </div>
 
 
-        <input type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" disabled="disabled" />
+        <input class="btn btn-primary" type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" disabled="disabled" />
     </div>
 
     @* Right Column *@
@@ -238,9 +238,9 @@
             <input type="submit" value="Validate" onclick="CountItems()" />
             <input id="SubmittedYaml" type="hidden" asp-for="YamlText" />
         </form> *@
-        <input type="button" onclick="ParseYaml()" value="Parse YAML" />
-        <input type="button" onclick="CopyToClipboard()" value="Copy YAML to Clipboard" />
-        <input type="button" onclick="ClearAll()" value="Clear All" />
+        <input class="btn btn-primary" type="button" onclick="ParseYaml()" value="Parse YAML" />
+        <input class="btn btn-primary" type="button" onclick="CopyToClipboard()" value="Copy YAML to Clipboard" />
+        <input class="btn btn-danger" type="button" onclick="ClearAll()" value="Clear All" />
 
         <div id="editor"></div>
         
