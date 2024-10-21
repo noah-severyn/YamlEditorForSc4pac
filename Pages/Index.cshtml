@@ -238,9 +238,11 @@
             <input type="submit" value="Validate" onclick="CountItems()" />
             <input id="SubmittedYaml" type="hidden" asp-for="YamlText" />
         </form> *@
-        <input type="button" onclick="ParseYaml()" value="Parse YAML" />
-        <input type="button" onclick="CopyToClipboard()" value="Copy YAML to Clipboard" />
-        <input type="button" onclick="ClearAll()" value="Clear All" />
+        <div style="padding-bottom: 5px">
+            <input type="button" onclick="ParseYaml()" value="Parse YAML" />
+            <input type="button" onclick="CopyToClipboard()" value="Copy YAML to Clipboard" />
+            <input type="button" onclick="ClearAll()" value="Clear All" />
+        </div>
 
         <div id="editor"></div>
         
