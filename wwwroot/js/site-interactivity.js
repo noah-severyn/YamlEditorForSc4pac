@@ -146,14 +146,14 @@ function FillPackageAssetForm(assetName) {
 
 
 function AddDependencyFromLocalList() {
-	var selectedPkg = document.getElementById('SelectLocalPackage').value;
+	var selectedPkg = document.getElementById('LocalPackageList').value;
 	var currentDependencies = document.getElementById('PackageDependencies').value;
 	if (currentDependencies === '') {
-		document.getElementById('PackageDependencies').value = selectedPkg
+		document.getElementById('PackageDependencies').value = selectedPkg + ';\n'
 	} else {
-		document.getElementById('PackageDependencies').value = currentDependencies + ';\n' + selectedPkg;
+		document.getElementById('PackageDependencies').value = currentDependencies + selectedPkg + ';\n';
 	}
-	document.getElementById('SelectLocalPackage').value = '';
+	document.getElementById('LocalPackageList').value = '';
 }
 function AddDepencencyFromPacList() {
 	var selectedPkg = document.getElementById('PacPackageList').value;
@@ -161,7 +161,7 @@ function AddDepencencyFromPacList() {
 	if (currentDependencies === '') {
 		document.getElementById('PackageDependencies').value = selectedPkg + ';\n'
 	} else {
-		document.getElementById('PackageDependencies').value = currentDependencies+ selectedPkg + ';\n';
+		document.getElementById('PackageDependencies').value = currentDependencies + selectedPkg + ';\n';
 	}
 	document.getElementById('PacPackageList').value = '';
 }
