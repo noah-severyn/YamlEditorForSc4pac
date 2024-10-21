@@ -76,7 +76,7 @@
                             <td></td>
                             <td>
                                 <label for="LocalPackageList">Packages in this file &nbsp;&nbsp;</label>
-                                <select id="LocalPackageList" placeholder="Select a package in this file"></select>
+                                <select id="LocalPackageList" placeholder="Select a package in this file" onchange="AddDependencyFromLocalList()"></select>
                                 <br />
                                 <label for="PacPackageList">Existing packages in sc4pac &nbsp;&nbsp;</label>
                                 <select id="PacPackageList" placeholder="Select a package" onchange="AddDepencencyFromPacList()"></select>
