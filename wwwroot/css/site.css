@@ -35,9 +35,7 @@ body {
     /*height: 650px;*/
     background-color: azure;
 }
-textarea, input[type=text], input[type=url] {
-    width: 99%
-}
+
 table {
     width: 100%;
 }
