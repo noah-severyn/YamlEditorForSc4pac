@@ -149,9 +149,9 @@ function AddDependencyFromLocalList() {
 	var selectedPkg = document.getElementById('SelectLocalPackage').value;
 	var currentDependencies = document.getElementById('PackageDependencies').value;
 	if (currentDependencies === '') {
-		document.getElementById('PackageDependencies').value = selectedPkg
+		document.getElementById('PackageDependencies').value = selectedPkg + ';\n'
 	} else {
-		document.getElementById('PackageDependencies').value = currentDependencies + ';\n' + selectedPkg;
+		document.getElementById('PackageDependencies').value = currentDependencies + selectedPkg + ';\n';
 	}
 	document.getElementById('SelectLocalPackage').value = '';
 }
