@@ -149,9 +149,9 @@
             <fieldset id="PackageVariantsContent" class="tab-pane m-3" tabindex="0">
                 <p>Choose a variant</p>
                 <form>
-                    <div class="mb-2 input-group">
-                        <span class="input-group-text">this file</span>
-                        <select id="SelectLocalPackageVariants" class="form-select" onchange="FillPackageVariantsDropdown()"></select>
+                    <div class="form-floating mb-2">
+                        <select id="SelectLocalPackageVariants" class="form-control form-select" onchange="FillPackageVariantsDropdown()"></select>
+                        <label for="SelectLocalPackageVariants">This file</label>
                     </div>
                 </form>
             </fieldset>
