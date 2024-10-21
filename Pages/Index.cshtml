@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
@@ -43,51 +43,35 @@
         <div class="tab-content" id="nav-tabContent">
             @* Package Properties tab *@
             <fieldset id="PackagePropertiesContent" class="tab-pane active m-3" tabindex="0">
-                <table id="PackagePropertiesTable">
-                    <colgroup>
-                        <col style="width: 120px;">
-                    </colgroup>
-                    <tbody>
-                        <tr>
-                            <td><label for="PackageGoup" class="required-label">Group</label></td>
-                            <td><input id="PackageGroup" oninput="UpdatePackageData('PackageGroup')" class="required"/></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageName" class="required-label">Name</label></td>
-                            <td><input id="PackageName" type="text" oninput="UpdatePackageData('PackageName')" class="required" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageVersion" class="required-label">Version</label></td>
-                            <td><input id="PackageVersion" type="text" oninput="UpdatePackageData('PackageVersion')" class="required" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageSubfolder" class="required-label">Subfolder</label></td>
-                            <td>
-                                <input id="PackageSubfolder" oninput="UpdatePackageData('PackageSubfolder')" required />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>
-                                Select a package to add as a dependency from one of the dropdowns below
-                            </td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>
-                                <label for="LocalPackageList">Packages in this file &nbsp;&nbsp;</label>
-                                <select id="LocalPackageList" placeholder="Select a package in this file"></select>
-                                <br />
-                                <label for="PacPackageList">Existing packages in sc4pac &nbsp;&nbsp;</label>
-                                <select id="PacPackageList" placeholder="Select a package" onchange="AddDepencencyFromPacList()"></select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageDependencies">Dependencies</label></td>
-                            <td><textarea id="PackageDependencies" rows="7" oninput="UpdatePackageData('PackageDependencies')"></textarea></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="form-floating mb-2">
+                    <input id="PackageGroup" oninput="UpdatePackageData('PackageGroup')" class="form-control required" required>
+                    <label for="PackageGoup" class="required-label">Group</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <input id="PackageName" type="text" oninput="UpdatePackageData('PackageName')" class="form-control required" required>
+                    <label for="PackageName" class="required-label">Name</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <input id="PackageVersion" type="text" oninput="UpdatePackageData('PackageVersion')" class="form-control  required" required>
+                    <label for="PackageVersion" class="required-label">Version</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <input id="PackageSubfolder" oninput="UpdatePackageData('PackageSubfolder')" class="form-control required" required>
+                    <label for="PackageSubfolder" class="required-label">Subfolder</label>
+                </div>
+                <p>Select a package to add as a dependency from one of the dropdowns below:</p>
+                <div class="form-floating mb-2">
+                    <select id="LocalPackageList" class="form-control" placeholder="Select a package in this file"></select>
+                    <label for="LocalPackageList">From this file</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <select id="PacPackageList" class="form-control" placeholder="Select a package" onchange="AddDepencencyFromPacList()"></select>
+                    <label for="PacPackageList">From default channel</label>
+                </div>
+                <div class="form-floating mb-2">
+                    <textarea id="PackageDependencies" rows="7" oninput="UpdatePackageData('PackageDependencies')" class="form-control"></textarea>
+                    <label for="PackageDependencies">Dependencies</label>
+                </div>
             </fieldset>
 
             @* Package Info tab *@
