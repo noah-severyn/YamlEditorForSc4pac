@@ -117,25 +117,25 @@
                     <div class="column">
                         <p>These assets will be installed for every user, regardless of the chosen variant or option. Choose an asset from one of the dropdowns below.</p>
                         <form>
-                            <div class="mb-2 input-group">
-                                <span class="input-group-text">this file</span>
-                                <select id="SelectLocalPackageAssets" class="form-select" onchange="FillPkgAssetId(this)"></select>
+                            <div class="form-floating mb-2">
+                                <select id="SelectLocalPackageAssets" class="form-control form-select" onchange="FillPkgAssetId(this)"></select>
+                                <label for="SelectLocalPackageAssets">From this file</label>
                             </div>
-                            <div class="mb-2 input-group">
-                                <span class="input-group-text">sc4pac</span>
-                                <select id="SelectPacPackageAssets" class="form-select" onchange="FillPkgAssetId(this)"></select>
+                            <div class="form-floating mb-2">
+                                <select id="SelectPacPackageAssets" class="form-control form-select" onchange="FillPkgAssetId(this)"></select>
+                                <label for="SelectPacPackageAssets">From default channel</label>
                             </div>
-                            <div class="mb-2 input-group">
-                                <span class="input-group-text">asset id</span>
-                                <input id="PackageAssetId" class="form-control" type="text" disabled="disabled" />
+                            <div class="form-floating mb-2">
+                                <input id="PackageAssetId" class="form-control" type="text" disabled>
+                                <label for="PackageAssetId">Asset ID</label>
                             </div>
-                            <div class="mb-2 input-group">
-                                <span class="input-group-text">Include</span>
+                            <div class="form-floating mb-2">
                                 <textarea id="PackageAssetInclude" class="form-control" rows="3" oninput="UpdatePackageData('PackageAssetInclude')"></textarea>
+                                <label for="PackageAssetInclude">Include</label>
                             </div>
-                            <div class="mb-2 input-group">
-                                <span class="input-group-text">Exclude</span>
+                            <div class="form-floating mb-2">
                                 <textarea id="PackageAssetExclude" class="form-control" rows="3" oninput="UpdatePackageData('PackageAssetExclude')"></textarea>
+                                <label for="PackageAssetExclude">Exclude</label>
                             </div>
                             <div class="mb-2">
                                 <input id="AddPackageAssetButton" class="btn btn-primary" type="button" value="Add Asset to Package" onclick="AddIncludedAsset()" disabled="disabled" />
