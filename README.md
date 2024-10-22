@@ -1,2 +1,2 @@
-# SC4PackMan
-UI and tools for sc4pac
+# YAML editor for sc4pac
+A YAML editor for creating sc4pac metadata files.
