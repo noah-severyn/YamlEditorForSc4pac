@@ -16,17 +16,18 @@
 <link rel="stylesheet" href="/css/treeview.min.css" type="text/css" />
 <script type="text/javascript" src="/js/treeview.min.js"></script>
 
-<div style="display:flex">
-    <div id="Column0" class="col-2">
+<div style="display:flex" class="row">
+    <div id="Column0" class="col-sm-12 col-md-2">
         <h2>File Structure</h2>
         <input type="button" class="btn btn-primary" onclick="ClearAll()" value="New Package" />
         <input type="button" class="btn btn-primary"  onclick="ResetAssetInputs()" value="New Asset" />
         <div id="MainTreeView"></div>
+    <hr>
     </div>
 
 
     @* Left Column *@
-    <div id="Column1" class="column">
+    <div id="Column1" class="col-sm-12 col-md-5">
         
         <h2>Data Input</h2>
         <p>For Dependencies, Image, Include, and Exclude fields add multiple items separated by a semicolon. Variants and are not yet supported with this tool.</p>
@@ -131,13 +132,13 @@
 
             @* Package Assets + Options tab *@
             <fieldset id="PackageAssetsContent" class="tab-pane m-3" tabindex="0">
-                <div style="display:flex">
-                    <div class="col-2">
+                <div style="display:flex" class="row">
+                    <div class="col-sm-12 col-md-3">
                         <input id="NewPackageAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="+ Include New" onclick="NewIncludedAsset()" />
                         <div id="AssetTreeView"></div>
                     </div>
 
-                    <div class="column">
+                    <div class="col-sm-12 col-md-9">
                         <p>These assets will be installed for every user, regardless of the chosen variant or option. Choose an asset from one of the dropdowns below.</p>
                         <form>
                             <div class="mb-2 input-group">
@@ -212,10 +213,11 @@
 
 
         <input class="btn btn-primary" type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" disabled="disabled" />
+        <hr>
     </div>
 
     @* Right Column *@
-    <div id="Column2" class="column">
+    <div id="Column2" class="col-sm-12 col-md-5">
         <h2>YAML Output</h2>
         <h5><span id="CurrentItemCount"></span></h5>
         <p>The contents in this code pane are automatically generated from inputs on the left, but is also able to be customized manually. Beware, manual changes may be overriden if any of the input values are changed!</p>
