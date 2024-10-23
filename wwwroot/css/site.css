@@ -35,9 +35,7 @@ body {
     /*height: 650px;*/
     background-color: azure;
 }
-textarea, input[type=text], input[type=url] {
-    width: 99%
-}
+
 table {
     width: 100%;
 }
@@ -69,4 +67,13 @@ table {
 /* https://stackoverflow.com/a/50478244/10802255 */
 .input-group-text {
     width: 70px; /*adjust as needed*/
+}
+
+.form-control.ts-wrapper {
+    height: initial !important;
+    padding-top: 2.125rem !important;
+}
+
+.form-control, textarea {
+    height: 100% !important;
 }
