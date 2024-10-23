@@ -56,8 +56,9 @@ table {
 }
 
 .required-label:after {
-    content: " *";
+    content: " *" !important;
     color:red;
+    position: initial !important;
 }
 
 /*Tab Styles*/
