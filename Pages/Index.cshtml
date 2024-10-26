@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Home page";
 }
+<script type="text/javascript" src="/js/site-util.js"></script>
 <script type="text/javascript" src="/js/site-interactivity.js"></script>
 <script type="text/javascript" src="/js/js-yaml.js"></script>
 
@@ -19,7 +20,7 @@
 <div style="display:flex" class="row">
     <div id="Column0" class="col-sm-12 col-md-2">
         <h2>File Structure</h2>
-        <input type="button" class="btn btn-primary" onclick="ClearAll()" value="New Package" />
+        <input type="button" class="btn btn-primary" onclick="ResetPackageInputs()" value="New Package" />
         <input type="button" class="btn btn-primary"  onclick="ResetAssetInputs()" value="New Asset" />
         <div id="MainTreeView"></div>
     </div>
@@ -35,7 +36,7 @@
         <nav class="nav nav-tabs" id="nav-tab" role="tablist">
             <button id="PackagePropertiesTab" class="nav-link active" data-bs-toggle="tab" data-bs-target="#PackagePropertiesContent" type="button" role="tab">Package Properties</button>
             <button id="PackageInfoTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageInfoContent" type="button" role="tab">Package Info</button>
-            <button id="PackageAssetsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageAssetsContent" type="button" role="tab">Package Assets</button>
+            <button id="IncludedAssetsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#IncludedAssetsContent" type="button" role="tab">Included Assets</button>
             <button id="PackageVaraintsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageVariantsContent" type="button" role="tab">Package Variants</button>
             <button id="AssetPropertiesTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#AssetPropertiesContent" type="button" role="tab">Asset Properties</button>
         </nav>
@@ -111,7 +112,7 @@
             </fieldset>
 
             @* Package Assets + Options tab *@
-            <fieldset id="PackageAssetsContent" class="tab-pane m-3" tabindex="0">
+            <fieldset id="IncludedAssetsContent" class="tab-pane m-3" tabindex="0">
                 <div style="display:flex" class="row">
                     <div class="col-sm-12 col-md-3">
                         <input id="NewPackageAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="+ Include New" onclick="NewIncludedAsset()" />
@@ -123,11 +124,11 @@
                         <form>
                             <div class="mb-2 input-group">
                                 <span class="input-group-text w1">This file</span>
-                                <select id="SelectLocalPackageAssets" class="form-select" onchange="FillPkgAssetId(this)"></select>
+                                <select id="SelectLocalPackageAssets" class="form-select" onchange="SetIncludedAssetId(this)"></select>
                             </div>
                             <div class="mb-2 input-group">
                                 <span class="input-group-text w1">Sc4pac</span>
-                                <select id="SelectPacPackageAssets" class="form-select" onchange="FillPkgAssetId(this)"></select>
+                                <select id="SelectPacPackageAssets" class="form-select" onchange="SetIncludedAssetId(this)"></select>
                             </div>
                             <div class="mb-2 input-group">
                                 <span class="input-group-text w1">Asset Id</span>
@@ -151,13 +152,13 @@
 
             @* Package Variants tab *@
             <fieldset id="PackageVariantsContent" class="tab-pane m-3" tabindex="0">
-                <p>Choose a variant</p>
-                <form>
+                <p>Not yet supported</p>
+                @* <form>
                     <div class="mb-2 input-group">
                         <span class="input-group-text">this file</span>
                         <select id="SelectLocalPackageVariants" class="form-select" onchange="FillPackageVariantsDropdown()"></select>
                     </div>
-                </form>
+                </form> *@
             </fieldset>
 
             @* Asset Properties tab *@

@@ -2,16 +2,17 @@
  * Clears all inputs and the code pane.
  */
 function ClearAll() {
-	ClearPackageInputs();
+	ResetPackageInputs();
 	ResetAssetInputs();
 	yamlData.length = 0;
-	cm.setValue('');
+	cm.setValue('#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.\n');
 	ParseYaml();
 }
 /**
- * Clears all the Package input form fields.
+ * Resets the Package input and Included asset form fields.
  */
-function ClearPackageInputs() {
+function ResetPackageInputs() {
+	currPackageIdx = '0';
 	document.getElementById('PackageGroup').value = '';
 	if (groupTomSelect = document.getElementById('PackageGroup').tomselect) groupTomSelect.clear();
 	document.getElementById('PackageName').value = '';
@@ -34,29 +35,33 @@ function ClearPackageInputs() {
 	document.getElementById('PackageAssetId').value = '';
 	document.getElementById('PackageAssetInclude').value = '';
 	document.getElementById('PackageAssetExclude').value = '';
+	UpdateIncludedAssetTree();
 }
 /**
- * Clears all the Package Asset input form fields.
+ * Resets the Package Asset input form fields.
  */
-function ClearPackageAssetInputs() {
+function ResetPackageAssetInputs() {
 	document.getElementById('SelectLocalPackageAssets').value = '';
 	document.getElementById('SelectPacPackageAssets').value = '';
 	document.getElementById('PackageAssetId').value = '';
 	document.getElementById('PackageAssetInclude').value = '';
 	document.getElementById('PackageAssetExclude').value = '';
+	UpdateIncludedAssetTree();
 }
 /**
- * Clears all the Asset input form fields.
+ * Resets the Asset input form fields.
  */
 function ResetAssetInputs() {
+	currAssetIdx = '0';
 	document.getElementById('AssetUrl').value = '';
 	document.getElementById('AssetId').value = '';
 	document.getElementById('AssetVersion').value = '';
 	document.getElementById('AssetLastModified').value = 0;
 	document.getElementById('AssetLastModifiedText').value = '';
 	document.getElementById('AddAssetButton').disabled = true;
-	currAssetIdx = '0';
 }
+
+
 /**
  * Apply basic validation rules for the specified entry field.
  */
@@ -99,15 +104,10 @@ function EntryValidation(elementId) {
 	}
 }
 
-function StartNewPackage() {
-	ClearPackageInputs();
-	currPackageIdx = '0';
-}
 
-// --------------------------------------------------------------------------------------------
-// ---------------------------------------   Packages   ---------------------------------------
-// --------------------------------------------------------------------------------------------
-
+// --------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------   Packages   ---------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 /**
  * Fill the Package input form fields with the values from the currently selected package number.
  */
@@ -137,14 +137,15 @@ function FillPackageForm() {
 /**
  * Fill the Package Asset input form fields with the values from the currently selected package and asset number.
  */
-function FillPackageAssetForm(assetName) {
+function FillIncludedAssetForm(assetName) {
 	var pkgAsset = GetCurrentDocument('p').assets.find((i) => i.assetId === assetName);
 	document.getElementById('PackageAssetId').value = pkgAsset.assetId;
 	document.getElementById('PackageAssetInclude').value = ArrayToText(pkgAsset.include);
 	document.getElementById('PackageAssetExclude').value = ArrayToText(pkgAsset.exclude);
 }
-
-
+/**
+ * Adds the selected local dependency to the list.
+ */
 function AddDependencyFromLocalList() {
 	var selectedPkg = document.getElementById('LocalPackageList').value;
 	var currentDependencies = document.getElementById('PackageDependencies').value;
@@ -155,6 +156,9 @@ function AddDependencyFromLocalList() {
 	}
 	document.getElementById('LocalPackageList').value = '';
 }
+/**
+ * Adds the selected sc4pac dependency to the list.
+ */
 function AddDepencencyFromPacList() {
 	var selectedPkg = document.getElementById('PacPackageList').value;
 	var currentDependencies = document.getElementById('PackageDependencies').value;
@@ -166,7 +170,7 @@ function AddDepencencyFromPacList() {
 	document.getElementById('PacPackageList').value = '';
 }
 /**
- * Live update the YAML codepane with the values in the current Package form field as the user types.
+ * Update the YAML codepane with the values in the current Package form field.
  */
 function UpdatePackageData(fieldName) {
 	EntryValidation(fieldName);
@@ -201,7 +205,7 @@ function UpdatePackageData(fieldName) {
 	}
 }
 /**
- * Add a new package to the end of this YAML document.
+ * Append a new package to the end of the YAML document.
  */
 function AppendNewPackage() {
 	var newPackage = {
@@ -236,6 +240,12 @@ function AppendNewPackage() {
 	UpdateCodePane();
 	CountItems();
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------   Included Assets   ------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 /**
  * Add a new asset to the currently selected package.
  */
@@ -258,17 +268,17 @@ function AddIncludedAsset() {
 		}
 		doc.assets.push(newAsset);
 
-		ClearPackageAssetInputs();
+		ResetPackageAssetInputs();
 		document.getElementById('AddPackageAssetButton').disabled = true;
 		UpdateCodePane();
 		CountItems();
-		UpdateAssetTree();
+		UpdateIncludedAssetTree();
 	}
 }
-
-
-
-function FillPkgAssetId(obj) {
+/**
+ * Sets the included asset id to the currently currently selected value.
+ */
+function SetIncludedAssetId(obj) {
 	if (obj.id === 'SelectLocalPackageAssets') {
 		document.getElementById('SelectPacPackageAssets').value = '';
 	} else {
@@ -283,16 +293,16 @@ function FillPkgAssetId(obj) {
 	}
 }
 function NewIncludedAsset() {
-	ClearPackageAssetInputs();
+	ResetPackageAssetInputs();
 }
 
 
 
 
 
-// --------------------------------------------------------------------------------------------
-// ----------------------------------------   Assets   ----------------------------------------
-// --------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------   Assets   ----------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 /**
  * Fill the Asset input form fields with the values from the currently selected asset number.
  */
@@ -351,78 +361,4 @@ function FillDateTimePicker() {
 	} catch (e) {
 		console.log(e)
 	}
-}
-
-
-//TODO - move these functions to a new util class
-
-// --------------------------------------------------------------------------------------------
-// -----------------------------------   Helper Functions   -----------------------------------
-// --------------------------------------------------------------------------------------------
-/**
- * Convert an array to the format used in input boxes for user input.
- * @param {Array} itemList List to process
- * @returns A single string, each item on a new line, semicolon delineated.
- */
-function ArrayToText(itemList) {
-	if (itemList === undefined || itemList === null) {
-		return '';
-	}
-
-	var output = '';
-	itemList.forEach((item) => {
-		output = output + item + ';\n';
-	});
-	return output.slice(0, -1); //Remove the final \n
-}
-/**
- * Convert text to a properly formatted string array.
- * @param {string} text Semicolon delimited string to process
- * @returns An array of strings
- */
-function TextToArray(text) {
-	if (text === '' || text === null || text === undefined) {
-		return null;
-	}
-	return text.replaceAll('\n', '').replaceAll('"', '').split(';').filter((item) => item !== '');
-}
-/**
- * Determine whether the specified object contains the properties of a sc4pac Asset.
- * @param {Object} obj The object to analyze
- * @returns TRUE if the object represents an Asset; FALSE otherwise
- */
-function IsAsset(obj) {
-	if (obj === null || obj === undefined) {
-		return false;
-	}
-	return Object.hasOwn(obj, 'assetId') && Object.hasOwn(obj, 'lastModified') && Object.hasOwn(obj, 'url') && Object.hasOwn(obj, 'version');
-}
-/**
- * Determine whether the specified object contains the properties of a sc4pac Package.
- * @param {Object} obj The object to analyze
- * @returns TRUE if the object represents a Package; FALSE otherwise
- */
-function IsPackage(obj) {
-	if (obj === null || obj === undefined) {
-		return false;
-	}
-	return Object.hasOwn(obj, 'group') && Object.hasOwn(obj, 'name') && Object.hasOwn(obj, 'version') && Object.hasOwn(obj, 'subfolder');
-}
-
-/**
- * Return the currently selected package or asset document object.
- * @param {string} type The type of document to return. 'p' for packages and 'a' for assets.
- * @returns The currently selected document object of the specified type
- */
-function GetCurrentDocument(type) {
-	if (type.toLowerCase().charAt(0) === 'p') {
-		if (currPackageIdx !== '0') {
-			return yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
-		}
-	} else {
-		if (currAssetIdx !== '0') {
-			return yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
-		}
-	}
-	return null;
 }

@@ -9,38 +9,6 @@ CodeMirror(document.querySelector('#editor'), {
 	lineWrapping: true,
 	value:
 		`#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.
-group: "b62"
-name: "albertsons-retro-grocery"
-version: "3"
-subfolder: "300-commercial"
-info:
-  summary: "A retro grocery store presented as a CS$ and Landmark"
-  website: "https://community.simtropolis.com/files/file/29961-b62-remastered-albertsons-60s-retro-grocery/"
-  description: >
-    Albertsons LLC is an American grocery company founded and based in Boise, Idaho in 1939. It is the second largest supermarket chain in North America after The Kroger Company.
-
-    This package contains a 6x6 CS$ growable and ploppable lot.
-    It utilizes the timed props contained in SHK parking pack. These items may take a day or so to appear.
-  author: "Bobbo662, nos.17"
-  images:
-  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/albertsons-1.png.0e04fdbc77eef773f8cb8cd8934ecef7.png"
-  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/albertsons-2.png.1a6f057d9312f324f5333fc1123d9766.png"
-  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/albertsons-3.png.4f4c4e7b379e0256c50926fa5af92ede.png"
-  - "https://www.simtropolis.com/objects/screens/monthly_2024_08/albertsons-4.png.0a405c7188883317d7c38929ec430e68.png"
-assets:
-- assetId: "b62-albertsons-retro-grocery"
-dependencies:
-- "bsc:texturepack-cycledogg-vol01"
-- "shk:parking-pack"
-- "bsc:mega-props-sg-vol01"
-- "lbt:mega-prop-pack-vol01"
-- "supershk:mega-parking-textures"
-
----
-url: "https://community.simtropolis.com/files/file/29961-b62-remastered-albertsons-60s-retro-grocery/?do=download&r=202438"
-assetId: "b62-albertsons-retro-grocery"
-version: "3"
-lastModified: "2024-08-14T23:01:22Z"
 `,
 	mode: 'yaml'
 });
@@ -76,7 +44,7 @@ var listOfPackages = new Array();
 var listOfGroups = new Array();
 ParseYaml();
 ResetAssetInputs();
-ClearPackageInputs();
+ResetPackageInputs();
 
 
 
@@ -266,17 +234,19 @@ function UpdateMainTree() {
 		if (t.data.name.indexOf(' - ') > 0) {
 			if (t.data.name.indexOf(':') > 0) {
 				currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+				(new bootstrap.Tab(document.getElementById('PackagePropertiesTab'))).show();
 				FillPackageForm();
-				UpdateAssetTree();
+				UpdateIncludedAssetTree();
 			} else {
 				currAssetIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+				(new bootstrap.Tab(document.getElementById('AssetPropertiesTab'))).show();
 				FillAssetForm();
 			}
 		}
 	});
 }
 
-function UpdateAssetTree() {
+function UpdateIncludedAssetTree() {
 	var pkgAssets;
 	var doc = GetCurrentDocument('p');
 	if (doc == null || doc.assets == null) {
@@ -288,7 +258,7 @@ function UpdateAssetTree() {
 	var pkgAssetData = [{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }]
 	atv = new TreeView(pkgAssetData, 'AssetTreeView');
 	atv.on("select", function (t) {
-		FillPackageAssetForm(t.data.name);
+		FillIncludedAssetForm(t.data.name);
 	});
 }
 
@@ -315,7 +285,7 @@ function CountItems() {
 		});
 	}
 
-	//Pachage dependency selection for local packages
+	//Package dependency selection for local packages
 	var localPkgList = document.getElementById('LocalPackageList');
 	localPkgList.replaceChildren();
 	localPkgList.appendChild(new Option('', ''));
@@ -329,13 +299,6 @@ function CountItems() {
 	localAssetList.replaceChildren();
 	localAssetList.appendChild(new Option('', ''));
 	listOfAssets.forEach(i => localAssetList.add(new Option(i.assetId, i.assetId)));
-
-	//Package:asset selection for existing sc4pac assets
-	var pacAssetList = document.getElementById('SelectPacPackageAssets');
-	pacAssetList.replaceChildren();
-	pacAssetList.appendChild(new Option('', ''));
-	pacAssets.forEach(i => pacAssetList.add(new Option(i.name, i.name)));
-
 
 	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
 }
@@ -358,7 +321,6 @@ function UpdateCodePane() {
 		});
 		//The parser blows away the multiline context so we need to rebuild it :(
 		if (doc.indexOf('description: ') > 0) {
-			
 			var rgx = new RegExp('description: \"(.*?)\"');
 			var oldText = doc.match(rgx)[0];
 			var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"','');
