@@ -361,7 +361,7 @@ function UpdateCodePane() {
 			
 			var rgx = new RegExp('description: \"(.*?)\"');
 			var oldText = doc.match(rgx)[0];
-			var newText = oldText.replace('description: "', "description: >\n    ").replaceAll('\\n', '\n    ').replace('"','');
+			var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"','');
 			doc = doc.replace(oldText, newText);
 		}
 
