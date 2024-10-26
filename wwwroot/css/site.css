@@ -19,15 +19,6 @@ body {
   margin-bottom: 60px;
 }
 
-.column {
-    flex: 50%;
-    /*display:flex*/
-}
-
-#FileName {
-    font-family: Courier New, Courier, monospace;
-}
-
 .CodeMirror {
     border: 1px solid turquoise;
 }
@@ -38,26 +29,15 @@ body {
 textarea, input[type=text], input[type=url] {
     width: 99%
 }
-table {
-    width: 100%;
-}
-.visible2 {
-    visibility: visible;
-    display: block;
-}
-
-.invisible2 {
-    visibility: hidden;
-    display: none;
-}
 
 .required {
-    border-color:dodgerblue;
+    /*border-color:dodgerblue;*/
 }
 
 .required-label:after {
-    content: " *" !important;
-    color:red;
+    content: "*" !important;
+    padding-left: .2rem;
+    color: red;
     position: initial !important;
 }
 
@@ -67,6 +47,9 @@ table {
 }
 
 /* https://stackoverflow.com/a/50478244/10802255 */
-.input-group-text {
-    width: 70px; /*adjust as needed*/
+.w1 {
+    width: 70px;
+}
+.w2 {
+    width: 110px;
 }

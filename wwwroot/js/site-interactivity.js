@@ -426,17 +426,3 @@ function GetCurrentDocument(type) {
 	}
 	return null;
 }
-
-//Array.prototype.removeItem = function (item) {
-//	//https://stackoverflow.com/a/5767357/10802255
-//	const index = this.indexOf(item);
-//	if (index > -1) {
-//		return this.splice(index, 1);
-//	} else {
-//		return this;
-//	}
-//}
-
-//Array.prototype.remove = function (index) {
-//	this.splice(index, 1);
-//}
