@@ -67,7 +67,7 @@ function ResetAssetInputs() {
  */
 function EntryValidation(elementId) {
 	//Prevent adding package if any required fields are blank
-	if (document.getElementById('PackageGroup').value === '' || document.getElementById('PackageName').value === '' || document.getElementById('PackageVersion').value === '' || document.getElementById('PackageSummary').value === '' || document.getElementById('PackageWebsite').value === '') {
+	if (document.getElementById('PackageGroup').value === '' || document.getElementById('PackageName').value === '' || document.getElementById('PackageVersion').value === '' || document.getElementById('PackageSummary').value === '') {
 		document.getElementById('AddPackageButton').disabled = true;
 	} else {
 		document.getElementById('AddPackageButton').disabled = false;
