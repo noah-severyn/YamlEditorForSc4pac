@@ -90,7 +90,7 @@ function EntryValidation(elementId) {
 	if (fieldName === 'Subfolder' || fieldName === 'LastModified') {
 		return;
 	} else if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'Id') {
-		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-]'), '');
+		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-]', 'g'), '');
 	} else if (fieldName === 'Dependencies') {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-:;\n]'), '');
 	} else if (fieldName === 'Website' || fieldName === 'AssetUrl') {
