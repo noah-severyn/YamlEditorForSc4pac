@@ -52,6 +52,7 @@ new TomSelect('#PacPackageList', {
 	valueField: 'id',
 	labelField: 'id',
 	searchField: ['id'],
+	maxItems: 1,
 
 	// fetch remote data
 	load: function (query, callback) {
