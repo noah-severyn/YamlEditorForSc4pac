@@ -155,6 +155,8 @@ function AddDependencyFromLocalList() {
 		document.getElementById('PackageDependencies').value = currentDependencies + selectedPkg + ';\n';
 	}
 	document.getElementById('LocalPackageList').value = '';
+	
+	document.getElementById('PackageDependencies').dispatchEvent(new Event('input'))
 }
 /**
  * Adds the selected sc4pac dependency to the list.
@@ -168,6 +170,8 @@ function AddDepencencyFromPacList() {
 		document.getElementById('PackageDependencies').value = currentDependencies + selectedPkg + ';\n';
 	}
 	document.getElementById('PacPackageList').value = '';
+
+	document.getElementById('PackageDependencies').dispatchEvent(new Event('input'))
 }
 /**
  * Update the YAML codepane with the values in the current Package form field.
