@@ -64,10 +64,10 @@
 
                     <label for="PacPackageList" class="form-label">Add a dependency:</label>
                     <div class="input-group mb-2">
-                        <label class="input-group-text" for="PacPackageList">From sc4pac</label>
-                        <input id="PacPackageList" class="form-control" onchange="AddDepencencyFromPacList()" />
-                        <label class="input-group-text" for="PacPackageList">From this file</label>
-                        <select id="LocalPackageList" class="form-control" onchange="AddDependencyFromLocalList()"></select>
+                        <label class="input-group-text w2" for="PacPackageList">From sc4pac</label>
+                        <input id="PacPackageList" class="form-control" onchange="PackageAddDependency(this)" />
+                        <label class="input-group-text w2" for="LocalPackageList">From this file</label>
+                        <select id="LocalPackageList" class="form-control" onchange="PackageAddDependency(this)"></select>
                     </div>
 
                     <div class="input-group mb-2">
@@ -111,7 +111,7 @@
                 </form>
             </fieldset>
 
-            @* Package Assets + Options tab *@
+            @* Package (Included) Assets tab *@
             <fieldset id="IncludedAssetsContent" class="tab-pane m-3" tabindex="0">
                 <div style="display:flex" class="row">
                     <div class="col-sm-12 col-md-3">
@@ -152,13 +152,51 @@
 
             @* Package Variants tab *@
             <fieldset id="PackageVariantsContent" class="tab-pane m-3" tabindex="0">
-                <p>Not yet supported</p>
-                @* <form>
-                    <div class="mb-2 input-group">
-                        <span class="input-group-text">this file</span>
-                        <select id="SelectLocalPackageVariants" class="form-select" onchange="FillPackageVariantsDropdown()"></select>
+                <div style="display:flex" class="row">
+                    <div class="col-sm-12 col-md-3">
+                        <input id="NewPackageAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="+ Include New" onclick="NewIncludedAsset()" />
+                        <div id="VariantTreeView"></div>
                     </div>
-                </form> *@
+
+                    <div class="col-sm-12 col-md-9">
+                        <p class="bs-danger">[Add some text here explaning the key/value of variant]</p>
+                        <form>
+                            <div class="mb-2 input-group">
+                                <span class="input-group-text w1">Key</span>
+                                <input id="VariantKey" class="form-control" type="text" />
+                                <span class="input-group-text w1">Value</span>
+                                <input id="VariantValue" class="form-control" type="text" />
+                            </div>
+
+                            <label for="VariantsPacAssetList" class="form-label">Add an asset:</label>
+                            <div class="input-group mb-2">
+                                <label class="input-group-text w2" for="VariantsPacAssetList">From sc4pac</label>
+                                <input id="VariantsPacAssetList" class="form-control" onchange="VariantAddAsset(this)" />
+                                <label class="input-group-text w2" for="VariantsLocalAssetList">From this file</label>
+                                <select id="VariantsLocalAssetList" class="form-control" onchange="VariantAddAsset(this)"></select>
+                            </div>
+                            <div class="mb-2 input-group">
+                                <span class="input-group-text w1">Assets</span>
+                                <textarea id="VariantAssets" class="form-control" rows="3" oninput=""></textarea>
+                            </div>
+
+                            <label for="VariantsPacPackageList" class="form-label">Add a dependency:</label>
+                            <div class="input-group mb-2">
+                                <label class="input-group-text w2" for="VariantsPacPackageList">From sc4pac</label>
+                                <input id="VariantsPacPackageList" class="form-control" onchange="VariantAddDependency(this)" />
+                                <label class="input-group-text w2" for="VariantsLocalPackageList">From this file</label>
+                                <select id="VariantsLocalPackageList" class="form-control" onchange="VariantAddDependency(this)"></select>
+                            </div>
+                            <div class="mb-2 input-group">
+                                <span class="input-group-text w2">Dependencies</span>
+                                <textarea id="VariantDependencies" class="form-control" rows="3" oninput=""></textarea>
+                            </div>
+                            <div class="mb-2">
+                                <input id="AddVariantButton" class="btn btn-primary" type="button" value="Add Variant to Package" onclick="" disabled="disabled" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </fieldset>
 
             @* Asset Properties tab *@

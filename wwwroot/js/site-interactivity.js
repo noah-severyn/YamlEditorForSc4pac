@@ -14,11 +14,11 @@ function ClearAll() {
 function ResetPackageInputs() {
 	currPackageIdx = '0';
 	document.getElementById('PackageGroup').value = '';
-	if (groupTomSelect = document.getElementById('PackageGroup').tomselect) groupTomSelect.clear();
+	if (groupTomSelect = document.getElementById('PackageGroup').tomselect) groupTomSelect.clear(true);
 	document.getElementById('PackageName').value = '';
 	document.getElementById('PackageVersion').value = '';
 	document.getElementById('PackageSubfolder').value = '';
-	if (subfolderTomSelect = document.getElementById('PackageSubfolder').tomselect) subfolderTomSelect.clear();
+	if (subfolderTomSelect = document.getElementById('PackageSubfolder').tomselect) subfolderTomSelect.clear(true);
 	document.getElementById('PackageDependencies').value = '';
 	document.getElementById('LocalPackageList').value = '';
 	document.getElementById('PacPackageList').value = '';
@@ -36,6 +36,14 @@ function ResetPackageInputs() {
 	document.getElementById('PackageAssetInclude').value = '';
 	document.getElementById('PackageAssetExclude').value = '';
 	UpdateIncludedAssetTree();
+
+	document.getElementById('VariantKey').value = '';
+	document.getElementById('VariantValue').value = '';
+	document.getElementById('VariantAssets').value = '';
+	document.getElementById('VariantDependencies').value = '';
+	if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
+	document.getElementById('VariantsLocalPackageList').value = '';
+	UpdateVariantTree();
 }
 /**
  * Resets the Package Asset input form fields.
@@ -60,6 +68,19 @@ function ResetAssetInputs() {
 	document.getElementById('AssetLastModifiedText').value = '';
 	document.getElementById('AddAssetButton').disabled = true;
 }
+/**
+ * Resets the Varaint input form fields.
+ */
+function ResetVariantForm() {
+	document.getElementById('VariantKey').value = '';
+	document.getElementById('VariantValue').value = '';
+	document.getElementById('VariantAssets').value = '';
+	document.getElementById('VariantDependencies').value = '';
+	if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
+	document.getElementById('VariantsLocalPackageList').value = '';
+}
+
+
 
 
 /**
@@ -144,30 +165,16 @@ function FillIncludedAssetForm(assetName) {
 	document.getElementById('PackageAssetExclude').value = ArrayToText(pkgAsset.exclude);
 }
 /**
- * Adds the selected local dependency to the list.
+ * Adds the selected dependency to the list.
  */
-function AddDependencyFromLocalList() {
-	var selectedPkg = document.getElementById('LocalPackageList').value;
+function PackageAddDependency(input) {
 	var currentDependencies = document.getElementById('PackageDependencies').value;
 	if (currentDependencies === '') {
-		document.getElementById('PackageDependencies').value = selectedPkg + ';\n'
+		document.getElementById('PackageDependencies').value = input.value + ';\n'
 	} else {
-		document.getElementById('PackageDependencies').value = currentDependencies + selectedPkg + ';\n';
+		document.getElementById('PackageDependencies').value = currentDependencies + input.value + ';\n';
 	}
-	document.getElementById('LocalPackageList').value = '';
-}
-/**
- * Adds the selected sc4pac dependency to the list.
- */
-function AddDepencencyFromPacList() {
-	var selectedPkg = document.getElementById('PacPackageList').value;
-	var currentDependencies = document.getElementById('PackageDependencies').value;
-	if (currentDependencies === '') {
-		document.getElementById('PackageDependencies').value = selectedPkg + ';\n'
-	} else {
-		document.getElementById('PackageDependencies').value = currentDependencies + selectedPkg + ';\n';
-	}
-	document.getElementById('PacPackageList').value = '';
+	input.value = '';
 }
 /**
  * Update the YAML codepane with the values in the current Package form field.
@@ -297,6 +304,38 @@ function NewIncludedAsset() {
 }
 
 
+// --------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------   Variants   ---------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+/**
+ * Fill the Varaint input form fields with the specified variant.
+ */
+function FillVariantForm(vData) {
+	console.log(vData);
+	var key = Object.keys(vData.variant)[0]
+	document.getElementById('VariantKey').value = key.substring(key.lastIndexOf(':') + 1);
+	document.getElementById('VariantValue').value = Object.values(vData.variant)[0];
+	document.getElementById('VariantAssets').value = '';
+	document.getElementById('VariantDependencies').value = ArrayToText(vData.dependencies);
+}
+function VariantAddDependency(input) {
+	var currentDependencies = document.getElementById('VariantDependencies').value;
+	if (currentDependencies === '') {
+		document.getElementById('VariantDependencies').value = input.value + ';\n'
+	} else {
+		document.getElementById('VariantDependencies').value = currentDependencies + input.value + ';\n';
+	}
+	variantPackageSelect.clear(true);
+}
+function VariantAddAsset(input) {
+	var currentAssets = document.getElementById('VariantAssets').value;
+	if (currentAssets === '') {
+		document.getElementById('VariantAssets').value = input.value + ';\n'
+	} else {
+		document.getElementById('VariantAssets').value = currentAssets + input.value + ';\n';
+	}
+	variantAssetSelect.clear(true);
+}
 
 
 

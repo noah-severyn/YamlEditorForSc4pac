@@ -59,7 +59,7 @@ function IsPackage(obj) {
 
 
 /**
- * Return the currently selected package or asset document object.
+ * Return the currently selected package or asset document object from the YAML data.
  * @param {string} type The type of document to return. 'p' for packages and 'a' for assets.
  * @returns The currently selected document object of the specified type
  */
