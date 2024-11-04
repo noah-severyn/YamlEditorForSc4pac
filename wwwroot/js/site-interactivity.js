@@ -168,6 +168,8 @@ function AddDepencencyFromPacList() {
 		document.getElementById('PackageDependencies').value = currentDependencies + selectedPkg + ';\n';
 	}
 	document.getElementById('PacPackageList').value = '';
+
+	document.getElementById('PacPackageList').tomselect.clear(true);
 }
 /**
  * Update the YAML codepane with the values in the current Package form field.
