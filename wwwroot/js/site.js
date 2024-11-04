@@ -53,37 +53,63 @@ new TomSelect('#PacPackageList', {
 	labelField: 'id',
 	searchField: ['id'],
 	maxItems: 1,
+	optgroups: [
+		{value: 'default', label: 'Default channel'},
+		{value: 'zasco', label: 'Zasco\'s channel'},
+	],
+	optgroupField: 'optGroup',
 
 	// fetch remote data
-	load: function (query, callback) {
+	load: async function (query, callback) {
 		var self = this;
 		if (self.loading > 1) {
 			callback();
 			return;
 		}
 
-		var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		fetch(url)
+		var defaultChannelURL = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
+		var zascoChannelURL = 'https://zasco.github.io/sc4pac-channel/channel/sc4pac-channel-contents.json'
+		allPackages = []
+
+		function handleResponse(jsonContents, channel) {
+			//Filter the response to remove assets and add a new field combining the group and name
+			return jsonContents.filter((item) => item.group !== 'sc4pacAsset')
+				.map(i => ({ id: i.group + ":" + i.name, optGroup: channel, ...i }))
+		}
+		
+		await fetch(defaultChannelURL)
 			.then(response => response.json())
 			.then(json => {
-				//Filter the response to remove assets and add a new field combining the group and name
-				callback(json.contents
-					.filter((item) => item.group !== 'sc4pacAsset')
-					.map(i => ({ id: i.group + ":" + i.name, ...i }))
-				);
-				//console.log(json.contents
-				//	.filter((item) => item.group !== 'sc4pacAsset')
-				//	.map(i => ({ id: i.group + ":" + i.name, ...i }))
-				//);
-				self.settings.load = null;
-			}).catch(() => {
-				callback();
+				allPackages = allPackages.concat(handleResponse(json.contents, 'default'))
+				defaultFailed = false
+			})
+			.catch(() => {
+				defaultFailed = true
 			});
+		
+		await fetch(zascoChannelURL)
+			.then(response => response.json())
+			.then(json => {
+				allPackages = allPackages.concat(handleResponse(json.contents, 'zasco'))
+				zascoFailed = false
+			})
+			.catch(() => {
+				zascoFailed = true
+			});
+		
+		if (!defaultFailed || !zascoFailed) {
+			callback(allPackages);
+			self.settings.load = null;
+		}
+		else callback();
 	},
 	// custom rendering function for options
 	render: {
 		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.group + ":" + item.name)+ '</div>';
+			return '<div class="py-2 d-flex">' + escape(item.group + ":" + item.name/*  +"["+ item.optGroup +" channel]" */) + '</div>';
+		},
+		optgroup_header: function(data, escape) {
+			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
 		}
 	},
 });
