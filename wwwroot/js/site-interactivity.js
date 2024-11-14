@@ -39,7 +39,7 @@ function ResetPackageInputs() {
 
 	document.getElementById('VariantKey').value = '';
 	document.getElementById('VariantValue').value = '';
-	document.getElementById('VariantAssets').value = '';
+	document.getElementById('VariantAssetId').value = '';
 	document.getElementById('VariantDependencies').value = '';
 	if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
 	document.getElementById('VariantsLocalPackageList').value = '';
@@ -101,6 +101,13 @@ function EntryValidation(elementId) {
 		document.getElementById('AddAssetButton').disabled = false;
 	}
 
+	//
+	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '') {
+		document.getElementById('AddVariantButton').disabled = true;
+	} else {
+		document.getElementById('AddVariantButton').disabled = false;
+	}
+
 	
 
 	var inputElement = document.getElementById(elementId);
@@ -110,7 +117,7 @@ function EntryValidation(elementId) {
 	var fieldName = elementId.replaceAll('Package', '').replaceAll('Asset', '');
 	if (fieldName === 'Subfolder' || fieldName === 'LastModified') {
 		return;
-	} else if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'Id') {
+	} else if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'Id' || fieldName === 'VariantKey' || fieldName === 'VariantValue') {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-]'), '');
 	} else if (fieldName === 'Dependencies') {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-:;\n]'), '');
@@ -310,13 +317,17 @@ function NewIncludedAsset() {
 /**
  * Fill the Varaint input form fields with the specified variant.
  */
-function FillVariantForm(vData) {
-	console.log(vData);
+function FillVariantFormHeader(vData) {
 	var key = Object.keys(vData.variant)[0]
 	document.getElementById('VariantKey').value = key.substring(key.lastIndexOf(':') + 1);
 	document.getElementById('VariantValue').value = Object.values(vData.variant)[0];
-	document.getElementById('VariantAssets').value = '';
+	document.getElementById('VariantDescription').value = '';
 	document.getElementById('VariantDependencies').value = ArrayToText(vData.dependencies);
+}
+function FillVariantFormAsset(vAsset) {
+	document.getElementById('VariantAssetId').value = vAsset.assetId;
+	document.getElementById('VariantInclude').value = ArrayToText(vAsset.include);
+	document.getElementById('VariantExclude').value = ArrayToText(vAsset.exclude);
 }
 function VariantAddDependency(input) {
 	var currentDependencies = document.getElementById('VariantDependencies').value;
@@ -328,14 +339,60 @@ function VariantAddDependency(input) {
 	variantPackageSelect.clear(true);
 }
 function VariantAddAsset(input) {
-	var currentAssets = document.getElementById('VariantAssets').value;
-	if (currentAssets === '') {
-		document.getElementById('VariantAssets').value = input.value + ';\n'
-	} else {
-		document.getElementById('VariantAssets').value = currentAssets + input.value + ';\n';
-	}
-	variantAssetSelect.clear(true);
+	//var currentAssets = document.getElementById('VariantAssets').value;
+	//if (currentAssets === '') {
+	//	document.getElementById('VariantAssetId').value = input.value + ';\n'
+	//} else {
+	//	document.getElementById('VariantAssetId').value = currentAssets + input.value + ';\n';
+	//}
+	//variantAssetSelect.clear(true);
 }
+function UpdateVariantData(elem) {
+	EntryValidation(elem.id);
+}
+function AppendNewVariant() {
+	//The `variants` property of a document is an array of variant objects. The variant object has three properties:
+	//	- variant: an object with one key value pair, with the key as the name of the variant, and the value its value
+	//	- assets: an array of asset objects. Each aset object has three properties:
+	//		- assetId: unique Id of the asset
+	//		- include: array of items in the asset to include
+	//		- exclude: array of items in the asset to exclude
+	//	- dependencies: an array of strings
+	var doc = GetCurrentDocument('p');
+	var newItem = {
+		variant: { [document.getElementById('VariantKey').value]: document.getElementById('VariantValue').value },
+		assets: [{
+			assetId: document.getElementById('VariantAssets').value,
+			include: TextToArray(document.getElementById('VariantInclude').value),
+			exclude: TextToArray(document.getElementById('VariantExclude').value),
+		}],
+		dependencies: TextToArray(document.getElementById('VariantDependencies').value)
+	}
+	//console.log(newItem);
+	//yamlData.push(newAsset);
+
+	//UpdateCodePane();
+	//CountItems();
+	//ResetAssetInputs();
+}
+//kodlovag:uniform-street-lighting-mod:light-color
+//variants:
+//- variant: { nightmode: "dark" }
+//  dependencies:
+//  - "simfox:day-and-nite-mod"
+//  assets:
+//  - assetId: "dumbledore-hogwarts-castle"
+//    include:
+//    - "/Hogwarts DarkNite/"
+
+//variantDescriptions:
+//  kodlovag:uniform-street-lighting-mod:light-color:
+//    "white": "white lights (recommended, similar to LED lamps)"
+//    "orange": "orange lights (recommended, similar to sodium vapor lamps)"
+//    "yellow": "yellow lights"
+//    "blue": "blue lights"
+//    "green": "green lights"
+//    "red": "red lights"
 
 
 

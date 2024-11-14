@@ -413,33 +413,70 @@ function UpdateVariantTree() {
 		pkgVariants = [];
 	} else {
 		var pkgId = doc.group + ':' + doc.name + ':';
-		let allVariantNames = doc.variants.map((v) => Object.keys(v.variant)[0]);
-		let uniqueVariantNames = [...new Set(allVariantNames)]; //https://stackoverflow.com/a/33121880/10802255
-		
-		pkgVariants =
-			uniqueVariantNames.map((uName) => ({
-				name: uName.replace(pkgId, ''),
-				expanded: true,
-				//First find all with the current name, then return all the values (options) associated with that variant. Lastly format that list correctly for the tree view.
-				children: doc.variants
-					.filter((i) => Object.keys(i.variant)[0] === uName)
-					.map((i) => Object.values(i.variant)[0])
-					.map((i) => ({name: i, children: []}))
-			}));
+		//let allVariantNames = doc.variants.map((v) => Object.keys(v.variant)[0]);
+		//let uniqueVariantNames = [...new Set(allVariantNames)]; //https://stackoverflow.com/a/33121880/10802255
+		//console.log(allVariantNames);
+		//console.log(uniqueVariantNames);
+
+		//pkgVariants = uniqueVariantNames.map((uName) => ({
+		//	name: uName.replace(pkgId, ''),
+		//	expanded: true,
+		//	//First find all with the current name, then return all the values (options) associated with that variant. Lastly format that list correctly for the tree view.
+		//	children: doc.variants
+		//		.filter((i) => Object.keys(i.variant)[0] === uName)
+		//		.map((i) => Object.values(i.variant)[0])
+		//		.map((i) => ({name: i, children: []}))
+		//}));
+		let allVariantNames = doc.variants.map((v) => ({ key: Object.keys(v.variant)[0], value: Object.values(v.variant)[0] }));
+
+		pkgVariants = allVariantNames.map((v) => ({
+			name: v.key.replace(pkgId, '') + ':' + v.value,
+			expanded: true,
+			children: [
+				{ name: 'Header', children: [] },
+				{
+					name: 'Assets (' + GetVariant(doc, v.key, v.value).assets.length + ')',
+					expanded: false,
+					children: GetVariant(doc, v.key, v.value).assets.map((item) => ({ name: item.assetId, children: [] }))
+				},
+			]
+		}));
 	}
 
 	var pkgVariantsData = [{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }]
 	vtv = new TreeView(pkgVariantsData, 'VariantTreeView');
 	vtv.on("select", function (t) {
-		let variantValue = t.data.name;
-		//Must get the key of the clicked value as there's no guarantee that the value is unique within all of the package variants (e.g. if you click on style:pond, there could be a style2:pond)
-		let variantKey = t.target.target.parentElement.parentElement.parentElement.parentElement.firstChild.textContent.substring(1)
-		var ret = doc.variants.filter((i) =>
-			(Object.keys(i.variant)[0] === pkgId + variantKey) &&
-			(Object.values(i.variant)[0] === variantValue)
-		)[0];
-		FillVariantForm(ret);
+		let selectedItem = t.data.name;
+
+		if (selectedItem === "Header") {
+			let activeVariant = t.target.target.parentElement.parentElement.parentElement.parentElement.firstChild.textContent.substring(1);
+			let variantKey = pkgId + activeVariant.substring(0, activeVariant.indexOf(':'));
+			let variantValue = activeVariant.substring(activeVariant.indexOf(':') + 1);
+
+			let selectedVariant = GetVariant(doc, variantKey, variantValue);
+			FillVariantFormHeader(selectedVariant);
+		} else {
+			let activeVariant = t.target.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstChild.textContent.substring(1);
+			let variantKey = pkgId + activeVariant.substring(0, activeVariant.indexOf(':'));
+			let variantValue = activeVariant.substring(activeVariant.indexOf(':') + 1);
+			let docVariant = GetVariant(doc, variantKey, variantValue);
+
+			let selectedAsset = docVariant.assets.filter(i => i.assetId === selectedItem)[0];
+			console.log(selectedAsset);
+			FillVariantFormAsset(selectedAsset);
+		}
+		
+		
+		
+		
 	});
+}
+
+function GetVariant(doc, key, value) {
+	return doc.variants.filter((i) =>
+		(Object.keys(i.variant)[0] === key) &&
+		(Object.values(i.variant)[0] === value)
+	)[0];
 }
 
 
@@ -480,9 +517,13 @@ function CountItems() {
 
 	//Package:asset selection for local assets
 	var localAssetList = document.getElementById('SelectLocalPackageAssets');
+	var variantAssets = document.getElementById('VariantsLocalAssetList');
 	localAssetList.replaceChildren();
 	localAssetList.appendChild(new Option('', ''));
+	variantAssets.replaceChildren();
+	variantAssets.appendChild(new Option('', ''));
 	listOfAssets.forEach(i => localAssetList.add(new Option(i.assetId, i.assetId)));
+	listOfAssets.forEach(i => variantAssets.add(new Option(i.assetId, i.assetId)));
 
 	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
 }
