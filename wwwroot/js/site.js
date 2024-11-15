@@ -465,18 +465,7 @@ function UpdateVariantTree() {
 			console.log(selectedAsset);
 			FillVariantFormAsset(selectedAsset);
 		}
-		
-		
-		
-		
 	});
-}
-
-function GetVariant(doc, key, value) {
-	return doc.variants.filter((i) =>
-		(Object.keys(i.variant)[0] === key) &&
-		(Object.values(i.variant)[0] === value)
-	)[0];
 }
 
 
@@ -567,4 +556,28 @@ function CopyToClipboard() {
 
 function validate() {
 	//ensure any manually typed yaml (as opposed to generated yaml) is syntactically valid
+
+
+/**
+ * Return the currently selected package or asset document object from the YAML data.
+ * @param {string} type The type of document to return. 'p' for packages and 'a' for assets.
+ * @returns The currently selected document object of the specified type
+ */
+			return yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
+		}
+	}
+	return null;
+}
+/**
+ * Returns a variant object in the document with the specified key/value set.
+ * @param {Object} doc The document (package) containing the desired variant
+ * @param {string} key Variant key (name)
+ * @param {string} value Variant value
+ * @returns The specified variant
+ */
+function GetVariant(doc, key, value) {
+	return doc.variants.filter((i) =>
+		(Object.keys(i.variant)[0] === key) &&
+		(Object.values(i.variant)[0] === value)
+	)[0];
 }

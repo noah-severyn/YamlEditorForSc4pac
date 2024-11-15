@@ -56,22 +56,3 @@ function IsPackage(obj) {
 	}
 	return Object.hasOwn(obj, 'group') && Object.hasOwn(obj, 'name') && Object.hasOwn(obj, 'version') && Object.hasOwn(obj, 'subfolder');
 }
-
-
-/**
- * Return the currently selected package or asset document object from the YAML data.
- * @param {string} type The type of document to return. 'p' for packages and 'a' for assets.
- * @returns The currently selected document object of the specified type
- */
-function GetCurrentDocument(type) {
-	if (type.toLowerCase().charAt(0) === 'p') {
-		if (currPackageIdx !== '0') {
-			return yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
-		}
-	} else {
-		if (currAssetIdx !== '0') {
-			return yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
-		}
-	}
-	return null;
-}

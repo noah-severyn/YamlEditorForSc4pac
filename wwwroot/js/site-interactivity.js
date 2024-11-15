@@ -71,13 +71,18 @@ function ResetAssetInputs() {
 /**
  * Resets the Varaint input form fields.
  */
-function ResetVariantForm() {
+function ResetVariantInputs() {
 	document.getElementById('VariantKey').value = '';
 	document.getElementById('VariantValue').value = '';
-	document.getElementById('VariantAssets').value = '';
+	document.getElementById('VariantDescription').value = '';
 	document.getElementById('VariantDependencies').value = '';
+	document.getElementById('VariantAssetId').value = '';
+	document.getElementById('VariantInclude').value = '';
+	document.getElementById('VariantExclude').value = '';
 	if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
+	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
 	document.getElementById('VariantsLocalPackageList').value = '';
+	document.getElementById('VariantsLocalAssetList').value = '';
 }
 
 
@@ -87,6 +92,9 @@ function ResetVariantForm() {
  * Apply basic validation rules for the specified entry field.
  */
 function EntryValidation(elementId) {
+	var currPkg = GetCurrentDocument('p');
+	var currAst = GetCurrentDocument('a');
+
 	//Prevent adding package if any required fields are blank
 	if (document.getElementById('PackageGroup').value === '' || document.getElementById('PackageName').value === '' || document.getElementById('PackageVersion').value === '' || document.getElementById('PackageSummary').value === '') {
 		document.getElementById('AddPackageButton').disabled = true;
@@ -102,7 +110,7 @@ function EntryValidation(elementId) {
 	}
 
 	//
-	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '') {
+	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '' || currPkg == null) {
 		document.getElementById('AddVariantButton').disabled = true;
 	} else {
 		document.getElementById('AddVariantButton').disabled = false;
@@ -317,6 +325,11 @@ function NewIncludedAsset() {
 /**
  * Fill the Varaint input form fields with the specified variant.
  */
+function NewVariant() {
+	ResetVariantInputs();
+}
+
+
 function FillVariantFormHeader(vData) {
 	var key = Object.keys(vData.variant)[0]
 	document.getElementById('VariantKey').value = key.substring(key.lastIndexOf(':') + 1);
@@ -338,17 +351,20 @@ function VariantAddDependency(input) {
 	}
 	variantPackageSelect.clear(true);
 }
-function VariantAddAsset(input) {
-	//var currentAssets = document.getElementById('VariantAssets').value;
-	//if (currentAssets === '') {
-	//	document.getElementById('VariantAssetId').value = input.value + ';\n'
-	//} else {
-	//	document.getElementById('VariantAssetId').value = currentAssets + input.value + ';\n';
-	//}
-	//variantAssetSelect.clear(true);
-}
 function UpdateVariantData(elem) {
-	EntryValidation(elem.id);
+
+	console.log('update');
+	if (elem.id === 'VariantsPacAssetList' || elem.id === 'VariantsLocalAssetList') {
+		document.getElementById('VariantAssetId').value = elem.value;
+		if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
+		elem.value = '';
+	} else if (elem.id === 'VariantsPacPackageList' || elem.id === 'VariantsLocalPackageList') {
+		document.getElementById('VariantDependencies').value = document.getElementById('VariantDependencies').value + elem.value + ';\n';
+		if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
+		elem.value = '';
+	} else {
+		EntryValidation(elem.id);
+	}
 }
 function AppendNewVariant() {
 	//The `variants` property of a document is an array of variant objects. The variant object has three properties:
@@ -359,21 +375,30 @@ function AppendNewVariant() {
 	//		- exclude: array of items in the asset to exclude
 	//	- dependencies: an array of strings
 	var doc = GetCurrentDocument('p');
-	var newItem = {
+	var newVariant = {
 		variant: { [document.getElementById('VariantKey').value]: document.getElementById('VariantValue').value },
 		assets: [{
-			assetId: document.getElementById('VariantAssets').value,
+			assetId: document.getElementById('VariantAssetId').value,
 			include: TextToArray(document.getElementById('VariantInclude').value),
 			exclude: TextToArray(document.getElementById('VariantExclude').value),
 		}],
 		dependencies: TextToArray(document.getElementById('VariantDependencies').value)
 	}
-	//console.log(newItem);
-	//yamlData.push(newAsset);
 
-	//UpdateCodePane();
-	//CountItems();
-	//ResetAssetInputs();
+	//To avoid writing null properties, only add the property if the input is not blank
+	if (document.getElementById('VariantInclude').value !== '') {
+		newVariant.assets
+	}
+	if (document.getElementById('VariantInclude').value !== '') {
+		newVariant.assets
+	}
+
+	doc.variants.push(newVariant)
+
+	UpdateCodePane();
+	CountItems();
+	ResetVariantInputs();
+	UpdateVariantTree();
 }
 //kodlovag:uniform-street-lighting-mod:light-color
 //variants:

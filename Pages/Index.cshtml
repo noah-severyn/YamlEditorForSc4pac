@@ -154,12 +154,11 @@
             <fieldset id="PackageVariantsContent" class="tab-pane m-3" tabindex="0">
                 <div style="display:flex" class="row">
                     <div class="col-sm-12 col-md-3">
-                        <input id="NewPackageAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="+ Include New" onclick="NewIncludedAsset()" />
                         <div id="VariantTreeView"></div>
                     </div>
 
                     <div class="col-sm-12 col-md-9">
-                        <p class="bs-danger">[Add some text here explaning the key/value of variant]</p>
+                        <p>The <b>key</b> is the name of the variant, and the <b>value</b> is its value.</p>
                         <form>
                             <div class="mb-2 input-group">
                                 <label class="input-group-text w1">Key</label>
@@ -188,9 +187,9 @@
                             <label for="VariantsPacAssetList" class="form-label">Add an asset:</label>
                             <div class="input-group mb-2">
                                 <label class="input-group-text w2" for="VariantsPacAssetList">From sc4pac</label>
-                                <input id="VariantsPacAssetList" class="form-control" onchange="VariantAddAsset(this)" disabled />
+                                <input id="VariantsPacAssetList" class="form-control" onchange="UpdateVariantData(this)" />
                                 <label class="input-group-text w2" for="VariantsLocalAssetList">From this file</label>
-                                <select id="VariantsLocalAssetList" class="form-control" onchange="VariantAddAsset(this)"></select>
+                                <select id="VariantsLocalAssetList" class="form-control" onchange="UpdateVariantData(this)"></select>
                             </div>
                             <div class="mb-2 input-group">
                                 <label class="input-group-text w1">Asset Id</label>
@@ -203,8 +202,12 @@
                                 <textarea id="VariantExclude" class="form-control" rows="3" onchange="UpdateVariantData(this)"></textarea>
                             </div>
 
-                            <div class="mb-2">
+                            <div class="mb-2 btn-group">
+                                <input id="ResetVariantFormButton" class="btn btn-outline-primary" type="button" value="Reset Form" onclick="ResetVariantInputs()" />
+                                <input id="AddAssetToVariantButton" class="btn btn-outline-warning" type="button" value="Add Asset to Variant" onclick="AddAssetToVariant()" />
+                                <input id="RemoveAssetFromVariantButton" class="btn btn-outline-warning" type="button" value="Remove Asset from Variant" onclick="RemoveAssetFromVariant()" />
                                 <input id="AddVariantButton" class="btn btn-primary" type="button" value="Add Variant to Package" onclick="AppendNewVariant()" disabled="disabled" />
+                                <input id="RemoveVariantButton" class="btn btn-outline-danger" type="button" value="Remove Variant" onclick="RemoveVariant()" />
                             </div>
                         </form>
                     </div>
@@ -244,6 +247,18 @@
 
 
         <input class="btn btn-primary" type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" disabled="disabled" />
+        <button class="btn btn-primary" onSelect="AddContentToList">Add Content</button>
+        <div class="input-group mb-2">
+            <span class="input-group-text">Basic tags input</span>
+            <div class="tags-input form-control" data-splitchars="[;']" data-name="myTagInput"></div>
+            @* <span class="input-group-text">Basic tags input2</span>
+            <div id="tags2" class="tags-input form-control" data-splitchars="[;']" data-name="myTagInput2"></div> *@
+        </div>
+
+        <div class="input-group mb-2">
+            <span class="input-group-text">use-bootstrap-tag</span>
+            <input id="example" class="form-control" type="text" value="html,css,js">
+        </div>
     </div>
 
     @* Right Column *@
