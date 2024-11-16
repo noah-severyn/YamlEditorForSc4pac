@@ -120,6 +120,7 @@ var listOfGroups = new Array();
 ParseYaml();
 ResetAssetInputs();
 ResetPackageInputs();
+ResetVariantInputs();
 
 
 
@@ -225,8 +226,8 @@ var variantAssetSelect = new TomSelect('#VariantsPacAssetList', {
 				callback(json.contents
 					.filter((item) => item.group === 'sc4pacAsset')
 				);
-				console.log(json.contents.filter((item) => item.group === 'sc4pacAsset'));
-				console.log(sc4pacAssets.map(i => ({ id: i.name, ...i })));
+				//console.log(json.contents.filter((item) => item.group === 'sc4pacAsset'));
+				//console.log(sc4pacAssets.map(i => ({ id: i.name, ...i })));
 				self.settings.load = null;
 			}).catch(() => {
 				callback();
@@ -448,23 +449,22 @@ function UpdateVariantTree() {
 	var pkgVariantsData = [{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }]
 	vtv = new TreeView(pkgVariantsData, 'VariantTreeView');
 	vtv.on("select", function (t) {
-		let selectedItem = t.data.name;
-
+		var selectedItem = t.data.name;
+		var selectedVariant;
+		
 		if (selectedItem === "Header") {
-			let activeVariant = t.target.target.parentElement.parentElement.parentElement.parentElement.firstChild.textContent.substring(1);
-			let variantKey = pkgId + activeVariant.substring(0, activeVariant.indexOf(':'));
-			let variantValue = activeVariant.substring(activeVariant.indexOf(':') + 1);
-
-			let selectedVariant = GetVariant(doc, variantKey, variantValue);
-			FillVariantFormHeader(selectedVariant);
+			selectedVariant = t.target.target.parentElement.parentElement.parentElement.parentElement.firstChild.textContent.substring(1);
 		} else {
-			let activeVariant = t.target.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstChild.textContent.substring(1);
-			let variantKey = pkgId + activeVariant.substring(0, activeVariant.indexOf(':'));
-			let variantValue = activeVariant.substring(activeVariant.indexOf(':') + 1);
-			let docVariant = GetVariant(doc, variantKey, variantValue);
+			selectedVariant = t.target.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstChild.textContent.substring(1);
+		}
 
-			let selectedAsset = docVariant.assets.filter(i => i.assetId === selectedItem)[0];
-			console.log(selectedAsset);
+		var variantKey = pkgId + selectedVariant.substring(0, selectedVariant.indexOf(':'));
+		var variantValue = selectedVariant.substring(selectedVariant.indexOf(':') + 1);
+		var activeVariant = GetVariant(doc, variantKey, variantValue);
+		FillVariantFormHeader(activeVariant);
+
+		if (selectedItem !== "Header") {
+			let selectedAsset = activeVariant.assets.filter(i => i.assetId === selectedItem)[0];
 			FillVariantFormAsset(selectedAsset);
 		}
 	});
@@ -558,6 +558,7 @@ function CopyToClipboard() {
 
 function validate() {
 	//ensure any manually typed yaml (as opposed to generated yaml) is syntactically valid
+}
 
 
 /**
@@ -565,6 +566,13 @@ function validate() {
  * @param {string} type The type of document to return. 'p' for packages and 'a' for assets.
  * @returns The currently selected document object of the specified type
  */
+function GetCurrentDocument(type) {
+	if (type.toLowerCase().charAt(0) === 'p') {
+		if (currPackageIdx !== '0') {
+			return yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
+		}
+	} else {
+		if (currAssetIdx !== '0') {
 			return yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
 		}
 	}

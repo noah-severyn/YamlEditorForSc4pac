@@ -203,9 +203,11 @@
                             </div>
 
                             <div class="mb-2 btn-group">
-                                <input id="ResetVariantFormButton" class="btn btn-outline-primary" type="button" value="Reset Form" onclick="ResetVariantInputs()" />
-                                <input id="AddAssetToVariantButton" class="btn btn-outline-warning" type="button" value="Add Asset to Variant" onclick="AddAssetToVariant()" />
-                                <input id="RemoveAssetFromVariantButton" class="btn btn-outline-warning" type="button" value="Remove Asset from Variant" onclick="RemoveAssetFromVariant()" />
+                                <input id="ResetVariantFormButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetVariantInputs()" />
+                                <input id="AddAssetToVariantButton" class="btn btn-outline-primary btn-sm" type="button" value="Add Asset to Variant" onclick="AddAssetToVariant()" />
+                                <input id="RemoveAssetFromVariantButton" class="btn btn-outline-primary btn-sm" type="button" value="Remove Asset from Variant" onclick="RemoveAssetFromVariant()" />
+                            </div>
+                            <div class="mb-2 btn-group">
                                 <input id="AddVariantButton" class="btn btn-primary" type="button" value="Add Variant to Package" onclick="AppendNewVariant()" disabled="disabled" />
                                 <input id="RemoveVariantButton" class="btn btn-outline-danger" type="button" value="Remove Variant" onclick="RemoveVariant()" />
                             </div>
@@ -248,17 +250,6 @@
 
         <input class="btn btn-primary" type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" disabled="disabled" />
         <button class="btn btn-primary" onSelect="AddContentToList">Add Content</button>
-        <div class="input-group mb-2">
-            <span class="input-group-text">Basic tags input</span>
-            <div class="tags-input form-control" data-splitchars="[;']" data-name="myTagInput"></div>
-            @* <span class="input-group-text">Basic tags input2</span>
-            <div id="tags2" class="tags-input form-control" data-splitchars="[;']" data-name="myTagInput2"></div> *@
-        </div>
-
-        <div class="input-group mb-2">
-            <span class="input-group-text">use-bootstrap-tag</span>
-            <input id="example" class="form-control" type="text" value="html,css,js">
-        </div>
     </div>
 
     @* Right Column *@

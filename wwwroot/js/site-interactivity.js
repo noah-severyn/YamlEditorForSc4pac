@@ -352,8 +352,6 @@ function VariantAddDependency(input) {
 	variantPackageSelect.clear(true);
 }
 function UpdateVariantData(elem) {
-
-	console.log('update');
 	if (elem.id === 'VariantsPacAssetList' || elem.id === 'VariantsLocalAssetList') {
 		document.getElementById('VariantAssetId').value = elem.value;
 		if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
@@ -366,6 +364,42 @@ function UpdateVariantData(elem) {
 		EntryValidation(elem.id);
 	}
 }
+function AddAssetToVariant() {
+	var doc = GetCurrentDocument('p');
+	var variant = GetVariant(doc, doc.group + ':' + doc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
+
+	var newAsset = {
+		assetId: document.getElementById('VariantAssetId').value,
+		include: TextToArray(document.getElementById('VariantInclude').value),
+		exclude: TextToArray(document.getElementById('VariantExclude').value),
+	};
+	variant.assets.push(newAsset);
+
+
+	document.getElementById('VariantAssetId').value = '';
+	document.getElementById('VariantInclude').value = '';
+	document.getElementById('VariantExclude').value = '';
+	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
+	document.getElementById('VariantsLocalAssetList').value = '';
+	UpdateVariantTree();
+	UpdateCodePane();
+}
+function RemoveAssetFromVariant() {
+	var doc = GetCurrentDocument('p');
+	var variant = GetVariant(doc, doc.group + ':' + doc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
+	variant.assets = variant.assets.filter((i) => i.assetId !== document.getElementById('VariantAssetId').value);
+}
+function RemoveVariant() {
+	var doc = GetCurrentDocument('p');
+	doc.variants = doc.variants.filter((i) =>
+		(Object.keys(i.variant)[0] !== document.getElementById('VariantKey').value) &&
+		(Object.values(i.variant)[0] !== document.getElementById('VariantValue').value)
+	);
+	UpdateVariantTree();
+	UpdateCodePane();
+	ResetVariantInputs();
+}
+
 function AppendNewVariant() {
 	//The `variants` property of a document is an array of variant objects. The variant object has three properties:
 	//	- variant: an object with one key value pair, with the key as the name of the variant, and the value its value
