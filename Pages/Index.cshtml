@@ -111,7 +111,7 @@
                 </form>
             </fieldset>
 
-            @* Package (Included) Assets tab *@
+            @* Included Assets tab *@
             <fieldset id="IncludedAssetsContent" class="tab-pane m-3" tabindex="0">
                 <div style="display:flex" class="row">
                     <div class="col-sm-12 col-md-3">
@@ -161,6 +161,10 @@
                         <p>The <b>key</b> is the name of the variant, and the <b>value</b> is its value.</p>
                         <form>
                             <div class="mb-2 input-group">
+                                <div class="form-check mt-2 me-2">
+                                    <input id="IsGlobalVariant" class="form-check-input" type="checkbox" title="Whether this variant is defined globally or locally for the package">
+                                    <label class="form-check-label" for="IsGlobalVariant" title="Whether this variant is defined globally or locally for the package">Global</label>
+                                </div>
                                 <label class="input-group-text required-label w1">Key</label>
                                 <input id="VariantKey" class="form-control" type="text" oninput="UpdateVariantData(this)" />
                                 <label class="input-group-text required-label w1">Value</label>
@@ -208,7 +212,7 @@
                                 <input id="RemoveAssetFromVariantButton" class="btn btn-outline-primary btn-sm" type="button" value="Remove Asset from Variant" onclick="RemoveAssetFromVariant()" />
                             </div>
                             <div class="mb-2 btn-group">
-                                <input id="AddVariantButton" class="btn btn-primary" type="button" value="Add Variant to Package" onclick="AppendNewVariant()" disabled="disabled" />
+                                <input id="AddVariantButton" class="btn btn-primary" type="button" value="Add Variant to Package" onclick="AddNewVariant()" disabled="disabled" />
                                 <input id="RemoveVariantButton" class="btn btn-outline-danger" type="button" value="Remove Variant" onclick="RemoveVariant()" />
                             </div>
                         </form>

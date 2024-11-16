@@ -72,6 +72,7 @@ function ResetAssetInputs() {
  * Resets the Varaint input form fields.
  */
 function ResetVariantInputs() {
+	document.getElementById('IsGlobalVariant').checked = false;
 	document.getElementById('VariantKey').value = '';
 	document.getElementById('VariantValue').value = '';
 	document.getElementById('VariantDescription').value = '';
@@ -320,8 +321,10 @@ function NewVariant() {
 	ResetVariantInputs();
 }
 function FillVariantFormHeader(vData) {
-	var key = Object.keys(vData.variant)[0]
-	document.getElementById('VariantKey').value = key.substring(key.lastIndexOf(':') + 1);
+	var key = Object.keys(vData.variant)[0];
+	var idx = key.lastIndexOf(':');
+	document.getElementById('IsGlobalVariant').checked = (key.substring(0, idx) !== selectedDoc.group + ':' + selectedDoc.name);
+	document.getElementById('VariantKey').value = key.substring(idx + 1);
 	document.getElementById('VariantValue').value = Object.values(vData.variant)[0];
 	document.getElementById('VariantDescription').value = '';
 	document.getElementById('VariantDependencies').value = ArrayToText(vData.dependencies);
@@ -350,7 +353,9 @@ function UpdateVariantData(elem) {
 		if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
 		elem.value = '';
 	} else {
-		EntryValidation(elem.id);
+		//Not going to bother implementing all of the onchange stuff here because I want to redesign how this works (see pr #43)
+		//Also it's a convoluted process where once the variant key name is changed the current setup will not be able to find the named variant any more
+
 	}
 	UpdateCodePane();
 }
@@ -387,7 +392,7 @@ function RemoveVariant() {
 	ResetVariantInputs();
 }
 
-function AppendNewVariant() {
+function AddNewVariant() {
 	//The `variants` property of a document is an array of variant objects. The variant object has three properties:
 	//	- variant: an object with one key value pair, with the key as the name of the variant, and the value its value
 	//	- assets: an array of asset objects. Each aset object has three properties:
@@ -395,14 +400,21 @@ function AppendNewVariant() {
 	//		- include: array of items in the asset to include
 	//		- exclude: array of items in the asset to exclude
 	//	- dependencies: an array of strings
+	var newName;
+	if (document.getElementById('IsGlobalVariant').checked) {
+		newName = document.getElementById('VariantKey').value;
+	} else {
+		newName = `${selectedDoc.group}:${selectedDoc.name}:${document.getElementById('VariantKey').value}`;
+	}
 	var newVariant = {
-		variant: { [document.getElementById('VariantKey').value]: document.getElementById('VariantValue').value },
-		assets: [{
-			assetId: document.getElementById('VariantAssetId').value,
-		}]
+		variant: { [newName]: document.getElementById('VariantValue').value },
+		assets: new Array()
 	}
 
 	//To avoid writing null properties, only add the property if the input is not blank
+	if (document.getElementById('VariantAssetId').value !== '') {
+		newVariant.assets[0].assetId = document.getElementById('VariantAssetId').value;
+	}
 	if (document.getElementById('VariantInclude').value !== '') {
 		newVariant.assets[0].include = TextToArray(document.getElementById('VariantInclude').value);
 	}
@@ -416,7 +428,7 @@ function AppendNewVariant() {
 	if (selectedDoc.variants === undefined) {
 		selectedDoc.variants = new Array();
 	}
-	selectedDoc.variants.push(newVariant)
+	selectedDoc.variants.push(newVariant);
 
 	UpdateCodePane();
 	CountItems();
