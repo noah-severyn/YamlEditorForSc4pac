@@ -376,7 +376,9 @@ function UpdateMainTree() {
 		if (t.data.name.indexOf(' - ') > 0) {
 			if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
 				currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
-				(new bootstrap.Tab(document.getElementById('PackagePropertiesTab'))).show();
+				if (document.querySelector(".nav-link.active").value === 'Asset Properties') {
+					(new bootstrap.Tab(document.getElementById('PackagePropertiesTab'))).show();
+				}
 				FillPackageForm();
 				UpdateIncludedAssetTree();
 				UpdateVariantTree();
