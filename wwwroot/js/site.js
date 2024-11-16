@@ -109,6 +109,10 @@ var atv;
  * Variant Tree View
  */
 var vtv;
+/**
+ * Currently selected document in the main tree - may be a package or an asset
+ */
+var selectedDoc;
 
 const cm = document.querySelector('.CodeMirror').CodeMirror;
 var yamlData = null;
@@ -347,6 +351,7 @@ async function FetchSc4EvermoreData() {
  */
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
+	selectedDoc = yamlData.filter((doc) => IsPackage(doc))[0];
 	CountItems();
 	UpdateMainTree();
 }
@@ -380,12 +385,16 @@ function UpdateMainTree() {
 				if (document.querySelector(".nav-link.active").value === 'Asset Properties') {
 					(new bootstrap.Tab(document.getElementById('PackagePropertiesTab'))).show();
 				}
+
+				selectedDoc = yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
 				FillPackageForm();
 				UpdateIncludedAssetTree();
 				UpdateVariantTree();
 			} else {
 				currAssetIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 				(new bootstrap.Tab(document.getElementById('AssetPropertiesTab'))).show();
+
+				selectedDoc = yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
 				FillAssetForm();
 			}
 		}
@@ -394,11 +403,10 @@ function UpdateMainTree() {
 
 function UpdateIncludedAssetTree() {
 	var pkgAssets;
-	var doc = GetCurrentDocument('p');
-	if (doc == null || doc.assets == null) {
+	if (selectedDoc == null || selectedDoc.assets == null) {
 		pkgAssets = [];
 	} else {
-		pkgAssets = doc.assets.map((i) => ({ name: i.assetId, children: [] }));
+		pkgAssets = selectedDoc.assets.map((i) => ({ name: i.assetId, children: [] }));
 	}
 
 	var pkgAssetData = [{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }]
@@ -410,12 +418,11 @@ function UpdateIncludedAssetTree() {
 
 function UpdateVariantTree() {
 	var pkgVariants;
-	var doc = GetCurrentDocument('p');
 	
-	if (doc == null || doc.variants == null) {
+	if (selectedDoc == null || selectedDoc.variants == null) {
 		pkgVariants = [];
 	} else {
-		var pkgId = doc.group + ':' + doc.name + ':';
+		var pkgId = selectedDoc.group + ':' + selectedDoc.name + ':';
 		//let allVariantNames = doc.variants.map((v) => Object.keys(v.variant)[0]);
 		//let uniqueVariantNames = [...new Set(allVariantNames)]; //https://stackoverflow.com/a/33121880/10802255
 		//console.log(allVariantNames);
@@ -430,7 +437,7 @@ function UpdateVariantTree() {
 		//		.map((i) => Object.values(i.variant)[0])
 		//		.map((i) => ({name: i, children: []}))
 		//}));
-		let allVariantNames = doc.variants.map((v) => ({ key: Object.keys(v.variant)[0], value: Object.values(v.variant)[0] }));
+		let allVariantNames = selectedDoc.variants.map((v) => ({ key: Object.keys(v.variant)[0], value: Object.values(v.variant)[0] }));
 
 		pkgVariants = allVariantNames.map((v) => ({
 			name: v.key.replace(pkgId, '') + ':' + v.value,
@@ -438,9 +445,9 @@ function UpdateVariantTree() {
 			children: [
 				{ name: 'Header', children: [] },
 				{
-					name: 'Assets (' + GetVariant(doc, v.key, v.value).assets.length + ')',
+					name: 'Assets (' + GetVariant(v.key, v.value).assets.length + ')',
 					expanded: false,
-					children: GetVariant(doc, v.key, v.value).assets.map((item) => ({ name: item.assetId, children: [] }))
+					children: GetVariant(v.key, v.value).assets.map((item) => ({ name: item.assetId, children: [] }))
 				},
 			]
 		}));
@@ -460,7 +467,7 @@ function UpdateVariantTree() {
 
 		var variantKey = pkgId + selectedVariant.substring(0, selectedVariant.indexOf(':'));
 		var variantValue = selectedVariant.substring(selectedVariant.indexOf(':') + 1);
-		var activeVariant = GetVariant(doc, variantKey, variantValue);
+		var activeVariant = GetVariant(variantKey, variantValue);
 		FillVariantFormHeader(activeVariant);
 
 		if (selectedItem !== "Header") {
@@ -522,28 +529,28 @@ function CountItems() {
 
 function UpdateCodePane() {
 	var newYaml = '';
-	var doc = '';
+	var docu = '';
 	//TODO - figure out how to retain comments
 
 	for (var idx = 0; idx < yamlData.length; idx++) {
 		if (yamlData[idx] === null) {
 			continue;
 		}
-		doc = jsyaml.dump(yamlData[idx], {
+		docu = jsyaml.dump(yamlData[idx], {
 			'lineWidth': -1,
 			'quotingType': '"',
 			'noArrayIndent': true,
 			'forceQuotes': true
 		});
 		//The parser blows away the multiline context so we need to rebuild it :(
-		if (doc.indexOf('description: ') > 0) {
+		if (docu.indexOf('description: ') > 0) {
 			var rgx = new RegExp('description: \"(.*?)\"');
-			var oldText = doc.match(rgx)[0];
+			var oldText = docu.match(rgx)[0];
 			var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"','');
-			doc = doc.replace(oldText, newText);
+			docu = docu.replace(oldText, newText);
 		}
 
-		newYaml = newYaml + doc;
+		newYaml = newYaml + docu;
 		if (idx !== yamlData.length - 1) {
 			newYaml = newYaml + '\n---\n';
 		}
@@ -562,31 +569,14 @@ function validate() {
 
 
 /**
- * Return the currently selected package or asset document object from the YAML data.
- * @param {string} type The type of document to return. 'p' for packages and 'a' for assets.
- * @returns The currently selected document object of the specified type
- */
-function GetCurrentDocument(type) {
-	if (type.toLowerCase().charAt(0) === 'p') {
-		if (currPackageIdx !== '0') {
-			return yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
-		}
-	} else {
-		if (currAssetIdx !== '0') {
-			return yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
-		}
-	}
-	return null;
-}
-/**
  * Returns a variant object in the document with the specified key/value set.
  * @param {Object} doc The document (package) containing the desired variant
  * @param {string} key Variant key (name)
  * @param {string} value Variant value
  * @returns The specified variant
  */
-function GetVariant(doc, key, value) {
-	return doc.variants.filter((i) =>
+function GetVariant(key, value) {
+	return selectedDoc.variants.filter((i) =>
 		(Object.keys(i.variant)[0] === key) &&
 		(Object.values(i.variant)[0] === value)
 	)[0];

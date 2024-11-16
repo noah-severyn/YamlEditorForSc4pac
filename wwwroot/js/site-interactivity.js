@@ -92,9 +92,6 @@ function ResetVariantInputs() {
  * Apply basic validation rules for the specified entry field.
  */
 function EntryValidation(elementId) {
-	var currPkg = GetCurrentDocument('p');
-	var currAst = GetCurrentDocument('a');
-
 	//Prevent adding package if any required fields are blank
 	if (document.getElementById('PackageGroup').value === '' || document.getElementById('PackageName').value === '' || document.getElementById('PackageVersion').value === '' || document.getElementById('PackageSummary').value === '') {
 		document.getElementById('AddPackageButton').disabled = true;
@@ -110,7 +107,7 @@ function EntryValidation(elementId) {
 	}
 
 	//
-	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '' || currPkg == null) {
+	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '' || selectedDoc == null) {
 		document.getElementById('AddVariantButton').disabled = true;
 	} else {
 		document.getElementById('AddVariantButton').disabled = false;
@@ -149,32 +146,31 @@ function EntryValidation(elementId) {
  */
 function FillPackageForm() {
 	if (currPackageIdx != '0') {
-		var doc = GetCurrentDocument('p');
 
-		document.getElementById('PackageGroup').value = doc.group;
-		document.getElementById('PackageName').value = doc.name;
-		document.getElementById('PackageVersion').value = doc.version;
-		document.getElementById('PackageSubfolder').value = doc.subfolder;
-		document.getElementById('PackageDependencies').value = ArrayToText(doc.dependencies);
+		document.getElementById('PackageGroup').value = selectedDoc.group;
+		document.getElementById('PackageName').value = selectedDoc.name;
+		document.getElementById('PackageVersion').value = selectedDoc.version;
+		document.getElementById('PackageSubfolder').value = selectedDoc.subfolder;
+		document.getElementById('PackageDependencies').value = ArrayToText(selectedDoc.dependencies);
 
-		document.getElementById('PackageSummary').value = doc.info.summary;
-		document.getElementById('PackageConflicts').value = doc.info.conflicts ?? '';
-		document.getElementById('PackageWarning').value = doc.info.warning ?? '';
-		document.getElementById('PackageDescription').value = doc.info.description ?? '';
-		document.getElementById('PackageAuthor').value = doc.info.author ?? '';
-		document.getElementById('PackageImages').value = ArrayToText(doc.info.images);
-		document.getElementById('PackageWebsite').value = doc.info.website;
+		document.getElementById('PackageSummary').value = selectedDoc.info.summary;
+		document.getElementById('PackageConflicts').value = selectedDoc.info.conflicts ?? '';
+		document.getElementById('PackageWarning').value = selectedDoc.info.warning ?? '';
+		document.getElementById('PackageDescription').value = selectedDoc.info.description ?? '';
+		document.getElementById('PackageAuthor').value = selectedDoc.info.author ?? '';
+		document.getElementById('PackageImages').value = ArrayToText(selectedDoc.info.images);
+		document.getElementById('PackageWebsite').value = selectedDoc.info.website;
 
 		//For some reason these must be last otherwise the regular text inputs will not populate correctly
-		(pkgGroupSelect.createItem(doc.group) || pkgGroupSelect.addItem(doc.group));
-		pkgSubfolderSelect.addItem(doc.subfolder);
+		(pkgGroupSelect.createItem(selectedDoc.group) || pkgGroupSelect.addItem(selectedDoc.group));
+		pkgSubfolderSelect.addItem(selectedDoc.subfolder);
 	}
 }
 /**
  * Fill the Package Asset input form fields with the values from the currently selected package and asset number.
  */
 function FillIncludedAssetForm(assetName) {
-	var pkgAsset = GetCurrentDocument('p').assets.find((i) => i.assetId === assetName);
+	var pkgAsset = selectedDoc.assets.find((i) => i.assetId === assetName);
 	document.getElementById('PackageAssetId').value = pkgAsset.assetId;
 	document.getElementById('PackageAssetInclude').value = ArrayToText(pkgAsset.include);
 	document.getElementById('PackageAssetExclude').value = ArrayToText(pkgAsset.exclude);
@@ -197,32 +193,31 @@ function PackageAddDependency(input) {
 function UpdatePackageData(fieldName) {
 	EntryValidation(fieldName);
 	if (currPackageIdx !== '0') {
-		var doc = GetCurrentDocument('p');
-		doc.group = document.getElementById('PackageGroup').value;
-		doc.name = document.getElementById('PackageName').value;
-		doc.version = document.getElementById('PackageVersion').value;
-		doc.subfolder = document.getElementById('PackageSubfolder').value;
+		selectedDoc.group = document.getElementById('PackageGroup').value;
+		selectedDoc.name = document.getElementById('PackageName').value;
+		selectedDoc.version = document.getElementById('PackageVersion').value;
+		selectedDoc.subfolder = document.getElementById('PackageSubfolder').value;
 		if (document.getElementById('PackageDependencies').value !== '') {
-			doc.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
+			selectedDoc.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
 		}
 
-		doc.info.summary = document.getElementById('PackageSummary').value;
+		selectedDoc.info.summary = document.getElementById('PackageSummary').value;
 		if (document.getElementById('PackageWarning').value !== '') {
-			doc.info.warning = document.getElementById('PackageWarning').value
+			selectedDoc.info.warning = document.getElementById('PackageWarning').value
 		}
 		if (document.getElementById('PackageConflicts').value !== '') {
-			doc.info.conflicts = document.getElementById('PackageConflicts').value
+			selectedDoc.info.conflicts = document.getElementById('PackageConflicts').value
 		}
 		if (document.getElementById('PackageDescription').value !== '') {
-			doc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
+			selectedDoc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
 		}
 		if (document.getElementById('PackageAuthor').value !== '') {
-			doc.info.author = document.getElementById('PackageAuthor').value
+			selectedDoc.info.author = document.getElementById('PackageAuthor').value
 		}
 		if (document.getElementById('PackageImages').value !== '') {
-			doc.info.images = TextToArray(document.getElementById('PackageImages').value);
+			selectedDoc.info.images = TextToArray(document.getElementById('PackageImages').value);
 		}
-		doc.info.website = document.getElementById('PackageWebsite').value;
+		selectedDoc.info.website = document.getElementById('PackageWebsite').value;
 		UpdateCodePane();
 	}
 }
@@ -274,7 +269,6 @@ function AppendNewPackage() {
 function AddIncludedAsset() {
 	EntryValidation('PackageAssetId');
 	if (currPackageIdx !== '0') {
-		var doc = GetCurrentDocument('p');
 		var newAsset = {
 			assetId: document.getElementById('PackageAssetId').value
 		}
@@ -285,10 +279,10 @@ function AddIncludedAsset() {
 		if (document.getElementById('PackageAssetExclude').value !== '') {
 			newAsset.exclude = TextToArray(document.getElementById('PackageAssetExclude').value);
 		}
-		if (doc.assets === undefined) {
-			doc.assets = new Array();
+		if (selectedDoc.assets === undefined) {
+			selectedDoc.assets = new Array();
 		}
-		doc.assets.push(newAsset);
+		selectedDoc.assets.push(newAsset);
 
 		ResetPackageAssetInputs();
 		document.getElementById('AddPackageAssetButton').disabled = true;
@@ -365,8 +359,7 @@ function UpdateVariantData(elem) {
 	}
 }
 function AddAssetToVariant() {
-	var doc = GetCurrentDocument('p');
-	var variant = GetVariant(doc, doc.group + ':' + doc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
+	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
 
 	var newAsset = {
 		assetId: document.getElementById('VariantAssetId').value,
@@ -385,13 +378,11 @@ function AddAssetToVariant() {
 	UpdateCodePane();
 }
 function RemoveAssetFromVariant() {
-	var doc = GetCurrentDocument('p');
-	var variant = GetVariant(doc, doc.group + ':' + doc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
+	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
 	variant.assets = variant.assets.filter((i) => i.assetId !== document.getElementById('VariantAssetId').value);
 }
 function RemoveVariant() {
-	var doc = GetCurrentDocument('p');
-	doc.variants = doc.variants.filter((i) =>
+	selectedDoc.variants = selectedDoc.variants.filter((i) =>
 		(Object.keys(i.variant)[0] !== document.getElementById('VariantKey').value) &&
 		(Object.values(i.variant)[0] !== document.getElementById('VariantValue').value)
 	);
@@ -408,7 +399,6 @@ function AppendNewVariant() {
 	//		- include: array of items in the asset to include
 	//		- exclude: array of items in the asset to exclude
 	//	- dependencies: an array of strings
-	var doc = GetCurrentDocument('p');
 	var newVariant = {
 		variant: { [document.getElementById('VariantKey').value]: document.getElementById('VariantValue').value },
 		assets: [{
@@ -427,23 +417,17 @@ function AppendNewVariant() {
 		newVariant.assets
 	}
 
-	doc.variants.push(newVariant)
+	selectedDoc.variants.push(newVariant)
 
 	UpdateCodePane();
 	CountItems();
 	ResetVariantInputs();
 	UpdateVariantTree();
 }
-//kodlovag:uniform-street-lighting-mod:light-color
-//variants:
-//- variant: { nightmode: "dark" }
-//  dependencies:
-//  - "simfox:day-and-nite-mod"
-//  assets:
-//  - assetId: "dumbledore-hogwarts-castle"
-//    include:
-//    - "/Hogwarts DarkNite/"
 
+function UpdateVariantDescription() {
+	//TODO - impelement UpdateVariantDescription
+}
 //variantDescriptions:
 //  kodlovag:uniform-street-lighting-mod:light-color:
 //    "white": "white lights (recommended, similar to LED lamps)"
@@ -464,11 +448,10 @@ function AppendNewVariant() {
 function FillAssetForm() {
 	document.getElementById('AddAssetButton').disabled = (currAssetIdx != '0');
 	if (currAssetIdx !== '0') {
-		var doc = GetCurrentDocument('a');
-		document.getElementById('AssetUrl').value = doc.url;
-		document.getElementById('AssetId').value = doc.assetId;
-		document.getElementById('AssetVersion').value = doc.version;
-		document.getElementById('AssetLastModified').value = new Date(doc.lastModified).toISOString().slice(0, 19);
+		document.getElementById('AssetUrl').value = selectedDoc.url;
+		document.getElementById('AssetId').value = selectedDoc.assetId;
+		document.getElementById('AssetVersion').value = selectedDoc.version;
+		document.getElementById('AssetLastModified').value = new Date(selectedDoc.lastModified).toISOString().slice(0, 19);
 	}
 }
 /**
@@ -477,18 +460,17 @@ function FillAssetForm() {
 function UpdateAssetItem(itemName) {
 	EntryValidation(itemName);
 	if (currAssetIdx !== '0') {
-		var doc = GetCurrentDocument('a');
-		doc.url = document.getElementById('AssetUrl').value;
-		doc.assetId = document.getElementById('AssetId').value;
-		doc.version = document.getElementById('AssetVersion').value;
-		doc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
+		selectedDoc.url = document.getElementById('AssetUrl').value;
+		selectedDoc.assetId = document.getElementById('AssetId').value;
+		selectedDoc.version = document.getElementById('AssetVersion').value;
+		selectedDoc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
 		UpdateCodePane();
 	}
 }
 /**
  * Add a new asset to the end of this YAML document.
  */
-function AppendNewAsset() {
+function AddNewAsset() {
 	var newAsset = {
 		url: document.getElementById('AssetUrl').value,
 		assetId: document.getElementById('AssetId').value,
@@ -499,6 +481,7 @@ function AppendNewAsset() {
 
 	UpdateCodePane();
 	CountItems();
+	UpdateMainTree();
 	ResetAssetInputs();
 }
 /**
