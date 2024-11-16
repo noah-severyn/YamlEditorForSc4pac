@@ -115,7 +115,6 @@
             <fieldset id="IncludedAssetsContent" class="tab-pane m-3" tabindex="0">
                 <div style="display:flex" class="row">
                     <div class="col-sm-12 col-md-3">
-                        <input id="NewPackageAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="+ Include New" onclick="NewIncludedAsset()" />
                         <div id="AssetTreeView"></div>
                     </div>
 
@@ -142,7 +141,8 @@
                                 <span class="input-group-text w1">Exclude</span>
                                 <textarea id="PackageAssetExclude" class="form-control" rows="3" oninput="UpdatePackageData('PackageAssetExclude')"></textarea>
                             </div>
-                            <div class="mb-2">
+                            <div class="mb-2 btn-group">
+                                <input id="ResetIncludedAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetIncludedAssetForm()" />
                                 <input id="AddPackageAssetButton" class="btn btn-primary" type="button" value="Add Asset to Package" onclick="AddIncludedAsset()" disabled="disabled" />
                             </div>
                         </form>
@@ -161,9 +161,9 @@
                         <p>The <b>key</b> is the name of the variant, and the <b>value</b> is its value.</p>
                         <form>
                             <div class="mb-2 input-group">
-                                <label class="input-group-text w1">Key</label>
+                                <label class="input-group-text required-label w1">Key</label>
                                 <input id="VariantKey" class="form-control" type="text" oninput="UpdateVariantData(this)" />
-                                <label class="input-group-text w1">Value</label>
+                                <label class="input-group-text required-label w1">Value</label>
                                 <input id="VariantValue" class="form-control" type="text" oninput="UpdateVariantData(this)" />
                             </div>
 

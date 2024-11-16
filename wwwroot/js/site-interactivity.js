@@ -48,7 +48,7 @@ function ResetPackageInputs() {
 /**
  * Resets the Package Asset input form fields.
  */
-function ResetPackageAssetInputs() {
+function ResetIncludedAssetInputs() {
 	document.getElementById('SelectLocalPackageAssets').value = '';
 	document.getElementById('SelectPacPackageAssets').value = '';
 	document.getElementById('PackageAssetId').value = '';
@@ -145,26 +145,23 @@ function EntryValidation(elementId) {
  * Fill the Package input form fields with the values from the currently selected package number.
  */
 function FillPackageForm() {
-	if (currPackageIdx != '0') {
+	document.getElementById('PackageGroup').value = selectedDoc.group;
+	document.getElementById('PackageName').value = selectedDoc.name;
+	document.getElementById('PackageVersion').value = selectedDoc.version;
+	document.getElementById('PackageSubfolder').value = selectedDoc.subfolder;
+	document.getElementById('PackageDependencies').value = ArrayToText(selectedDoc.dependencies);
 
-		document.getElementById('PackageGroup').value = selectedDoc.group;
-		document.getElementById('PackageName').value = selectedDoc.name;
-		document.getElementById('PackageVersion').value = selectedDoc.version;
-		document.getElementById('PackageSubfolder').value = selectedDoc.subfolder;
-		document.getElementById('PackageDependencies').value = ArrayToText(selectedDoc.dependencies);
+	document.getElementById('PackageSummary').value = selectedDoc.info.summary;
+	document.getElementById('PackageConflicts').value = selectedDoc.info.conflicts ?? '';
+	document.getElementById('PackageWarning').value = selectedDoc.info.warning ?? '';
+	document.getElementById('PackageDescription').value = selectedDoc.info.description ?? '';
+	document.getElementById('PackageAuthor').value = selectedDoc.info.author ?? '';
+	document.getElementById('PackageImages').value = ArrayToText(selectedDoc.info.images);
+	document.getElementById('PackageWebsite').value = selectedDoc.info.website;
 
-		document.getElementById('PackageSummary').value = selectedDoc.info.summary;
-		document.getElementById('PackageConflicts').value = selectedDoc.info.conflicts ?? '';
-		document.getElementById('PackageWarning').value = selectedDoc.info.warning ?? '';
-		document.getElementById('PackageDescription').value = selectedDoc.info.description ?? '';
-		document.getElementById('PackageAuthor').value = selectedDoc.info.author ?? '';
-		document.getElementById('PackageImages').value = ArrayToText(selectedDoc.info.images);
-		document.getElementById('PackageWebsite').value = selectedDoc.info.website;
-
-		//For some reason these must be last otherwise the regular text inputs will not populate correctly
-		(pkgGroupSelect.createItem(selectedDoc.group) || pkgGroupSelect.addItem(selectedDoc.group));
-		pkgSubfolderSelect.addItem(selectedDoc.subfolder);
-	}
+	//For some reason these must be last otherwise the regular text inputs will not populate correctly
+	(pkgGroupSelect.createItem(selectedDoc.group) || pkgGroupSelect.addItem(selectedDoc.group));
+	pkgSubfolderSelect.addItem(selectedDoc.subfolder);
 }
 /**
  * Fill the Package Asset input form fields with the values from the currently selected package and asset number.
@@ -284,7 +281,7 @@ function AddIncludedAsset() {
 		}
 		selectedDoc.assets.push(newAsset);
 
-		ResetPackageAssetInputs();
+		ResetIncludedAssetInputs();
 		document.getElementById('AddPackageAssetButton').disabled = true;
 		UpdateCodePane();
 		CountItems();
@@ -308,8 +305,8 @@ function SetIncludedAssetId(obj) {
 		document.getElementById('AddPackageAssetButton').disabled = true;
 	}
 }
-function NewIncludedAsset() {
-	ResetPackageAssetInputs();
+function ResetIncludedAssetForm() {
+	ResetIncludedAssetInputs();
 }
 
 
@@ -322,8 +319,6 @@ function NewIncludedAsset() {
 function NewVariant() {
 	ResetVariantInputs();
 }
-
-
 function FillVariantFormHeader(vData) {
 	var key = Object.keys(vData.variant)[0]
 	document.getElementById('VariantKey').value = key.substring(key.lastIndexOf(':') + 1);
@@ -357,6 +352,7 @@ function UpdateVariantData(elem) {
 	} else {
 		EntryValidation(elem.id);
 	}
+	UpdateCodePane();
 }
 function AddAssetToVariant() {
 	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
@@ -403,20 +399,23 @@ function AppendNewVariant() {
 		variant: { [document.getElementById('VariantKey').value]: document.getElementById('VariantValue').value },
 		assets: [{
 			assetId: document.getElementById('VariantAssetId').value,
-			include: TextToArray(document.getElementById('VariantInclude').value),
-			exclude: TextToArray(document.getElementById('VariantExclude').value),
-		}],
-		dependencies: TextToArray(document.getElementById('VariantDependencies').value)
+		}]
 	}
 
 	//To avoid writing null properties, only add the property if the input is not blank
 	if (document.getElementById('VariantInclude').value !== '') {
-		newVariant.assets
+		newVariant.assets[0].include = TextToArray(document.getElementById('VariantInclude').value);
 	}
-	if (document.getElementById('VariantInclude').value !== '') {
-		newVariant.assets
+	if (document.getElementById('VariantExclude').value !== '') {
+		newVariant.assets[0].exclude = TextToArray(document.getElementById('VariantExclude').value);
+	}
+	if (document.getElementById('VariantDependencies').value !== '') {
+		newVariant.dependencies = TextToArray(document.getElementById('VariantDependencies').value);
 	}
 
+	if (selectedDoc.variants === undefined) {
+		selectedDoc.variants = new Array();
+	}
 	selectedDoc.variants.push(newVariant)
 
 	UpdateCodePane();

@@ -121,10 +121,6 @@ var countOfAssets = 0;
 var listOfAssets = new Array();
 var listOfPackages = new Array();
 var listOfGroups = new Array();
-ParseYaml();
-ResetAssetInputs();
-ResetPackageInputs();
-ResetVariantInputs();
 
 
 
@@ -328,6 +324,13 @@ var pkgGroupSelect = new TomSelect('#PackageGroup', {
 
 
 
+ParseYaml();
+ResetAssetInputs();
+ResetPackageInputs();
+ResetVariantInputs();
+
+
+
 //TODO - validate YAML in code pane for valid yaml syntax
 //TODO - validate YAML in code pane for valid sc4pac schema
 //TODO - implement variants for packages
@@ -352,8 +355,12 @@ async function FetchSc4EvermoreData() {
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
 	selectedDoc = yamlData.filter((doc) => IsPackage(doc))[0];
+	if (selectedDoc !== undefined) {
+		FillPackageForm();
+	}
 	CountItems();
 	UpdateMainTree();
+	UpdateVariantTree();
 }
 
 
@@ -378,26 +385,26 @@ function UpdateMainTree() {
 		{ name: 'Assets (' + astList.length + ')', expanded: true, children: astList }
 	];
 	mtv = new TreeView(mainTreeData, 'MainTreeView');
+	
 	mtv.on("select", function (t) {
-		if (t.data.name.indexOf(' - ') > 0) {
-			if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
-				currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
-				if (document.querySelector(".nav-link.active").value === 'Asset Properties') {
-					(new bootstrap.Tab(document.getElementById('PackagePropertiesTab'))).show();
-				}
-
-				selectedDoc = yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
-				FillPackageForm();
-				UpdateIncludedAssetTree();
-				UpdateVariantTree();
-			} else {
-				currAssetIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
-				(new bootstrap.Tab(document.getElementById('AssetPropertiesTab'))).show();
-
-				selectedDoc = yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
-				FillAssetForm();
+		if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
+			currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+			if (document.querySelector(".nav-link.active").value === 'Asset Properties') {
+				(new bootstrap.Tab(document.getElementById('PackagePropertiesTab'))).show();
 			}
+
+			selectedDoc = yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
+			FillPackageForm();
+			UpdateIncludedAssetTree();
+			UpdateVariantTree();
+		} else {
+			currAssetIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+			(new bootstrap.Tab(document.getElementById('AssetPropertiesTab'))).show();
+
+			selectedDoc = yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
+			FillAssetForm();
 		}
+
 	});
 }
 
@@ -523,7 +530,7 @@ function CountItems() {
 	listOfAssets.forEach(i => localAssetList.add(new Option(i.assetId, i.assetId)));
 	listOfAssets.forEach(i => variantAssets.add(new Option(i.assetId, i.assetId)));
 
-	document.getElementById('CurrentItemCount').innerHTML = 'This file contains: ' + countOfPackages + ' packages, ' + countOfAssets + ' assets'
+	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 }
 
 
@@ -571,13 +578,24 @@ function validate() {
 /**
  * Returns a variant object in the document with the specified key/value set.
  * @param {Object} doc The document (package) containing the desired variant
- * @param {string} key Variant key (name)
+ * @param {string} key Variant key (name). If the key is for a local package variant and is not found, a global variant with the same key will be returned if found.
  * @param {string} value Variant value
- * @returns The specified variant
+ * @returns The specified variant if found; undefined if not found
  */
 function GetVariant(key, value) {
-	return selectedDoc.variants.filter((i) =>
+	//Variants can be defined globally for the entire Plugins folder (e.g. nightmode, driveside, roadstyle, CAM), or locally on a per-package basis (e.g. group:package:variant)
+	var localVariant = selectedDoc.variants.filter((i) =>
 		(Object.keys(i.variant)[0] === key) &&
 		(Object.values(i.variant)[0] === value)
 	)[0];
+
+	if (localVariant === undefined) {
+		var globalKey = key.substring(key.lastIndexOf(':') + 1);
+		return selectedDoc.variants.filter((i) =>
+			(Object.keys(i.variant)[0] === globalKey) &&
+			(Object.values(i.variant)[0] === value)
+		)[0];
+	} else {
+		return localVariant;
+	}
 }
