@@ -249,13 +249,21 @@
                         </div>
                     </div>
                 </form>
-                <input type="button" id="AddAssetButton" class="btn btn-primary" value="Add New Asset" onclick="AddNewAsset()" disabled="disabled" />
-                <input type="button" id="ClearAssetFormButton" class="btn btn-danger" value="Clear Inputs" onclick="ResetAssetInputs()" />
+                <div class="mb-2 btn-group">
+                    <input id="ResetAssetFormButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetAssetInputs()" />
+                </div>
+                <div class="mb-2 btn-group">
+                    <input id="AddAssetButton" class="btn btn-primary" type="button" value="Add New Asset" onclick="AddAsset()" disabled />
+                    <input id="RemoveAssetButton" class="btn btn-outline-danger" type="button" value="Remove Asset" onclick="RemoveSelectedDoc()" />
+                </div>
             </fieldset>
         </div>
 
-
-        <input class="btn btn-primary" type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" disabled="disabled" />
+        <div class="mb-2 btn-group">
+            <input id="AddPackageButton" class="btn btn-primary" type="button" value="Add New Package" onclick="AddPackage()" disabled="disabled" />
+            <input id="RemovePackageButton" class="btn btn-outline-danger" type="button" value="Remove Package" onclick="RemoveSelectedDoc()" />
+        </div>
+        
     </div>
 
     @* Right Column *@

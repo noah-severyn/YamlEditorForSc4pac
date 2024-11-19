@@ -239,7 +239,7 @@ function UpdatePackageData(fieldName) {
 /**
  * Append a new package to the end of the YAML document.
  */
-function AppendNewPackage() {
+function AddPackage() {
 	var newPackage = {
 		group: document.getElementById('PackageGroup').value,
 		name: document.getElementById('PackageName').value,
@@ -501,7 +501,7 @@ function UpdateAssetItem(itemName) {
 /**
  * Add a new asset to the end of this YAML document.
  */
-function AddNewAsset() {
+function AddAsset() {
 	var newAsset = {
 		url: document.getElementById('AssetUrl').value,
 		assetId: document.getElementById('AssetId').value,
