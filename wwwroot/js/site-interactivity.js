@@ -183,6 +183,22 @@ function PackageAddDependency(input) {
 	} else {
 		document.getElementById('PackageDependencies').value = currentDependencies + input.value + ';\n';
 	}
+	document.getElementById('LocalPackageList').value = '';
+}
+/**
+ * Adds the selected sc4pac dependency to the list.
+ */
+function AddDepencencyFromPacList() {
+	var selectedPkg = document.getElementById('PacPackageList').value;
+	var currentDependencies = document.getElementById('PackageDependencies').value;
+	if (currentDependencies === '') {
+		document.getElementById('PackageDependencies').value = selectedPkg + ';\n'
+	} else {
+		document.getElementById('PackageDependencies').value = currentDependencies + selectedPkg + ';\n';
+	}
+	document.getElementById('PacPackageList').value = '';
+
+	document.getElementById('PacPackageList').tomselect.clear(true);
 	input.value = '';
 }
 /**
