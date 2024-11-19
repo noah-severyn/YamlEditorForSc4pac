@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Home page";
 }
+<script type="text/javascript" src="/js/site-util.js"></script>
 <script type="text/javascript" src="/js/site-interactivity.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" integrity="sha512-CSBhVREyzHAjAFfBlIBakjoRUKp5h7VSweP0InR/pAJyptH7peuhCsqAI/snV+TwZmXZqoUklpXp6R6wMnYf5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -17,17 +18,19 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/js-treeview@1.1.5/dist/treeview.min.css" integrity="sha256-7HeITe+2TSRri/WLPYj3ogabAV0rUDJT3mUe3135Pog=" crossorigin="anonymous">
 <script src="https://cdn.jsdelivr.net/npm/js-treeview@1.1.5/dist/treeview.min.js" integrity="sha256-93K+UKgnmM6W/Gp13Z2QUMEStoI+wSf1dykHaFphUc0=" crossorigin="anonymous"></script>
 
-<div style="display:flex">
-    <div id="Column0" class="col-2">
+<div style="display:flex" class="row">
+    <div id="Column0" class="col-sm-12 col-md-2">
         <h2>File Structure</h2>
-        <input type="button" onclick="ClearAll()" value="New Package" />
-        <input type="button" class="btn btn-primary"  onclick="ResetAssetInputs()" value="New Asset" />
+        <div class="mb-2 btn-group">
+            <input type="button" class="btn btn-primary" onclick="ResetPackageInputs()" value="New Package" />
+            <input type="button" class="btn btn-primary"  onclick="ResetAssetInputs()" value="New Asset" />
+        </div>
         <div id="MainTreeView"></div>
     </div>
 
 
     @* Left Column *@
-    <div id="Column1" class="column">
+    <div id="Column1" class="col-sm-12 col-md-5">
         
         <h2>Data Input</h2>
         <p>For Dependencies, Image, Include, and Exclude fields add multiple items separated by a semicolon. Variants and are not yet supported with this tool.</p>
@@ -36,7 +39,7 @@
         <nav class="nav nav-tabs" id="nav-tab" role="tablist">
             <button id="PackagePropertiesTab" class="nav-link active" data-bs-toggle="tab" data-bs-target="#PackagePropertiesContent" type="button" role="tab">Package Properties</button>
             <button id="PackageInfoTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageInfoContent" type="button" role="tab">Package Info</button>
-            <button id="PackageAssetsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageAssetsContent" type="button" role="tab">Package Assets</button>
+            <button id="IncludedAssetsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#IncludedAssetsContent" type="button" role="tab">Included Assets</button>
             <button id="PackageVaraintsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageVariantsContent" type="button" role="tab">Package Variants</button>
             <button id="AssetPropertiesTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#AssetPropertiesContent" type="button" role="tab">Asset Properties</button>
         </nav>
@@ -44,124 +47,105 @@
         <div class="tab-content" id="nav-tabContent">
             @* Package Properties tab *@
             <fieldset id="PackagePropertiesContent" class="tab-pane active m-3" tabindex="0">
-                <table id="PackagePropertiesTable">
-                    <colgroup>
-                        <col style="width: 120px;">
-                    </colgroup>
-                    <tbody>
-                        <tr>
-                            <td><label for="PackageGoup" class="required-label">Group</label></td>
-                            <td><input id="PackageGroup" oninput="UpdatePackageData('PackageGroup')" class="required"/></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageName" class="required-label">Name</label></td>
-                            <td><input id="PackageName" type="text" oninput="UpdatePackageData('PackageName')" class="required" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageVersion" class="required-label">Version</label></td>
-                            <td><input id="PackageVersion" type="text" oninput="UpdatePackageData('PackageVersion')" class="required" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageSubfolder" class="required-label">Subfolder</label></td>
-                            <td>
-                                <input id="PackageSubfolder" oninput="UpdatePackageData('PackageSubfolder')" required />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>
-                                Select a package to add as a dependency from one of the dropdowns below
-                            </td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>
-                                <label for="LocalPackageList">Packages in this file &nbsp;&nbsp;</label>
-                                <select id="LocalPackageList" placeholder="Select a package in this file"></select>
-                                <br />
-                                <label for="PacPackageList">Existing packages in sc4pac &nbsp;&nbsp;</label>
-                                <select id="PacPackageList" placeholder="Select a package" onchange="AddDepencencyFromPacList()"></select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageDependencies">Dependencies</label></td>
-                            <td><textarea id="PackageDependencies" rows="7" oninput="UpdatePackageData('PackageDependencies')"></textarea></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <form>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text required-label w2">Group</span>
+                        <input id="PackageGroup" class="form-control required" oninput="UpdatePackageData('PackageGroup')" />
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text required-label w2">Name</span>
+                        <input id="PackageName" class="form-control required" type="text" oninput="UpdatePackageData('PackageName')" />
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text required-label w2">Version</span>
+                        <input id="PackageVersion" class="form-control required" type="text" oninput="UpdatePackageData('PackageVersion')" />
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text required-label w2">Subfolder</span>
+                        <input id="PackageSubfolder" class="form-control required" oninput="UpdatePackageData('PackageSubfolder')" required />
+                    </div>
+
+                    <label for="PacPackageList" class="form-label">Add a dependency:</label>
+                    <div class="input-group mb-2">
+                        <label class="input-group-text w2" for="PacPackageList">From sc4pac</label>
+                        <input id="PacPackageList" class="form-control" onchange="PackageAddDependency(this)" />
+                        <label class="input-group-text w2" for="LocalPackageList">From this file</label>
+                        <select id="LocalPackageList" class="form-control" onchange="PackageAddDependency(this)"></select>
+                    </div>
+
+                    <div class="input-group mb-2">
+                        <span class="input-group-text w2">Dependencies</span>
+                        <textarea id="PackageDependencies" class="form-control" rows="7" oninput="UpdatePackageData('PackageDependencies')"></textarea>
+                    </div>
+                </form>
             </fieldset>
 
             @* Package Info tab *@
             <fieldset id="PackageInfoContent" class="tab-pane m-3" tabindex="0">
-                <table id="PackageInfoTable">
-                    <colgroup>
-                        <col style="width: 120px;">
-                    </colgroup>
-                    <tbody>
-                        <tr>
-                            <td><label for="PackageSummary" class="required-label">Summary</label></td>
-                            <td><input id="PackageSummary" type="text" oninput="UpdatePackageData('PackageSummary')" class="required" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageWarning">Warning</label></td>
-                            <td><input id="PackageWarning" type="text" oninput="UpdatePackageData('PackageWarning')" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageConflicts">Conflicts</label></td>
-                            <td><input id="PackageConflicts" type="text" oninput="UpdatePackageData('PackageConflicts')" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageDescription">Description</label></td>
-                            <td><textarea id="PackageDescription" rows="9" oninput="UpdatePackageData('PackageDescription')"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageAuthor">Author</label></td>
-                            <td><input id="PackageAuthor" type="text" oninput="UpdatePackageData('PackageAuthor')" /></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageImages">Images</label></td>
-                            <td><textarea id="PackageImages" rows="5" oninput="UpdatePackageData('PackageImages')"></textarea></td>
-                        </tr>
-                        <tr>
-                            <td><label for="PackageWebsite" class="required-label">Website</label></td>
-                            <td><input id="PackageWebsite" type="url" oninput="UpdatePackageData('PackageWebsite')" class="required" /></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <form>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text w2">Website</span>
+                        <input id="PackageWebsite" class="form-control" type="url" oninput="UpdatePackageData('PackageWebsite')" />
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text required-label w2">Summary</span>
+                        <input id="PackageSummary" class="form-control required" type="text" oninput="UpdatePackageData('PackageSummary')" />
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text w2">Warning</span>
+                        <input id="PackageWarning" class="form-control" type="text" oninput="UpdatePackageData('PackageWarning')" />
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text w2">Conflicts</span>
+                        <input id="PackageConflicts" class="form-control" type="text" oninput="UpdatePackageData('PackageConflicts')" />
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text w2">Author</span>
+                        <input id="PackageAuthor" class="form-control" type="text" oninput="UpdatePackageData('PackageAuthor')" />
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text w2">Description</span>
+                        <textarea id="PackageDescription" class="form-control" rows="9" oninput="UpdatePackageData('PackageDescription')"></textarea>
+                    </div>
+                    <div class="input-group mb-2">
+                        <span class="input-group-text w2">Images</span>
+                        <textarea id="PackageImages" class="form-control" rows="5" oninput="UpdatePackageData('PackageImages')"></textarea>
+                    </div>
+                </form>
             </fieldset>
 
-            @* Package Assets + Options tab *@
-            <fieldset id="PackageAssetsContent" class="tab-pane m-3" tabindex="0">
-                <div style="display:flex">
-                    <div class="col-2">
-                        <input id="NewPackageAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="+ Include New" onclick="NewIncludedAsset()" />
+            @* Included Assets tab *@
+            <fieldset id="IncludedAssetsContent" class="tab-pane m-3" tabindex="0">
+                <div style="display:flex" class="row">
+                    <div class="col-sm-12 col-md-3">
                         <div id="AssetTreeView"></div>
                     </div>
 
-                    <div class="column">
+                    <div class="col-sm-12 col-md-9">
                         <p>These assets will be installed for every user, regardless of the chosen variant or option. Choose an asset from one of the dropdowns below.</p>
                         <form>
                             <div class="mb-2 input-group">
-                                <span class="input-group-text">this file</span>
-                                <select id="SelectLocalPackageAssets" class="form-select" onchange="FillPkgAssetId(this)"></select>
+                                <span class="input-group-text w1">This file</span>
+                                <select id="SelectLocalPackageAssets" class="form-select" onchange="SetIncludedAssetId(this)"></select>
                             </div>
                             <div class="mb-2 input-group">
-                                <span class="input-group-text">sc4pac</span>
-                                <select id="SelectPacPackageAssets" class="form-select" onchange="FillPkgAssetId(this)"></select>
+                                <span class="input-group-text w1">Sc4pac</span>
+                                <select id="SelectPacPackageAssets" class="form-select" onchange="SetIncludedAssetId(this)"></select>
                             </div>
                             <div class="mb-2 input-group">
-                                <span class="input-group-text">asset id</span>
+                                <span class="input-group-text w1">Asset Id</span>
                                 <input id="PackageAssetId" class="form-control" type="text" disabled="disabled" />
                             </div>
                             <div class="mb-2 input-group">
-                                <span class="input-group-text">Include</span>
+                                <span class="input-group-text w1">Include</span>
                                 <textarea id="PackageAssetInclude" class="form-control" rows="3" oninput="UpdatePackageData('PackageAssetInclude')"></textarea>
                             </div>
                             <div class="mb-2 input-group">
-                                <span class="input-group-text">Exclude</span>
+                                <span class="input-group-text w1">Exclude</span>
                                 <textarea id="PackageAssetExclude" class="form-control" rows="3" oninput="UpdatePackageData('PackageAssetExclude')"></textarea>
                             </div>
-                            <div class="mb-2">
+                            <div class="mb-2 btn-group">
+                                <input id="ResetIncludedAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetIncludedAssetForm()" />
                                 <input id="AddPackageAssetButton" class="btn btn-primary" type="button" value="Add Asset to Package" onclick="AddIncludedAsset()" disabled="disabled" />
                             </div>
                         </form>
@@ -171,13 +155,72 @@
 
             @* Package Variants tab *@
             <fieldset id="PackageVariantsContent" class="tab-pane m-3" tabindex="0">
-                <p>Choose a variant</p>
-                <form>
-                    <div class="mb-2 input-group">
-                        <span class="input-group-text">this file</span>
-                        <select id="SelectLocalPackageVariants" class="form-select" onchange="FillPackageVariantsDropdown()"></select>
+                <div style="display:flex" class="row">
+                    <div class="col-sm-12 col-md-3">
+                        <div id="VariantTreeView"></div>
                     </div>
-                </form>
+
+                    <div class="col-sm-12 col-md-9">
+                        <p>The <b>key</b> is the name of the variant, and the <b>value</b> is its value.</p>
+                        <form>
+                            <div class="mb-2 input-group">
+                                <div class="form-check mt-2 me-2">
+                                    <input id="IsGlobalVariant" class="form-check-input" type="checkbox" title="Whether this variant is defined globally or locally for the package">
+                                    <label class="form-check-label" for="IsGlobalVariant" title="Whether this variant is defined globally or locally for the package">Global</label>
+                                </div>
+                                <label class="input-group-text required-label w1">Key</label>
+                                <input id="VariantKey" class="form-control" type="text" oninput="UpdateVariantData(this)" />
+                                <label class="input-group-text required-label w1">Value</label>
+                                <input id="VariantValue" class="form-control" type="text" oninput="UpdateVariantData(this)" />
+                            </div>
+
+                            <div class="mb-2 input-group">
+                                <label class="input-group-text w2">Description</label>
+                                <input id="VariantDescription" class="form-control" type="text" oninput="UpdateVariantData(this)" />
+                            </div>
+
+                            <label for="VariantsPacPackageList" class="form-label">Add a dependency:</label>
+                            <div class="input-group mb-2">
+                                <label class="input-group-text w2" for="VariantsPacPackageList">From sc4pac</label>
+                                <input id="VariantsPacPackageList" class="form-control" onchange="UpdateVariantData(this)" />
+                                <label class="input-group-text w2" for="VariantsLocalPackageList">From this file</label>
+                                <select id="VariantsLocalPackageList" class="form-control" onchange="UpdateVariantData(this)"></select>
+                            </div>
+                            <div class="mb-2 input-group">
+                                <span class="input-group-text w2">Dependencies</span>
+                                <textarea id="VariantDependencies" class="form-control" rows="3" oninput=""></textarea>
+                            </div>
+
+                            <label for="VariantsPacAssetList" class="form-label">Add an asset:</label>
+                            <div class="input-group mb-2">
+                                <label class="input-group-text w2" for="VariantsPacAssetList">From sc4pac</label>
+                                <input id="VariantsPacAssetList" class="form-control" onchange="UpdateVariantData(this)" />
+                                <label class="input-group-text w2" for="VariantsLocalAssetList">From this file</label>
+                                <select id="VariantsLocalAssetList" class="form-control" onchange="UpdateVariantData(this)"></select>
+                            </div>
+                            <div class="mb-2 input-group">
+                                <label class="input-group-text w1">Asset Id</label>
+                                <input id="VariantAssetId" class="form-control" disabled />
+                            </div>
+                            <div class="input-group mb-2">
+                                <label class="input-group-text w1">Include</label>
+                                <textarea id="VariantInclude" class="form-control" rows="3" onchange="UpdateVariantData(this)"></textarea>
+                                <label class="input-group-text w1">Exclude</label>
+                                <textarea id="VariantExclude" class="form-control" rows="3" onchange="UpdateVariantData(this)"></textarea>
+                            </div>
+
+                            <div class="mb-2 btn-group">
+                                <input id="ResetVariantFormButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetVariantInputs()" />
+                                <input id="AddAssetToVariantButton" class="btn btn-outline-primary btn-sm" type="button" value="Add Asset to Variant" onclick="AddAssetToVariant()" />
+                                <input id="RemoveAssetFromVariantButton" class="btn btn-outline-primary btn-sm" type="button" value="Remove Asset from Variant" onclick="RemoveAssetFromVariant()" />
+                            </div>
+                            <div class="mb-2 btn-group">
+                                <input id="AddVariantButton" class="btn btn-primary" type="button" value="Add Variant to Package" onclick="AddNewVariant()" disabled />
+                                <input id="RemoveVariantButton" class="btn btn-outline-danger" type="button" value="Remove Variant" onclick="RemoveVariant()" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </fieldset>
 
             @* Asset Properties tab *@
@@ -206,17 +249,17 @@
                         </div>
                     </div>
                 </form>
-                <input type="button" id="AddAssetButton" class="btn btn-primary" value="Add New Asset" onclick="AppendNewAsset()" disabled="disabled" />
-                <input type="button" id="ClearAssetFormButton" class="btn btn-secondary" value="Clear Inputs" onclick="ResetAssetInputs()" />
+                <input type="button" id="AddAssetButton" class="btn btn-primary" value="Add New Asset" onclick="AddNewAsset()" disabled="disabled" />
+                <input type="button" id="ClearAssetFormButton" class="btn btn-danger" value="Clear Inputs" onclick="ResetAssetInputs()" />
             </fieldset>
         </div>
 
 
-        <input type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" disabled="disabled" />
+        <input class="btn btn-primary" type="button" id="AddPackageButton" value="Add New Package" onclick="AppendNewPackage()" disabled="disabled" />
     </div>
 
     @* Right Column *@
-    <div id="Column2" class="column">
+    <div id="Column2" class="col-sm-12 col-md-5">
         <h2>YAML Output</h2>
         <h5><span id="CurrentItemCount"></span></h5>
         <p>The contents in this code pane are automatically generated from inputs on the left, but is also able to be customized manually. Beware, manual changes may be overriden if any of the input values are changed!</p>
@@ -239,9 +282,12 @@
             <input type="submit" value="Validate" onclick="CountItems()" />
             <input id="SubmittedYaml" type="hidden" asp-for="YamlText" />
         </form> *@
-        <input type="button" onclick="ParseYaml()" value="Parse YAML" />
-        <input type="button" onclick="CopyToClipboard()" value="Copy YAML to Clipboard" />
-        <input type="button" onclick="ClearAll()" value="Clear All" />
+        <div class="mb-2 btn-group">
+            <input class="btn btn-primary" type="button" onclick="ParseYaml()" value="Parse YAML" />
+            <input class="btn btn-primary" type="button" onclick="CopyToClipboard()" value="Copy YAML to Clipboard" />
+            <input class="btn btn-danger" type="button" onclick="ClearAll()" value="Clear All" />
+        </div>
+        
 
         <div id="editor"></div>
         

@@ -2,22 +2,23 @@
  * Clears all inputs and the code pane.
  */
 function ClearAll() {
-	ClearPackageInputs();
+	ResetPackageInputs();
 	ResetAssetInputs();
 	yamlData.length = 0;
-	cm.setValue('');
+	cm.setValue('#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.\n');
 	ParseYaml();
 }
 /**
- * Clears all the Package input form fields.
+ * Resets the Package input and Included asset form fields.
  */
-function ClearPackageInputs() {
+function ResetPackageInputs() {
+	currPackageIdx = '0';
 	document.getElementById('PackageGroup').value = '';
-	if (groupTomSelect = document.getElementById('PackageGroup').tomselect) groupTomSelect.clear();
+	if (groupTomSelect = document.getElementById('PackageGroup').tomselect) groupTomSelect.clear(true);
 	document.getElementById('PackageName').value = '';
 	document.getElementById('PackageVersion').value = '';
 	document.getElementById('PackageSubfolder').value = '';
-	if (subfolderTomSelect = document.getElementById('PackageSubfolder').tomselect) subfolderTomSelect.clear();
+	if (subfolderTomSelect = document.getElementById('PackageSubfolder').tomselect) subfolderTomSelect.clear(true);
 	document.getElementById('PackageDependencies').value = '';
 	document.getElementById('LocalPackageList').value = '';
 	document.getElementById('PacPackageList').value = '';
@@ -34,35 +35,66 @@ function ClearPackageInputs() {
 	document.getElementById('PackageAssetId').value = '';
 	document.getElementById('PackageAssetInclude').value = '';
 	document.getElementById('PackageAssetExclude').value = '';
+	UpdateIncludedAssetTree();
+
+	document.getElementById('VariantKey').value = '';
+	document.getElementById('VariantValue').value = '';
+	document.getElementById('VariantAssetId').value = '';
+	document.getElementById('VariantDependencies').value = '';
+	if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
+	document.getElementById('VariantsLocalPackageList').value = '';
+	UpdateVariantTree();
 }
 /**
- * Clears all the Package Asset input form fields.
+ * Resets the Package Asset input form fields.
  */
-function ClearPackageAssetInputs() {
+function ResetIncludedAssetInputs() {
 	document.getElementById('SelectLocalPackageAssets').value = '';
 	document.getElementById('SelectPacPackageAssets').value = '';
 	document.getElementById('PackageAssetId').value = '';
 	document.getElementById('PackageAssetInclude').value = '';
 	document.getElementById('PackageAssetExclude').value = '';
+	UpdateIncludedAssetTree();
 }
 /**
- * Clears all the Asset input form fields.
+ * Resets the Asset input form fields.
  */
 function ResetAssetInputs() {
+	currAssetIdx = '0';
 	document.getElementById('AssetUrl').value = '';
 	document.getElementById('AssetId').value = '';
 	document.getElementById('AssetVersion').value = '';
 	document.getElementById('AssetLastModified').value = 0;
 	document.getElementById('AssetLastModifiedText').value = '';
 	document.getElementById('AddAssetButton').disabled = true;
-	currAssetIdx = '0';
 }
+/**
+ * Resets the Varaint input form fields.
+ */
+function ResetVariantInputs() {
+	document.getElementById('IsGlobalVariant').checked = false;
+	document.getElementById('VariantKey').value = '';
+	document.getElementById('VariantValue').value = '';
+	document.getElementById('VariantDescription').value = '';
+	document.getElementById('VariantDependencies').value = '';
+	document.getElementById('VariantAssetId').value = '';
+	document.getElementById('VariantInclude').value = '';
+	document.getElementById('VariantExclude').value = '';
+	if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
+	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
+	document.getElementById('VariantsLocalPackageList').value = '';
+	document.getElementById('VariantsLocalAssetList').value = '';
+}
+
+
+
+
 /**
  * Apply basic validation rules for the specified entry field.
  */
 function EntryValidation(elementId) {
 	//Prevent adding package if any required fields are blank
-	if (document.getElementById('PackageGroup').value === '' || document.getElementById('PackageName').value === '' || document.getElementById('PackageVersion').value === '' || document.getElementById('PackageSummary').value === '' || document.getElementById('PackageWebsite').value === '') {
+	if (document.getElementById('PackageGroup').value === '' || document.getElementById('PackageName').value === '' || document.getElementById('PackageVersion').value === '' || document.getElementById('PackageSummary').value === '') {
 		document.getElementById('AddPackageButton').disabled = true;
 	} else {
 		document.getElementById('AddPackageButton').disabled = false;
@@ -75,6 +107,13 @@ function EntryValidation(elementId) {
 		document.getElementById('AddAssetButton').disabled = false;
 	}
 
+	//
+	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '') {
+		document.getElementById('AddVariantButton').disabled = true;
+	} else {
+		document.getElementById('AddVariantButton').disabled = false;
+	}
+
 	
 
 	var inputElement = document.getElementById(elementId);
@@ -84,7 +123,7 @@ function EntryValidation(elementId) {
 	var fieldName = elementId.replaceAll('Package', '').replaceAll('Asset', '');
 	if (fieldName === 'Subfolder' || fieldName === 'LastModified') {
 		return;
-	} else if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'Id') {
+	} else if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'Id' || fieldName === 'VariantKey' || fieldName === 'VariantValue') {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-]'), '');
 	} else if (fieldName === 'Dependencies') {
 		inputText = inputText.toLowerCase().replaceAll(' ', '-').replace(new RegExp('[^a-z0-9-:;\n]'), '');
@@ -99,109 +138,89 @@ function EntryValidation(elementId) {
 	}
 }
 
-function StartNewPackage() {
-	ClearPackageInputs();
-	currPackageIdx = '0';
-}
 
-// --------------------------------------------------------------------------------------------
-// ---------------------------------------   Packages   ---------------------------------------
-// --------------------------------------------------------------------------------------------
-
+// --------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------   Packages   ---------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 /**
  * Fill the Package input form fields with the values from the currently selected package number.
  */
 function FillPackageForm() {
-	if (currPackageIdx != '0') {
-		var doc = GetCurrentDocument('p');
+	document.getElementById('PackageGroup').value = selectedDoc.group;
+	document.getElementById('PackageName').value = selectedDoc.name;
+	document.getElementById('PackageVersion').value = selectedDoc.version;
+	document.getElementById('PackageSubfolder').value = selectedDoc.subfolder;
+	document.getElementById('PackageDependencies').value = ArrayToText(selectedDoc.dependencies);
 
-		document.getElementById('PackageGroup').value = doc.group;
-		document.getElementById('PackageName').value = doc.name;
-		document.getElementById('PackageVersion').value = doc.version;
-		document.getElementById('PackageSubfolder').value = doc.subfolder;
-		document.getElementById('PackageDependencies').value = ArrayToText(doc.dependencies);
+	document.getElementById('PackageSummary').value = selectedDoc.info.summary;
+	document.getElementById('PackageConflicts').value = selectedDoc.info.conflicts ?? '';
+	document.getElementById('PackageWarning').value = selectedDoc.info.warning ?? '';
+	document.getElementById('PackageDescription').value = selectedDoc.info.description ?? '';
+	document.getElementById('PackageAuthor').value = selectedDoc.info.author ?? '';
+	document.getElementById('PackageImages').value = ArrayToText(selectedDoc.info.images);
+	document.getElementById('PackageWebsite').value = selectedDoc.info.website;
 
-		document.getElementById('PackageSummary').value = doc.info.summary;
-		document.getElementById('PackageConflicts').value = doc.info.conflicts ?? '';
-		document.getElementById('PackageWarning').value = doc.info.warning ?? '';
-		document.getElementById('PackageDescription').value = doc.info.description ?? '';
-		document.getElementById('PackageAuthor').value = doc.info.author ?? '';
-		document.getElementById('PackageImages').value = ArrayToText(doc.info.images);
-		document.getElementById('PackageWebsite').value = doc.info.website;
-
-		//For some reason these must be last otherwise the regular text inputs will not populate correctly
-		(pkgGroupSelect.createItem(doc.group) || pkgGroupSelect.addItem(doc.group));
-		pkgSubfolderSelect.addItem(doc.subfolder);
-	}
+	//For some reason these must be last otherwise the regular text inputs will not populate correctly
+	(pkgGroupSelect.createItem(selectedDoc.group) || pkgGroupSelect.addItem(selectedDoc.group));
+	pkgSubfolderSelect.addItem(selectedDoc.subfolder);
 }
 /**
  * Fill the Package Asset input form fields with the values from the currently selected package and asset number.
  */
-function FillPackageAssetForm(assetName) {
-	var pkgAsset = GetCurrentDocument('p').assets.find((i) => i.assetId === assetName);
+function FillIncludedAssetForm(assetName) {
+	var pkgAsset = selectedDoc.assets.find((i) => i.assetId === assetName);
 	document.getElementById('PackageAssetId').value = pkgAsset.assetId;
 	document.getElementById('PackageAssetInclude').value = ArrayToText(pkgAsset.include);
 	document.getElementById('PackageAssetExclude').value = ArrayToText(pkgAsset.exclude);
 }
-
-
-function AddDependencyFromLocalList() {
-	var selectedPkg = document.getElementById('SelectLocalPackage').value;
+/**
+ * Adds the selected dependency to the list.
+ */
+function PackageAddDependency(input) {
 	var currentDependencies = document.getElementById('PackageDependencies').value;
 	if (currentDependencies === '') {
-		document.getElementById('PackageDependencies').value = selectedPkg
+		document.getElementById('PackageDependencies').value = input.value + ';\n'
 	} else {
-		document.getElementById('PackageDependencies').value = currentDependencies + ';\n' + selectedPkg;
+		document.getElementById('PackageDependencies').value = currentDependencies + input.value + ';\n';
 	}
-	document.getElementById('SelectLocalPackage').value = '';
-}
-function AddDepencencyFromPacList() {
-	var selectedPkg = document.getElementById('PacPackageList').value;
-	var currentDependencies = document.getElementById('PackageDependencies').value;
-	if (currentDependencies === '') {
-		document.getElementById('PackageDependencies').value = selectedPkg + ';\n'
-	} else {
-		document.getElementById('PackageDependencies').value = currentDependencies+ selectedPkg + ';\n';
-	}
-	document.getElementById('PacPackageList').value = '';
+	input.value = '';
 }
 /**
- * Live update the YAML codepane with the values in the current Package form field as the user types.
+ * Update the YAML codepane with the values in the current Package form field.
  */
 function UpdatePackageData(fieldName) {
 	EntryValidation(fieldName);
 	if (currPackageIdx !== '0') {
-		var doc = GetCurrentDocument('p');
-		doc.group = document.getElementById('PackageGroup').value;
-		doc.name = document.getElementById('PackageName').value;
-		doc.version = document.getElementById('PackageVersion').value;
-		doc.subfolder = document.getElementById('PackageSubfolder').value;
+		selectedDoc.group = document.getElementById('PackageGroup').value;
+		selectedDoc.name = document.getElementById('PackageName').value;
+		selectedDoc.version = document.getElementById('PackageVersion').value;
+		selectedDoc.subfolder = document.getElementById('PackageSubfolder').value;
 		if (document.getElementById('PackageDependencies').value !== '') {
-			doc.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
+			selectedDoc.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
 		}
 
-		doc.info.summary = document.getElementById('PackageSummary').value;
+		selectedDoc.info.summary = document.getElementById('PackageSummary').value;
 		if (document.getElementById('PackageWarning').value !== '') {
-			doc.info.warning = document.getElementById('PackageWarning').value
+			selectedDoc.info.warning = document.getElementById('PackageWarning').value
 		}
 		if (document.getElementById('PackageConflicts').value !== '') {
-			doc.info.conflicts = document.getElementById('PackageConflicts').value
+			selectedDoc.info.conflicts = document.getElementById('PackageConflicts').value
 		}
 		if (document.getElementById('PackageDescription').value !== '') {
-			doc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
+			selectedDoc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
 		}
 		if (document.getElementById('PackageAuthor').value !== '') {
-			doc.info.author = document.getElementById('PackageAuthor').value
+			selectedDoc.info.author = document.getElementById('PackageAuthor').value
 		}
 		if (document.getElementById('PackageImages').value !== '') {
-			doc.info.images = TextToArray(document.getElementById('PackageImages').value);
+			selectedDoc.info.images = TextToArray(document.getElementById('PackageImages').value);
 		}
-		doc.info.website = document.getElementById('PackageWebsite').value;
+		selectedDoc.info.website = document.getElementById('PackageWebsite').value;
 		UpdateCodePane();
 	}
 }
 /**
- * Add a new package to the end of this YAML document.
+ * Append a new package to the end of the YAML document.
  */
 function AppendNewPackage() {
 	var newPackage = {
@@ -236,13 +255,18 @@ function AppendNewPackage() {
 	UpdateCodePane();
 	CountItems();
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------   Included Assets   ------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 /**
  * Add a new asset to the currently selected package.
  */
 function AddIncludedAsset() {
 	EntryValidation('PackageAssetId');
 	if (currPackageIdx !== '0') {
-		var doc = GetCurrentDocument('p');
 		var newAsset = {
 			assetId: document.getElementById('PackageAssetId').value
 		}
@@ -253,22 +277,22 @@ function AddIncludedAsset() {
 		if (document.getElementById('PackageAssetExclude').value !== '') {
 			newAsset.exclude = TextToArray(document.getElementById('PackageAssetExclude').value);
 		}
-		if (doc.assets === undefined) {
-			doc.assets = new Array();
+		if (selectedDoc.assets === undefined) {
+			selectedDoc.assets = new Array();
 		}
-		doc.assets.push(newAsset);
+		selectedDoc.assets.push(newAsset);
 
-		ClearPackageAssetInputs();
+		ResetIncludedAssetInputs();
 		document.getElementById('AddPackageAssetButton').disabled = true;
 		UpdateCodePane();
 		CountItems();
-		UpdateAssetTree();
+		UpdateIncludedAssetTree();
 	}
 }
-
-
-
-function FillPkgAssetId(obj) {
+/**
+ * Sets the included asset id to the currently currently selected value.
+ */
+function SetIncludedAssetId(obj) {
 	if (obj.id === 'SelectLocalPackageAssets') {
 		document.getElementById('SelectPacPackageAssets').value = '';
 	} else {
@@ -282,28 +306,166 @@ function FillPkgAssetId(obj) {
 		document.getElementById('AddPackageAssetButton').disabled = true;
 	}
 }
-function NewIncludedAsset() {
-	ClearPackageAssetInputs();
+function ResetIncludedAssetForm() {
+	ResetIncludedAssetInputs();
+}
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------   Variants   ---------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+/**
+ * Fill the Varaint input form fields with the specified variant.
+ */
+function NewVariant() {
+	ResetVariantInputs();
+}
+function FillVariantFormHeader(vData) {
+	var key = Object.keys(vData.variant)[0];
+	var idx = key.lastIndexOf(':');
+	document.getElementById('IsGlobalVariant').checked = (key.substring(0, idx) !== selectedDoc.group + ':' + selectedDoc.name);
+	document.getElementById('VariantKey').value = key.substring(idx + 1);
+	document.getElementById('VariantValue').value = Object.values(vData.variant)[0];
+	document.getElementById('VariantDescription').value = '';
+	document.getElementById('VariantDependencies').value = ArrayToText(vData.dependencies);
+	document.getElementById('VariantDescription').value = selectedDoc.variantDescriptions[key][Object.values(vData.variant)[0]];
+}
+function FillVariantFormAsset(vAsset) {
+	document.getElementById('VariantAssetId').value = vAsset.assetId;
+	document.getElementById('VariantInclude').value = ArrayToText(vAsset.include);
+	document.getElementById('VariantExclude').value = ArrayToText(vAsset.exclude);
+}
+function VariantAddDependency(input) {
+	var currentDependencies = document.getElementById('VariantDependencies').value;
+	if (currentDependencies === '') {
+		document.getElementById('VariantDependencies').value = input.value + ';\n'
+	} else {
+		document.getElementById('VariantDependencies').value = currentDependencies + input.value + ';\n';
+	}
+	variantPackageSelect.clear(true);
+}
+function UpdateVariantData(elem) {
+	if (elem.id === 'VariantsPacAssetList' || elem.id === 'VariantsLocalAssetList') {
+		document.getElementById('VariantAssetId').value = elem.value;
+		if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
+		elem.value = '';
+	} else if (elem.id === 'VariantsPacPackageList' || elem.id === 'VariantsLocalPackageList') {
+		document.getElementById('VariantDependencies').value = document.getElementById('VariantDependencies').value + elem.value + ';\n';
+		if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
+		elem.value = '';
+	} else {
+		EntryValidation(elem.id);
+		//Not going to bother implementing all of the onchange stuff here because I want to redesign how this works (see pr #43)
+		//Also it's a convoluted process where once the variant key name is changed the current setup will not be able to find the named variant any more
+
+	}
+	UpdateCodePane();
+}
+function AddAssetToVariant() {
+	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
+
+	var newAsset = {
+		assetId: document.getElementById('VariantAssetId').value,
+		include: TextToArray(document.getElementById('VariantInclude').value),
+		exclude: TextToArray(document.getElementById('VariantExclude').value),
+	};
+	variant.assets.push(newAsset);
+
+
+	document.getElementById('VariantAssetId').value = '';
+	document.getElementById('VariantInclude').value = '';
+	document.getElementById('VariantExclude').value = '';
+	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
+	document.getElementById('VariantsLocalAssetList').value = '';
+	UpdateVariantTree();
+	UpdateCodePane();
+}
+function RemoveAssetFromVariant() {
+	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
+	variant.assets = variant.assets.filter((i) => i.assetId !== document.getElementById('VariantAssetId').value);
+}
+function RemoveVariant() {
+	selectedDoc.variants = selectedDoc.variants.filter((i) =>
+		(Object.keys(i.variant)[0] !== document.getElementById('VariantKey').value) &&
+		(Object.values(i.variant)[0] !== document.getElementById('VariantValue').value)
+	);
+	UpdateVariantTree();
+	UpdateCodePane();
+	ResetVariantInputs();
+}
+
+function AddNewVariant() {
+	//The `variants` property of a document is an array of variant objects. The variant object has three properties:
+	//	- variant: an object with one key value pair, with the key as the name of the variant, and the value its value
+	//	- assets: an array of asset objects. Each aset object has three properties:
+	//		- assetId: unique Id of the asset
+	//		- include: array of items in the asset to include
+	//		- exclude: array of items in the asset to exclude
+	//	- dependencies: an array of strings
+	var newKey;
+	if (document.getElementById('IsGlobalVariant').checked) {
+		newKey = document.getElementById('VariantKey').value;
+	} else {
+		newKey = `${selectedDoc.group}:${selectedDoc.name}:${document.getElementById('VariantKey').value}`;
+	}
+	var newValue = document.getElementById('VariantValue').value;
+	var newVariant = {
+		variant: { [newKey]: newValue },
+		assets: new Array()
+	}
+
+	//To avoid writing null properties, only add the property if the input is not blank
+	var newAsset = new Object();
+	if (document.getElementById('VariantAssetId').value !== '') {
+		newAsset.assetId = document.getElementById('VariantAssetId').value;
+	}
+	if (document.getElementById('VariantInclude').value !== '') {
+		newAsset.include = TextToArray(document.getElementById('VariantInclude').value);
+	}
+	if (document.getElementById('VariantExclude').value !== '') {
+		newAsset.exclude = TextToArray(document.getElementById('VariantExclude').value);
+	}
+	if (document.getElementById('VariantDependencies').value !== '') {
+		newVariant.dependencies = TextToArray(document.getElementById('VariantDependencies').value);
+	}
+
+	newVariant.assets.push(newAsset);
+	if (selectedDoc.variants === undefined) {
+		selectedDoc.variants = new Array(newVariant);
+	} else {
+		selectedDoc.variants.push(newVariant);
+	}
+	
+	//Add variant descriptions (if any)
+	if (document.getElementById('VariantDescription').value !== '') {
+		selectedDoc.variantDescriptions = newPackage = {
+			[newKey]: {
+				[newValue]: document.getElementById('VariantDescription').value
+			}
+		};
+	}
+
+	UpdateCodePane();
+	CountItems();
+	ResetVariantInputs();
+	UpdateVariantTree();
 }
 
 
 
-
-
-// --------------------------------------------------------------------------------------------
-// ----------------------------------------   Assets   ----------------------------------------
-// --------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------   Assets   ----------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 /**
  * Fill the Asset input form fields with the values from the currently selected asset number.
  */
 function FillAssetForm() {
 	document.getElementById('AddAssetButton').disabled = (currAssetIdx != '0');
 	if (currAssetIdx !== '0') {
-		var doc = GetCurrentDocument('a');
-		document.getElementById('AssetUrl').value = doc.url;
-		document.getElementById('AssetId').value = doc.assetId;
-		document.getElementById('AssetVersion').value = doc.version;
-		document.getElementById('AssetLastModified').value = new Date(doc.lastModified).toISOString().slice(0, 19);
+		document.getElementById('AssetUrl').value = selectedDoc.url;
+		document.getElementById('AssetId').value = selectedDoc.assetId;
+		document.getElementById('AssetVersion').value = selectedDoc.version;
+		document.getElementById('AssetLastModified').value = new Date(selectedDoc.lastModified).toISOString().slice(0, 19);
 	}
 }
 /**
@@ -312,18 +474,17 @@ function FillAssetForm() {
 function UpdateAssetItem(itemName) {
 	EntryValidation(itemName);
 	if (currAssetIdx !== '0') {
-		var doc = GetCurrentDocument('a');
-		doc.url = document.getElementById('AssetUrl').value;
-		doc.assetId = document.getElementById('AssetId').value;
-		doc.version = document.getElementById('AssetVersion').value;
-		doc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
+		selectedDoc.url = document.getElementById('AssetUrl').value;
+		selectedDoc.assetId = document.getElementById('AssetId').value;
+		selectedDoc.version = document.getElementById('AssetVersion').value;
+		selectedDoc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
 		UpdateCodePane();
 	}
 }
 /**
  * Add a new asset to the end of this YAML document.
  */
-function AppendNewAsset() {
+function AddNewAsset() {
 	var newAsset = {
 		url: document.getElementById('AssetUrl').value,
 		assetId: document.getElementById('AssetId').value,
@@ -334,6 +495,7 @@ function AppendNewAsset() {
 
 	UpdateCodePane();
 	CountItems();
+	UpdateMainTree();
 	ResetAssetInputs();
 }
 /**
@@ -352,91 +514,3 @@ function FillDateTimePicker() {
 		console.log(e)
 	}
 }
-
-
-//TODO - move these functions to a new util class
-
-// --------------------------------------------------------------------------------------------
-// -----------------------------------   Helper Functions   -----------------------------------
-// --------------------------------------------------------------------------------------------
-/**
- * Convert an array to the format used in input boxes for user input.
- * @param {Array} itemList List to process
- * @returns A single string, each item on a new line, semicolon delineated.
- */
-function ArrayToText(itemList) {
-	if (itemList === undefined || itemList === null) {
-		return '';
-	}
-
-	var output = '';
-	itemList.forEach((item) => {
-		output = output + item + ';\n';
-	});
-	return output.slice(0, -1); //Remove the final \n
-}
-/**
- * Convert text to a properly formatted string array.
- * @param {string} text Semicolon delimited string to process
- * @returns An array of strings
- */
-function TextToArray(text) {
-	if (text === '' || text === null || text === undefined) {
-		return null;
-	}
-	return text.replaceAll('\n', '').replaceAll('"', '').split(';').filter((item) => item !== '');
-}
-/**
- * Determine whether the specified object contains the properties of a sc4pac Asset.
- * @param {Object} obj The object to analyze
- * @returns TRUE if the object represents an Asset; FALSE otherwise
- */
-function IsAsset(obj) {
-	if (obj === null || obj === undefined) {
-		return false;
-	}
-	return Object.hasOwn(obj, 'assetId') && Object.hasOwn(obj, 'lastModified') && Object.hasOwn(obj, 'url') && Object.hasOwn(obj, 'version');
-}
-/**
- * Determine whether the specified object contains the properties of a sc4pac Package.
- * @param {Object} obj The object to analyze
- * @returns TRUE if the object represents a Package; FALSE otherwise
- */
-function IsPackage(obj) {
-	if (obj === null || obj === undefined) {
-		return false;
-	}
-	return Object.hasOwn(obj, 'group') && Object.hasOwn(obj, 'name') && Object.hasOwn(obj, 'version') && Object.hasOwn(obj, 'subfolder');
-}
-
-/**
- * Return the currently selected package or asset document object.
- * @param {string} type The type of document to return. 'p' for packages and 'a' for assets.
- * @returns The currently selected document object of the specified type
- */
-function GetCurrentDocument(type) {
-	if (type.toLowerCase().charAt(0) === 'p') {
-		if (currPackageIdx !== '0') {
-			return yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
-		}
-	} else {
-		if (currAssetIdx !== '0') {
-			return yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
-		}
-	}
-	return null;
-}
-
-//Array.prototype.removeItem = function (item) {
-//	//https://stackoverflow.com/a/5767357/10802255
-//	const index = this.indexOf(item);
-//	if (index > -1) {
-//		return this.splice(index, 1);
-//	} else {
-//		return this;
-//	}
-//}
-
-//Array.prototype.remove = function (index) {
-//	this.splice(index, 1);
-//}
