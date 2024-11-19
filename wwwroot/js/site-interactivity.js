@@ -108,7 +108,7 @@ function EntryValidation(elementId) {
 	}
 
 	//
-	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '' || selectedDoc == null) {
+	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '') {
 		document.getElementById('AddVariantButton').disabled = true;
 	} else {
 		document.getElementById('AddVariantButton').disabled = false;
@@ -328,6 +328,7 @@ function FillVariantFormHeader(vData) {
 	document.getElementById('VariantValue').value = Object.values(vData.variant)[0];
 	document.getElementById('VariantDescription').value = '';
 	document.getElementById('VariantDependencies').value = ArrayToText(vData.dependencies);
+	document.getElementById('VariantDescription').value = selectedDoc.variantDescriptions[key][Object.values(vData.variant)[0]];
 }
 function FillVariantFormAsset(vAsset) {
 	document.getElementById('VariantAssetId').value = vAsset.assetId;
@@ -353,6 +354,7 @@ function UpdateVariantData(elem) {
 		if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
 		elem.value = '';
 	} else {
+		EntryValidation(elem.id);
 		//Not going to bother implementing all of the onchange stuff here because I want to redesign how this works (see pr #43)
 		//Also it's a convoluted process where once the variant key name is changed the current setup will not be able to find the named variant any more
 
@@ -400,53 +402,54 @@ function AddNewVariant() {
 	//		- include: array of items in the asset to include
 	//		- exclude: array of items in the asset to exclude
 	//	- dependencies: an array of strings
-	var newName;
+	var newKey;
 	if (document.getElementById('IsGlobalVariant').checked) {
-		newName = document.getElementById('VariantKey').value;
+		newKey = document.getElementById('VariantKey').value;
 	} else {
-		newName = `${selectedDoc.group}:${selectedDoc.name}:${document.getElementById('VariantKey').value}`;
+		newKey = `${selectedDoc.group}:${selectedDoc.name}:${document.getElementById('VariantKey').value}`;
 	}
+	var newValue = document.getElementById('VariantValue').value;
 	var newVariant = {
-		variant: { [newName]: document.getElementById('VariantValue').value },
+		variant: { [newKey]: newValue },
 		assets: new Array()
 	}
 
 	//To avoid writing null properties, only add the property if the input is not blank
+	var newAsset = new Object();
 	if (document.getElementById('VariantAssetId').value !== '') {
-		newVariant.assets[0].assetId = document.getElementById('VariantAssetId').value;
+		newAsset.assetId = document.getElementById('VariantAssetId').value;
 	}
 	if (document.getElementById('VariantInclude').value !== '') {
-		newVariant.assets[0].include = TextToArray(document.getElementById('VariantInclude').value);
+		newAsset.include = TextToArray(document.getElementById('VariantInclude').value);
 	}
 	if (document.getElementById('VariantExclude').value !== '') {
-		newVariant.assets[0].exclude = TextToArray(document.getElementById('VariantExclude').value);
+		newAsset.exclude = TextToArray(document.getElementById('VariantExclude').value);
 	}
 	if (document.getElementById('VariantDependencies').value !== '') {
 		newVariant.dependencies = TextToArray(document.getElementById('VariantDependencies').value);
 	}
 
+	newVariant.assets.push(newAsset);
 	if (selectedDoc.variants === undefined) {
-		selectedDoc.variants = new Array();
+		selectedDoc.variants = new Array(newVariant);
+	} else {
+		selectedDoc.variants.push(newVariant);
 	}
-	selectedDoc.variants.push(newVariant);
+	
+	//Add variant descriptions (if any)
+	if (document.getElementById('VariantDescription').value !== '') {
+		selectedDoc.variantDescriptions = newPackage = {
+			[newKey]: {
+				[newValue]: document.getElementById('VariantDescription').value
+			}
+		};
+	}
 
 	UpdateCodePane();
 	CountItems();
 	ResetVariantInputs();
 	UpdateVariantTree();
 }
-
-function UpdateVariantDescription() {
-	//TODO - impelement UpdateVariantDescription
-}
-//variantDescriptions:
-//  kodlovag:uniform-street-lighting-mod:light-color:
-//    "white": "white lights (recommended, similar to LED lamps)"
-//    "orange": "orange lights (recommended, similar to sodium vapor lamps)"
-//    "yellow": "yellow lights"
-//    "blue": "blue lights"
-//    "green": "green lights"
-//    "red": "red lights"
 
 
 
