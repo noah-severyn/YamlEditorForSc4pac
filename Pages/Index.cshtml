@@ -5,17 +5,18 @@
 }
 <script type="text/javascript" src="/js/site-util.js"></script>
 <script type="text/javascript" src="/js/site-interactivity.js"></script>
-<script type="text/javascript" src="/js/js-yaml.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" integrity="sha512-CSBhVREyzHAjAFfBlIBakjoRUKp5h7VSweP0InR/pAJyptH7peuhCsqAI/snV+TwZmXZqoUklpXp6R6wMnYf5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css" integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="/css/codemirror.css" type="text/css" />
-<script type="text/javascript" src="/js/codemirror.js"></script>
-<script type="text/javascript" src="/js/codemirror-yaml.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js" integrity="sha512-8RnEqURPUc5aqFEN04aQEiPlSAdE0jlFS/9iGgUyNtwFnSKCXhmB6ZTNl7LnDtDWKabJIASzXrzD0K+LYexU9g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/yaml/yaml.min.js" integrity="sha512-+aXDZ93WyextRiAZpsRuJyiAZ38ztttUyO/H3FZx4gOAOv4/k9C6Um1CvHVtaowHZ2h7kH0d+orWvdBLPVwb4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-<link rel="stylesheet" href="/css/tom-select.css" type="text/css" />
-<script type="text/javascript" src="/js/tom-select.complete.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/css/tom-select.min.css" integrity="sha512-fnaIKCc5zGOLlOvY3QDkgHHDiDdb4GyMqn99gIRfN6G6NrgPCvZ8tNLMCPYgfHM3i3WeAU6u4Taf8Cuo0Y0IyQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.js" integrity="sha512-96+GeOCMUo6K6W5zoFwGYN9dfyvJNorkKL4cv+hFVmLYx/JZS5vIxOk77GqiK0qYxnzBB+4LbWRVgu5XcIihAQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-<link rel="stylesheet" href="/css/treeview.min.css" type="text/css" />
-<script type="text/javascript" src="/js/treeview.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/js-treeview@1.1.5/dist/treeview.min.css" integrity="sha256-7HeITe+2TSRri/WLPYj3ogabAV0rUDJT3mUe3135Pog=" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/js-treeview@1.1.5/dist/treeview.min.js" integrity="sha256-93K+UKgnmM6W/Gp13Z2QUMEStoI+wSf1dykHaFphUc0=" crossorigin="anonymous"></script>
 
 <div style="display:flex" class="row">
     <div id="Column0" class="col-sm-12 col-md-2">
@@ -66,10 +67,10 @@
 
                     <label for="PacPackageList" class="form-label">Add a dependency:</label>
                     <div class="input-group mb-2">
-                        <label class="input-group-text" for="PacPackageList">From sc4pac</label>
-                        <input id="PacPackageList" class="form-control" onchange="AddDepencencyFromPacList()" />
-                        <label class="input-group-text" for="PacPackageList">From this file</label>
-                        <select id="LocalPackageList" class="form-control" onchange="AddDependencyFromLocalList()"></select>
+                        <label class="input-group-text w2" for="PacPackageList">From sc4pac</label>
+                        <input id="PacPackageList" class="form-control" onchange="PackageAddDependency(this)" />
+                        <label class="input-group-text w2" for="LocalPackageList">From this file</label>
+                        <select id="LocalPackageList" class="form-control" onchange="PackageAddDependency(this)"></select>
                     </div>
 
                     <div class="input-group mb-2">
@@ -113,11 +114,10 @@
                 </form>
             </fieldset>
 
-            @* Package Assets + Options tab *@
+            @* Included Assets tab *@
             <fieldset id="IncludedAssetsContent" class="tab-pane m-3" tabindex="0">
                 <div style="display:flex" class="row">
                     <div class="col-sm-12 col-md-3">
-                        <input id="NewPackageAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="+ Include New" onclick="NewIncludedAsset()" />
                         <div id="AssetTreeView"></div>
                     </div>
 
@@ -144,7 +144,8 @@
                                 <span class="input-group-text w1">Exclude</span>
                                 <textarea id="PackageAssetExclude" class="form-control" rows="3" oninput="UpdatePackageData('PackageAssetExclude')"></textarea>
                             </div>
-                            <div class="mb-2">
+                            <div class="mb-2 btn-group">
+                                <input id="ResetIncludedAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetIncludedAssetForm()" />
                                 <input id="AddPackageAssetButton" class="btn btn-primary" type="button" value="Add Asset to Package" onclick="AddIncludedAsset()" disabled="disabled" />
                             </div>
                         </form>
@@ -154,13 +155,72 @@
 
             @* Package Variants tab *@
             <fieldset id="PackageVariantsContent" class="tab-pane m-3" tabindex="0">
-                <p>Not yet supported</p>
-                @* <form>
-                    <div class="mb-2 input-group">
-                        <span class="input-group-text">this file</span>
-                        <select id="SelectLocalPackageVariants" class="form-select" onchange="FillPackageVariantsDropdown()"></select>
+                <div style="display:flex" class="row">
+                    <div class="col-sm-12 col-md-3">
+                        <div id="VariantTreeView"></div>
                     </div>
-                </form> *@
+
+                    <div class="col-sm-12 col-md-9">
+                        <p>The <b>key</b> is the name of the variant, and the <b>value</b> is its value.</p>
+                        <form>
+                            <div class="mb-2 input-group">
+                                <div class="form-check mt-2 me-2">
+                                    <input id="IsGlobalVariant" class="form-check-input" type="checkbox" title="Whether this variant is defined globally or locally for the package">
+                                    <label class="form-check-label" for="IsGlobalVariant" title="Whether this variant is defined globally or locally for the package">Global</label>
+                                </div>
+                                <label class="input-group-text required-label w1">Key</label>
+                                <input id="VariantKey" class="form-control" type="text" oninput="UpdateVariantData(this)" />
+                                <label class="input-group-text required-label w1">Value</label>
+                                <input id="VariantValue" class="form-control" type="text" oninput="UpdateVariantData(this)" />
+                            </div>
+
+                            <div class="mb-2 input-group">
+                                <label class="input-group-text w2">Description</label>
+                                <input id="VariantDescription" class="form-control" type="text" oninput="UpdateVariantData(this)" />
+                            </div>
+
+                            <label for="VariantsPacPackageList" class="form-label">Add a dependency:</label>
+                            <div class="input-group mb-2">
+                                <label class="input-group-text w2" for="VariantsPacPackageList">From sc4pac</label>
+                                <input id="VariantsPacPackageList" class="form-control" onchange="UpdateVariantData(this)" />
+                                <label class="input-group-text w2" for="VariantsLocalPackageList">From this file</label>
+                                <select id="VariantsLocalPackageList" class="form-control" onchange="UpdateVariantData(this)"></select>
+                            </div>
+                            <div class="mb-2 input-group">
+                                <span class="input-group-text w2">Dependencies</span>
+                                <textarea id="VariantDependencies" class="form-control" rows="3" oninput=""></textarea>
+                            </div>
+
+                            <label for="VariantsPacAssetList" class="form-label">Add an asset:</label>
+                            <div class="input-group mb-2">
+                                <label class="input-group-text w2" for="VariantsPacAssetList">From sc4pac</label>
+                                <input id="VariantsPacAssetList" class="form-control" onchange="UpdateVariantData(this)" />
+                                <label class="input-group-text w2" for="VariantsLocalAssetList">From this file</label>
+                                <select id="VariantsLocalAssetList" class="form-control" onchange="UpdateVariantData(this)"></select>
+                            </div>
+                            <div class="mb-2 input-group">
+                                <label class="input-group-text w1">Asset Id</label>
+                                <input id="VariantAssetId" class="form-control" disabled />
+                            </div>
+                            <div class="input-group mb-2">
+                                <label class="input-group-text w1">Include</label>
+                                <textarea id="VariantInclude" class="form-control" rows="3" onchange="UpdateVariantData(this)"></textarea>
+                                <label class="input-group-text w1">Exclude</label>
+                                <textarea id="VariantExclude" class="form-control" rows="3" onchange="UpdateVariantData(this)"></textarea>
+                            </div>
+
+                            <div class="mb-2 btn-group">
+                                <input id="ResetVariantFormButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetVariantInputs()" />
+                                <input id="AddAssetToVariantButton" class="btn btn-outline-primary btn-sm" type="button" value="Add Asset to Variant" onclick="AddAssetToVariant()" />
+                                <input id="RemoveAssetFromVariantButton" class="btn btn-outline-primary btn-sm" type="button" value="Remove Asset from Variant" onclick="RemoveAssetFromVariant()" />
+                            </div>
+                            <div class="mb-2 btn-group">
+                                <input id="AddVariantButton" class="btn btn-primary" type="button" value="Add Variant to Package" onclick="AddNewVariant()" disabled />
+                                <input id="RemoveVariantButton" class="btn btn-outline-danger" type="button" value="Remove Variant" onclick="RemoveVariant()" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </fieldset>
 
             @* Asset Properties tab *@
@@ -189,7 +249,7 @@
                         </div>
                     </div>
                 </form>
-                <input type="button" id="AddAssetButton" class="btn btn-primary" value="Add New Asset" onclick="AppendNewAsset()" disabled="disabled" />
+                <input type="button" id="AddAssetButton" class="btn btn-primary" value="Add New Asset" onclick="AddNewAsset()" disabled="disabled" />
                 <input type="button" id="ClearAssetFormButton" class="btn btn-danger" value="Clear Inputs" onclick="ResetAssetInputs()" />
             </fieldset>
         </div>
