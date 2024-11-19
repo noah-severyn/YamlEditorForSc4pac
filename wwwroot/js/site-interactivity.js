@@ -183,6 +183,7 @@ function PackageAddDependency(input) {
 	} else {
 		document.getElementById('PackageDependencies').value = currentDependencies + input.value + ';\n';
 	}
+	document.getElementById('PacPackageList').tomselect.clear(true);
 	document.getElementById('LocalPackageList').value = '';
 }
 /**
