@@ -290,13 +290,24 @@
             <input type="submit" value="Validate" onclick="CountItems()" />
             <input id="SubmittedYaml" type="hidden" asp-for="YamlText" />
         </form> *@
+        
         <div class="mb-2 btn-group">
-            <input class="btn btn-primary" type="button" onclick="ParseYaml()" value="Parse YAML" />
-            <input class="btn btn-primary" type="button" onclick="CopyToClipboard()" value="Copy YAML to Clipboard" />
-            <input class="btn btn-danger" type="button" onclick="ClearAll()" value="Clear All" />
+            <div class="dropdown">
+                <button id="LoadFromButton" class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Load From</button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="LoadFromFile()">Local File</a></li>
+                    @* <li><a class="dropdown-item" href="#">Default channel</a></li>
+                    <li><a class="dropdown-item" href="#">Zasco's channel</a></li> *@
+                </ul>
+            </div>
+            <button class="btn btn-primary" type="button" onclick="ParseYaml()">Parse YAML</button>
+            
+            <button class="btn btn-primary" type="button" onclick="CopyToClipboard()">Copy to Clipboard</button>
+            <button class="btn btn-primary" type="button" onclick="SaveAs()">Save As</button>
+            <button class="btn btn-danger" type="button" onclick="ClearAll()">Clear All</button>
         </div>
         
-
+        
         <div id="editor"></div>
         
     </div>

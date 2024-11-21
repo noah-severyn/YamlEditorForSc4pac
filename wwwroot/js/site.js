@@ -569,3 +569,47 @@ function RemoveSelectedDoc() {
 	UpdateCodePane();
 	ResetAssetInputs();
 }
+
+
+
+document.addEventListener("keydown", function (e) {
+	if ((e.metaKey || e.ctrlKey) && e.code === "KeyS") {
+		SaveAs();
+		e.preventDefault();
+	}
+}, false);
+function SaveAs() {
+	var bb = new Blob([yamlData], { type: 'application/yaml' });
+	var tmp = document.createElement('a');
+	tmp.download = 'download.yaml';
+	tmp.href = window.URL.createObjectURL(bb);
+	tmp.click();
+	tmp.remove();
+}
+
+
+document.addEventListener("keydown", function (e) {
+	if ((e.metaKey || e.ctrlKey) && e.code === "KeyO") {
+		LoadFromFile();
+		e.preventDefault();
+	}
+}, false);
+function LoadFromFile() {
+	var tmp = document.createElement("input")
+	tmp.type = 'file'
+	tmp.style.display = 'none'
+	tmp.onchange = function (e) {
+		var file = e.target.files[0];
+		if (!file) {
+			return;
+		}
+		var reader = new FileReader();
+		reader.onload = function (e) {
+			var contents = e.target.result;
+			cm.setValue(contents);
+			tmp.remove();
+		}
+		reader.readAsText(file);
+	}
+	tmp.click();
+}
