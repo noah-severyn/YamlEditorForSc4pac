@@ -1,15 +1,24 @@
 ﻿/**
- * Clears all inputs and the code pane.
+ * Clears all inputs and resets the code pane.
  */
 function ClearAll() {
-	ResetPackageInputs();
-	ResetAssetInputs();
+	ResetAllInputs();
 	yamlData.length = 0;
 	cm.setValue('#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.\n');
 	ParseYaml();
 }
 /**
- * Resets the Package input and Included asset form fields.
+ * Resets all input form fields.
+ */
+function ResetAllInputs() {
+	ResetPackageInputs();
+	ResetIncludedAssetInputs();
+	ResetVariantInputs();
+	ResetIncludedAssetInputs();
+	ResetAssetInputs();
+}
+/**
+ * Resets the Package input form fields.
  */
 function ResetPackageInputs() {
 	currPackageIdx = '0';
@@ -29,24 +38,9 @@ function ResetPackageInputs() {
 	document.getElementById('PackageAuthor').value = '';
 	document.getElementById('PackageImages').value = '';
 	document.getElementById('PackageWebsite').value = '';
-
-	document.getElementById('SelectLocalPackageAssets').value = '';
-	document.getElementById('SelectPacPackageAssets').value = '';
-	document.getElementById('PackageAssetId').value = '';
-	document.getElementById('PackageAssetInclude').value = '';
-	document.getElementById('PackageAssetExclude').value = '';
-	UpdateIncludedAssetTree();
-
-	document.getElementById('VariantKey').value = '';
-	document.getElementById('VariantValue').value = '';
-	document.getElementById('VariantAssetId').value = '';
-	document.getElementById('VariantDependencies').value = '';
-	if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
-	document.getElementById('VariantsLocalPackageList').value = '';
-	UpdateVariantTree();
 }
 /**
- * Resets the Package Asset input form fields.
+ * Resets the Included Asset input form fields.
  */
 function ResetIncludedAssetInputs() {
 	document.getElementById('SelectLocalPackageAssets').value = '';
@@ -55,18 +49,6 @@ function ResetIncludedAssetInputs() {
 	document.getElementById('PackageAssetInclude').value = '';
 	document.getElementById('PackageAssetExclude').value = '';
 	UpdateIncludedAssetTree();
-}
-/**
- * Resets the Asset input form fields.
- */
-function ResetAssetInputs() {
-	currAssetIdx = '0';
-	document.getElementById('AssetUrl').value = '';
-	document.getElementById('AssetId').value = '';
-	document.getElementById('AssetVersion').value = '';
-	document.getElementById('AssetLastModified').value = 0;
-	document.getElementById('AssetLastModifiedText').value = '';
-	document.getElementById('AddAssetButton').disabled = true;
 }
 /**
  * Resets the Varaint input form fields.
@@ -84,6 +66,17 @@ function ResetVariantInputs() {
 	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
 	document.getElementById('VariantsLocalPackageList').value = '';
 	document.getElementById('VariantsLocalAssetList').value = '';
+}
+/**
+ * Resets the Asset input form fields.
+ */
+function ResetAssetInputs() {
+	document.getElementById('AssetUrl').value = '';
+	document.getElementById('AssetId').value = '';
+	document.getElementById('AssetVersion').value = '';
+	document.getElementById('AssetLastModified').value = 0;
+	document.getElementById('AssetLastModifiedText').value = '';
+	document.getElementById('AddAssetButton').disabled = true;
 }
 
 
@@ -269,7 +262,9 @@ function AddPackage() {
 	newPackage.info.website = document.getElementById('PackageWebsite').value;
 	yamlData.push(newPackage);
 
+	
 	UpdateCodePane();
+	ParseYaml();
 	CountItems();
 }
 
