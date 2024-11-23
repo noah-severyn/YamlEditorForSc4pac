@@ -581,7 +581,13 @@ document.addEventListener("keydown", function (e) {
 function SaveAs() {
 	var bb = new Blob([yamlData], { type: 'application/yaml' });
 	var tmp = document.createElement('a');
-	tmp.download = 'download.yaml';
+	var fileName;
+	if (yamlData[0] == null) {
+		fileName = "document";
+	} else {
+		fileName = IsPackage(yamlData[0]) ? yamlData[0].name : yamlData[0].assetId;
+	}
+	tmp.download = fileName + '.yaml';
 	tmp.href = window.URL.createObjectURL(bb);
 	tmp.click();
 	tmp.remove();
