@@ -26,7 +26,7 @@
 </head>
 <body class="d-flex flex-column h-100 mb-0">
 	<header>
-		<nav class="navbar navbar-light border-bottom box-shadow bg-light mb-3" ">
+		<nav class="navbar navbar-light border-bottom box-shadow bg-light mb-3">
 			<div class="container justify-content-start">
 				<h1 class="navbar-brand mb-0">YAML editor for sc4pac</h1>
 				<span class="navbar-text">This tool is designed to help create and edit YAML metadata files used by <a href="https://community.simtropolis.com/forums/topic/762677-sc4pac-lets-write-our-own-package-manager/">sc4pac</a>. Please contact <a href="https://community.simtropolis.com/profile/455740-nos17/">nos.17</a> with any comments or issues.</span>
@@ -292,7 +292,7 @@
 
 			<!-- Right Column -->
 			<div id="Column2" class="col-sm-12 col-md-5">
-				<h2>YAML Output</h2>
+				<h2>YAML Output: <span id="YamlFileName" style="font-style:italic"></span></h2>
 				<h5><span id="CurrentItemCount"></span></h5>
 				<p>The contents in this code pane are automatically generated from inputs on the left, but is also able to be customized manually. Beware, manual changes may be overriden if any of the input values are changed!</p>
 
@@ -302,8 +302,8 @@
 						<button id="LoadFromButton" class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Load From</button>
 						<ul class="dropdown-menu">
 							<li><a class="dropdown-item" href="#" onclick="LoadFromFile()">Local File</a></li>
-							<!-- <li><a class="dropdown-item" href="#">Default channel</a></li>
-							<li><a class="dropdown-item" href="#">Zasco's channel</a></li> -->
+							<li><a class="dropdown-item" href="#" onclick="LoadFromGithub(this, 'default')" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Default channel</a></li>
+							<li><a class="dropdown-item" href="#" onclick="LoadFromGithub(this, 'zasco')" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Zasco's channel</a></li>
 						</ul>
 					</div>
 					<button class="btn btn-primary" type="button" onclick="ParseYaml()">Parse YAML</button>
@@ -314,6 +314,26 @@
 				</div>
 
 				<div id="editor"></div>
+
+				<div class="modal fade" id="LoadFromChannelDialog" tabindex="-1">
+					<div class="modal-dialog modal-dialog-scrollable">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h1 class="modal-title fs-5" id="ModalSourceTitle">Modal title</h1>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+							</div>
+							<div class="modal-body">
+								<nav aria-label="breadcrumb">
+									<ol id="ChannelBreadcrumb" class="breadcrumb">
+										<li class="breadcrumb-item active">Root</li>
+									</ol>
+								</nav>
+								<div id="ChannelItemList" class="list-group"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
 			</div>
 		</div>
 	</main>

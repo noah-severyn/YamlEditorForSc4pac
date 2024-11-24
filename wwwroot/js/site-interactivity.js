@@ -4,6 +4,7 @@
 function ClearAll() {
 	ResetAllInputs();
 	yamlData.length = 0;
+	document.getElementById('YamlFileName').textContent = '';
 	cm.setValue('#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.\n');
 	ParseYaml();
 }
