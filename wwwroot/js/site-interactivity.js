@@ -172,7 +172,7 @@ function FillPackageForm() {
 	document.getElementById('PackageDescription').value = selectedDoc.info.description ?? '';
 	document.getElementById('PackageAuthor').value = selectedDoc.info.author ?? '';
 	document.getElementById('PackageImages').value = ArrayToText(selectedDoc.info.images);
-	document.getElementById('PackageWebsite').value = selectedDoc.info.website;
+	document.getElementById('PackageWebsite').value = selectedDoc.info.website ?? '';
 
 	//For some reason these must be last otherwise the regular text inputs will not populate correctly
 	(pkgGroupSelect.createItem(selectedDoc.group) || pkgGroupSelect.addItem(selectedDoc.group));
@@ -249,7 +249,9 @@ function UpdatePackageData(fieldName) {
 		if (document.getElementById('PackageImages').value !== '') {
 			selectedDoc.info.images = TextToArray(document.getElementById('PackageImages').value);
 		}
-		selectedDoc.info.website = document.getElementById('PackageWebsite').value;
+		if (document.getElementById('PackageWebsite').value !== '') {
+			selectedDoc.info.website = document.getElementById('PackageWebsite').value;
+		}
 		UpdateCodePane();
 	}
 }
