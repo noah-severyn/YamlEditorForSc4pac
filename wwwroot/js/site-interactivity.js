@@ -1,17 +1,27 @@
 ﻿/**
- * Clears all inputs and the code pane.
+ * Clears all inputs and resets the code pane.
  */
 function ClearAll() {
-	ResetPackageInputs();
-	ResetAssetInputs();
+	ResetAllInputs();
 	yamlData.length = 0;
 	cm.setValue('#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.\n');
 	ParseYaml();
 }
 /**
- * Resets the Package input and Included asset form fields.
+ * Resets all input form fields.
  */
-function ResetPackageInputs() {
+function ResetAllInputs() {
+	ResetPackageInputs();
+	ResetIncludedAssetInputs();
+	ResetVariantInputs();
+	ResetIncludedAssetInputs();
+	ResetAssetInputs();
+}
+/**
+ * Resets the Package input form fields.
+ * @param {boolean} newForm Whether to toggle the new form state side effects
+ */
+function ResetPackageInputs(newForm = false) {
 	currPackageIdx = '0';
 	document.getElementById('PackageGroup').value = '';
 	if (groupTomSelect = document.getElementById('PackageGroup').tomselect) groupTomSelect.clear(true);
@@ -29,24 +39,15 @@ function ResetPackageInputs() {
 	document.getElementById('PackageAuthor').value = '';
 	document.getElementById('PackageImages').value = '';
 	document.getElementById('PackageWebsite').value = '';
+	document.getElementById('AddPackageButton').disabled = true;
 
-	document.getElementById('SelectLocalPackageAssets').value = '';
-	document.getElementById('SelectPacPackageAssets').value = '';
-	document.getElementById('PackageAssetId').value = '';
-	document.getElementById('PackageAssetInclude').value = '';
-	document.getElementById('PackageAssetExclude').value = '';
-	UpdateIncludedAssetTree();
-
-	document.getElementById('VariantKey').value = '';
-	document.getElementById('VariantValue').value = '';
-	document.getElementById('VariantAssetId').value = '';
-	document.getElementById('VariantDependencies').value = '';
-	if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
-	document.getElementById('VariantsLocalPackageList').value = '';
-	UpdateVariantTree();
+	if (newForm) {
+		document.getElementById('CurrentDocumentType').innerHTML = 'package';
+		document.getElementById('CurrentDocumentName').innerHTML = '[new package]';
+	}
 }
 /**
- * Resets the Package Asset input form fields.
+ * Resets the Included Asset input form fields.
  */
 function ResetIncludedAssetInputs() {
 	document.getElementById('SelectLocalPackageAssets').value = '';
@@ -55,18 +56,6 @@ function ResetIncludedAssetInputs() {
 	document.getElementById('PackageAssetInclude').value = '';
 	document.getElementById('PackageAssetExclude').value = '';
 	UpdateIncludedAssetTree();
-}
-/**
- * Resets the Asset input form fields.
- */
-function ResetAssetInputs() {
-	currAssetIdx = '0';
-	document.getElementById('AssetUrl').value = '';
-	document.getElementById('AssetId').value = '';
-	document.getElementById('AssetVersion').value = '';
-	document.getElementById('AssetLastModified').value = 0;
-	document.getElementById('AssetLastModifiedText').value = '';
-	document.getElementById('AddAssetButton').disabled = true;
 }
 /**
  * Resets the Varaint input form fields.
@@ -85,6 +74,22 @@ function ResetVariantInputs() {
 	document.getElementById('VariantsLocalPackageList').value = '';
 	document.getElementById('VariantsLocalAssetList').value = '';
 }
+/**
+ * Resets the Asset input form fields.
+ */
+function ResetAssetInputs(newForm = false) {
+	document.getElementById('AssetUrl').value = '';
+	document.getElementById('AssetId').value = '';
+	document.getElementById('AssetVersion').value = '';
+	document.getElementById('AssetLastModified').value = 0;
+	document.getElementById('AssetLastModifiedText').value = '';
+	document.getElementById('AddAssetButton').disabled = true;
+
+	if (newForm) {
+		document.getElementById('CurrentDocumentType').innerHTML = 'asset';
+		document.getElementById('CurrentDocumentName').innerHTML = '[new asset]';
+	}
+}
 
 
 
@@ -93,25 +98,31 @@ function ResetVariantInputs() {
  * Apply basic validation rules for the specified entry field.
  */
 function EntryValidation(elementId) {
-	//Prevent adding package if any required fields are blank
+	//Prevent adding a package if any required fields are blank
 	if (document.getElementById('PackageGroup').value === '' || document.getElementById('PackageName').value === '' || document.getElementById('PackageVersion').value === '' || document.getElementById('PackageSummary').value === '') {
 		document.getElementById('AddPackageButton').disabled = true;
+		document.getElementById('RemovePackageButton').disabled = true;
 	} else {
 		document.getElementById('AddPackageButton').disabled = false;
+		document.getElementById('RemovePackageButton').disabled = false;
 	}
 
-	//Prevent adding asset if any required fields are blank
+	//Prevent adding an asset if any required fields are blank
 	if (document.getElementById('AssetUrl').value === '' || document.getElementById('AssetId').value === '' || document.getElementById('AssetVersion').value === '' || document.getElementById('AssetLastModified').value === '') {
 		document.getElementById('AddAssetButton').disabled = true;
+		document.getElementById('RemoveAssetButton').disabled = true;
 	} else {
 		document.getElementById('AddAssetButton').disabled = false;
+		document.getElementById('RemoveAssetButton').disabled = false;
 	}
 
-	//
+	//Prevent adding a variant if any required fields are blank
 	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '') {
-		document.getElementById('AddVariantButton').disabled = true;
+		document.getElementById('AddVariantButton').disabled = true
+		document.getElementById('RemoveVariantButton').disabled = true;
 	} else {
 		document.getElementById('AddVariantButton').disabled = false;
+		document.getElementById('RemoveVariantButton').disabled = false;
 	}
 
 	
@@ -129,6 +140,9 @@ function EntryValidation(elementId) {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-:;\n]/g, '').toLowerCase();
 	} else if (fieldName === 'Website' || fieldName === 'AssetUrl') {
 		inputText = inputText.toLowerCase().replace(new RegExp('[^a-z0-9-&_:/?=.]'), '');
+	} else if (fieldName === 'Include' || fieldName === 'Exclude') {
+		//Want to replace ONLY for file/folder names, not regex strings
+		//inputText = inputText.replaceAll('\\', '/');
 	}
 	inputElement.value = inputText;
 
@@ -158,11 +172,14 @@ function FillPackageForm() {
 	document.getElementById('PackageDescription').value = selectedDoc.info.description ?? '';
 	document.getElementById('PackageAuthor').value = selectedDoc.info.author ?? '';
 	document.getElementById('PackageImages').value = ArrayToText(selectedDoc.info.images);
-	document.getElementById('PackageWebsite').value = selectedDoc.info.website;
+	document.getElementById('PackageWebsite').value = selectedDoc.info.website ?? '';
 
 	//For some reason these must be last otherwise the regular text inputs will not populate correctly
 	(pkgGroupSelect.createItem(selectedDoc.group) || pkgGroupSelect.addItem(selectedDoc.group));
 	pkgSubfolderSelect.addItem(selectedDoc.subfolder);
+
+	document.getElementById('CurrentDocumentType').innerHTML = "package";
+	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
 }
 /**
  * Fill the Package Asset input form fields with the values from the currently selected package and asset number.
@@ -232,7 +249,9 @@ function UpdatePackageData(fieldName) {
 		if (document.getElementById('PackageImages').value !== '') {
 			selectedDoc.info.images = TextToArray(document.getElementById('PackageImages').value);
 		}
-		selectedDoc.info.website = document.getElementById('PackageWebsite').value;
+		if (document.getElementById('PackageWebsite').value !== '') {
+			selectedDoc.info.website = document.getElementById('PackageWebsite').value;
+		}
 		UpdateCodePane();
 	}
 }
@@ -269,7 +288,9 @@ function AddPackage() {
 	newPackage.info.website = document.getElementById('PackageWebsite').value;
 	yamlData.push(newPackage);
 
+	
 	UpdateCodePane();
+	ParseYaml();
 	CountItems();
 }
 
@@ -323,9 +344,6 @@ function SetIncludedAssetId(obj) {
 		document.getElementById('AddPackageAssetButton').disabled = true;
 	}
 }
-function ResetIncludedAssetForm() {
-	ResetIncludedAssetInputs();
-}
 
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -334,9 +352,6 @@ function ResetIncludedAssetForm() {
 /**
  * Fill the Varaint input form fields with the specified variant.
  */
-function NewVariant() {
-	ResetVariantInputs();
-}
 function FillVariantFormHeader(vData) {
 	var key = Object.keys(vData.variant)[0];
 	var idx = key.lastIndexOf(':');
@@ -477,13 +492,15 @@ function AddNewVariant() {
  * Fill the Asset input form fields with the values from the currently selected asset number.
  */
 function FillAssetForm() {
+	if (selectedDoc === undefined || selectedDoc === null) { return;}
 	document.getElementById('AddAssetButton').disabled = (currAssetIdx != '0');
-	if (currAssetIdx !== '0') {
-		document.getElementById('AssetUrl').value = selectedDoc.url;
-		document.getElementById('AssetId').value = selectedDoc.assetId;
-		document.getElementById('AssetVersion').value = selectedDoc.version;
-		document.getElementById('AssetLastModified').value = new Date(selectedDoc.lastModified).toISOString().slice(0, 19);
-	}
+	document.getElementById('AssetUrl').value = selectedDoc.url;
+	document.getElementById('AssetId').value = selectedDoc.assetId;
+	document.getElementById('AssetVersion').value = selectedDoc.version;
+	document.getElementById('AssetLastModified').value = new Date(selectedDoc.lastModified).toISOString().slice(0, 19);
+
+	document.getElementById('CurrentDocumentType').innerHTML = "asset";
+	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.assetId;
 }
 /**
  * Live update the YAML codepane with the values in the current Asset form field as the user types.
@@ -528,6 +545,6 @@ function FillDateTimePicker() {
 			document.getElementById('AddAssetButton').disabled = false;
 		}
 	} catch (e) {
-		console.log(e)
+		console.log(e);
 	}
 }
