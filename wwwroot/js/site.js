@@ -660,33 +660,52 @@ function LoadFromFile() {
 	tmp.click();
 }
 
-var channelData;
-var folderData;
-async function LoadFromGithub(src) {
-	console.log(src);
-	var srcUrl;
-	
-	
-	if (src.tagName === 'A') { //If the source is 'a' (link) then its being triggered from the open menu; if it is 'BUTTON' then its being triggered from the modal dialog
-		switch (src.textContent.toLowerCase()) {
-			case 'default content':
+
+
+async function LoadFromGithub(srcElem, channel) {
+	var crumbNav = document.getElementById('ChannelBreadcrumb');
+	/**
+	 * If the source is `a` then its being triggered from the open menu; if it is `BUTTON` then its being triggered from a button click in the modal dialog. Basically, links go to the root folder level, buttons go to a subfolder level.
+	 */
+	var level = (srcElem.tagName === 'A') ? 1 : 2;
+
+	//Set the base srcUrl and update the breadcrumb menu.
+	if (level === 1) { 
+		switch (channel.toLowerCase()) {
+			case 'default':
 				srcUrl = 'https://api.github.com/repos/memo33/sc4pac/git/trees/2b987426294c3fb8b66b1875d629d5937ad921ac';
 				break;
-			case "zasco's channel":
+			case 'zasco':
 				srcUrl = 'https://api.github.com/repos/Zasco/sc4pac-channel/git/trees/ad3f15a09bf296df6ef87be2175542f1ee671407';
 				break;
 		}
-		loadFileDialog.querySelector('.modal-title').textContent = src.innerHTML;
+		if (srcElem.textContent !== 'Root') {
+			loadFileDialog.querySelector('.modal-title').textContent = srcElem.innerHTML;
+		}
+		if (crumbNav.children.length > 1) {
+			crumbNav.lastElementChild.remove();
+			crumbNav.firstElementChild.firstElementChild.remove(); //remove the <a> link
+			crumbNav.firstElementChild.textContent = 'Root';
+			crumbNav.firstElementChild.className = 'breadcrumb-item active'
+		}
+	}
+	else {
+		srcUrl = srcElem.value;
 
-	} else {
-		srcUrl = src.value;
+		var prevCrumb = crumbNav.firstElementChild 
+		prevCrumb.className = 'breadcrumb-item';
+		prevCrumb.textContent = '';
+
+		let newLink = document.createElement('a');
+		newLink.href = '#';
+		newLink.textContent = 'Root';
+		newLink.addEventListener('click', function () { LoadFromGithub(this, channel); });
+		prevCrumb.appendChild(newLink);
 
 		let newCrumb = document.createElement('li');
 		newCrumb.className = 'breadcrumb-item active';
-		let newLink = document.createElement('a');
-		newLink.href = '#';
-		newLink.textContent = src.path;
-		document.getElementById('ChannelBreadcrumb').appendChild(newCrumb).appendChild(newLink);
+		newCrumb.textContent = srcElem.textContent;
+		crumbNav.appendChild(newCrumb);
 	}
 
 
@@ -695,32 +714,27 @@ async function LoadFromGithub(src) {
 		.then(data => {
 			let listDiv = loadFileDialog.querySelector('.list-group');
 			listDiv.textContent = '';
-
-			channelData = data.tree;
-			//console.log(channelData);
-			channelData
+			data.tree
 				.filter((obj) => obj.path.charAt(0) !== '.')
 				.forEach(obj => {
 					let btn = document.createElement('button');
 					btn.className = 'list-group-item list-group-item-action';
 					btn.textContent = obj.path;
 					btn.value = obj.url;
-					if (src.tagName === 'A') {
-						btn.addEventListener('click', function () { LoadFromGithub(this); });
+					if (level === 1) {
+						btn.addEventListener('click', function () { LoadFromGithub(this, channel); });
 					} else {
 						btn.addEventListener('click', function () { GetContent(this.value); });
 					}
-					
+
 					listDiv.appendChild(btn);
 				});
 		})
 		.catch(error => console.error('Error fetching the tree data:', error));
-	
 }
 
 
 function GetContent(url) {
-	console.log(url);
 	fetch(url)
 		.then(response => response.json())
 		.then(data => {
