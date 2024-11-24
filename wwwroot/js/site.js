@@ -1,9 +1,4 @@
-// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-
-//Initialize required items (these are run as top-level statements)
-CodeMirror(document.querySelector('#editor'), {
+const cm = CodeMirror(document.querySelector('#editor'), {
 	lineNumbers: true,
 	tabSize: 2,
 	lineWrapping: true,
@@ -14,15 +9,24 @@ CodeMirror(document.querySelector('#editor'), {
 	mode: 'yaml'
 });
 
-var currPackageIdx = '0';
-var currAssetIdx = '0';
-var sc4pacAssets = new Array();
-var sc4pacPackages = new Array();
-var sc4pacData = FetchSc4pacData().then(result => {
-	sc4pacData = result.contents;
-	sc4pacAssets = result.contents.filter((item) => item.group === 'sc4pacAsset');
-	sc4pacPackages = result.contents.filter((item) => item.group !== 'sc4pacAsset');
-});
+
+//var sc4pacAssets = new Array();
+//var sc4pacPackages = new Array();
+//var sc4pacData = FetchSc4pacData().then(result => {
+//	sc4pacData = result.contents;
+//	sc4pacAssets = result.contents.filter((item) => item.group === 'sc4pacAsset');
+//	sc4pacPackages = result.contents.filter((item) => item.group !== 'sc4pacAsset');
+//});
+//async function FetchSc4pacData() {
+//	const request = new Request('https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json');
+//	const response = await fetch(request);
+//	return await response.json();
+//}
+//async function FetchSc4EvermoreData() {
+//	const request = new Request('https://www.sc4evermore.com/latest-modified-downloads.php');
+//	const response = await fetch(request);
+//	return await response.json();
+//}
 //fetch('/config.json').then(function (config) {
 //    console.log('API key:', config.apiKey);
 //});
@@ -41,12 +45,16 @@ var atv;
  */
 var vtv;
 /**
- * Currently selected document in the main tree - may be a package or an asset
+ * Array of packages and assets in this YAML file
+ */
+var yamlData = jsyaml.loadAll(cm.getValue());
+/**
+ * Currently selected document in the main tree - can be a package or an asset
  */
 var selectedDoc;
 
-const cm = document.querySelector('.CodeMirror').CodeMirror;
-var yamlData = null;
+var currPackageIdx = '0';
+var currAssetIdx = '0';
 var countOfPackages = 0;
 var countOfAssets = 0;
 var listOfAssets = new Array();
@@ -55,7 +63,7 @@ var listOfGroups = new Array();
 
 
 
-new TomSelect('#PacPackageList', {
+var pkgTomSelect = new TomSelect('#PacPackageList', {
 	valueField: 'id',
 	labelField: 'id',
 	searchField: ['id'],
@@ -282,6 +290,7 @@ var pkgGroupSelect = new TomSelect('#PackageGroup', {
 
 
 ParseYaml();
+SetSelectedDoc('p', 0);
 ResetAssetInputs();
 ResetPackageInputs();
 ResetVariantInputs();
@@ -290,19 +299,7 @@ ResetVariantInputs();
 
 //TODO - validate YAML in code pane for valid yaml syntax
 //TODO - validate YAML in code pane for valid sc4pac schema
-//TODO - implement variants for packages
 
-
-async function FetchSc4pacData() {
-	const request = new Request('https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json');
-	const response = await fetch(request);
-	return await response.json();
-}
-async function FetchSc4EvermoreData() {
-	const request = new Request('https://www.sc4evermore.com/latest-modified-downloads.php');
-	const response = await fetch(request);
-	return await response.json();
-}
 
 
 
@@ -311,7 +308,7 @@ async function FetchSc4EvermoreData() {
  */
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
-	selectedDoc = yamlData.filter((doc) => IsPackage(doc))[0];
+	
 	if (selectedDoc !== undefined) {
 		FillPackageForm();
 	}
@@ -344,10 +341,13 @@ function UpdateMainTree() {
 	mtv = new TreeView(mainTreeData, 'MainTreeView');
 	
 	mtv.on("select", function (t) {
-		if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
+		console.log(t.data.name.indexOf('(') > 0);
+		if (t.data.name.indexOf('(') > 0) { //A heading category was selected
+			return
+		} else if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
 			currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			if (document.querySelector(".nav-link.active").value === 'Asset Properties') {
-				(new bootstrap.Tab(document.getElementById('PackagePropertiesTab'))).show();
+				SelectTab('PackagePropertiesTab', true);
 			}
 
 			selectedDoc = yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
@@ -356,7 +356,7 @@ function UpdateMainTree() {
 			UpdateVariantTree();
 		} else {
 			currAssetIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
-			(new bootstrap.Tab(document.getElementById('AssetPropertiesTab'))).show();
+			SelectTab('AssetPropertiesTab', true);
 
 			selectedDoc = yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
 			FillAssetForm();
@@ -571,6 +571,41 @@ function RemoveSelectedDoc() {
 }
 
 
+/**
+ * Returns the specified package or asset
+ * @param {string} type Specify 'p' for packages or 'a' for assets.
+ * @param {number} index The nth package or asset to return
+ * @returns The specified package or asset
+ */
+function GetDocument(type, index) {
+	if (type.toLowerCase() === 'a') {
+		return yamlData.filter((doc) => IsAsset(doc))[index];
+	} else {
+		return yamlData.filter((doc) => IsPackage(doc))[index];
+	} 
+}
+
+/**
+ * Sets the currently selected document to the specified package or asset if found. If not found it sets the selectedDoc to null.
+ * @param {string} type Specify 'p' for packages or 'a' for assets.
+ * @param {number} index The nth package or asset to return
+ */
+function SetSelectedDoc(type, index) {
+	var docs;
+	if (type.toLowerCase() === 'p') {
+		docs = yamlData.filter((doc) => IsPackage(doc));
+	} else if (type.toLowerCase() === 'a') {
+		docs = yamlData.filter((doc) => IsAsset(doc));
+	}
+
+	if (index <= docs.length) {
+		selectedDoc = docs[0];
+	} else {
+		selectedDoc = null;
+	}
+}
+
+
 
 document.addEventListener("keydown", function (e) {
 	if ((e.metaKey || e.ctrlKey) && e.code === "KeyS") {
@@ -613,6 +648,8 @@ function LoadFromFile() {
 		reader.onload = function (e) {
 			var contents = e.target.result;
 			cm.setValue(contents);
+			ParseYaml();
+			SetSelectedDoc('p', 0);
 			tmp.remove();
 		}
 		reader.readAsText(file);

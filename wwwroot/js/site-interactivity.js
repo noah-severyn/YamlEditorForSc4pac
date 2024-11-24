@@ -122,6 +122,9 @@ function EntryValidation(elementId) {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-:;\n]/g, '').toLowerCase();
 	} else if (fieldName === 'Website' || fieldName === 'AssetUrl') {
 		inputText = inputText.toLowerCase().replace(new RegExp('[^a-z0-9-&_:/?=.]'), '');
+	} else if (fieldName === 'Include' || fieldName === 'Exclude') {
+		//Want to replace ONLY for file/folder names, not regex strings
+		//inputText = inputText.replaceAll('\\', '/');
 	}
 	inputElement.value = inputText;
 
@@ -318,9 +321,6 @@ function SetIncludedAssetId(obj) {
 		document.getElementById('AddPackageAssetButton').disabled = true;
 	}
 }
-function ResetIncludedAssetForm() {
-	ResetIncludedAssetInputs();
-}
 
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -472,13 +472,12 @@ function AddNewVariant() {
  * Fill the Asset input form fields with the values from the currently selected asset number.
  */
 function FillAssetForm() {
+	if (selectedDoc === undefined || selectedDoc === null) { return;}
 	document.getElementById('AddAssetButton').disabled = (currAssetIdx != '0');
-	if (currAssetIdx !== '0') {
-		document.getElementById('AssetUrl').value = selectedDoc.url;
-		document.getElementById('AssetId').value = selectedDoc.assetId;
-		document.getElementById('AssetVersion').value = selectedDoc.version;
-		document.getElementById('AssetLastModified').value = new Date(selectedDoc.lastModified).toISOString().slice(0, 19);
-	}
+	document.getElementById('AssetUrl').value = selectedDoc.url;
+	document.getElementById('AssetId').value = selectedDoc.assetId;
+	document.getElementById('AssetVersion').value = selectedDoc.version;
+	document.getElementById('AssetLastModified').value = new Date(selectedDoc.lastModified).toISOString().slice(0, 19);
 }
 /**
  * Live update the YAML codepane with the values in the current Asset form field as the user types.

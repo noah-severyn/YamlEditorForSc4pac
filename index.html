@@ -55,11 +55,11 @@
 				<p>Fields with an asterisk (*) are required.</p>
 
 				<nav class="nav nav-tabs" id="nav-tab" role="tablist">
-					<button id="PackagePropertiesTab" class="nav-link active" data-bs-toggle="tab" data-bs-target="#PackagePropertiesContent" type="button" role="tab">Package Properties</button>
-					<button id="PackageInfoTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageInfoContent" type="button" role="tab">Package Info</button>
-					<button id="IncludedAssetsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#IncludedAssetsContent" type="button" role="tab">Included Assets</button>
-					<button id="PackageVaraintsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageVariantsContent" type="button" role="tab">Package Variants</button>
-					<button id="AssetPropertiesTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#AssetPropertiesContent" type="button" role="tab">Asset Properties</button>
+					<button id="PackagePropertiesTab" class="nav-link active" data-bs-toggle="tab" data-bs-target="#PackagePropertiesContent" type="button" role="tab" onclick="SelectTab(this.id)">Package Properties</button>
+					<button id="PackageInfoTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageInfoContent" type="button" role="tab" onclick="SelectTab(this.id)">Package Info</button>
+					<button id="IncludedAssetsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#IncludedAssetsContent" type="button" role="tab" onclick="SelectTab(this.id)">Included Assets</button>
+					<button id="PackageVaraintsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageVariantsContent" type="button" role="tab" onclick="SelectTab(this.id)">Package Variants</button>
+					<button id="AssetPropertiesTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#AssetPropertiesContent" type="button" role="tab" onclick="SelectTab(this.id)">Asset Properties</button>
 				</nav>
 
 				<div class="tab-content" id="nav-tabContent">
@@ -163,7 +163,7 @@
 										<textarea id="PackageAssetExclude" class="form-control" rows="3" oninput="UpdatePackageData('PackageAssetExclude')"></textarea>
 									</div>
 									<div class="mb-2 btn-group">
-										<input id="ResetIncludedAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetIncludedAssetForm()" />
+										<input id="ResetIncludedAssetButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetIncludedAssetInputs()" />
 										<input id="AddPackageAssetButton" class="btn btn-primary" type="button" value="Add Asset to Package" onclick="AddIncludedAsset()" disabled="disabled" />
 									</div>
 								</form>
@@ -277,15 +277,15 @@
 					</fieldset>
 				</div>
 
-
-				<div class="mb-2 btn-group">
-					<input id="ResetPackageFormButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetPackageInputs()" />
+				<div id="PackageControls">
+					<div class="btn-group">
+						<input id="ResetPackageFormButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetPackageInputs()" />
+					</div>
+					<div class="btn-group">
+						<input id="AddPackageButton" class="btn btn-primary" type="button" value="Add New Package" onclick="AddPackage()" disabled="disabled" />
+						<input id="RemovePackageButton" class="btn btn-outline-danger" type="button" value="Remove Package" onclick="RemoveSelectedDoc()" />
+					</div>
 				</div>
-				<div class="mb-2 btn-group">
-					<input id="AddPackageButton" class="btn btn-primary" type="button" value="Add New Package" onclick="AddPackage()" disabled="disabled" />
-					<input id="RemovePackageButton" class="btn btn-outline-danger" type="button" value="Remove Package" onclick="RemoveSelectedDoc()" />
-				</div>
-
 			</div>
 
 			<!-- Right Column -->
@@ -321,7 +321,7 @@
 		<span class="container text-muted">&copy; 2024 - YAML editor for sc4pac</span>
 	</footer>
 
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+	<!--<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>-->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 	<script src="wwwroot/js/site.js" asp-append-version="true"></script>
 
