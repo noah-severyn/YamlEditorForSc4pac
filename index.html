@@ -302,8 +302,8 @@
 						<button id="LoadFromButton" class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Load From</button>
 						<ul class="dropdown-menu">
 							<li><a class="dropdown-item" href="#" onclick="LoadFromFile()">Local File</a></li>
-							<!-- <li><a class="dropdown-item" href="#">Default channel</a></li>
-							<li><a class="dropdown-item" href="#">Zasco's channel</a></li> -->
+							<li><a class="dropdown-item" href="#" onclick="LoadFromGithub(this)" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Default channel</a></li>
+							<li><a class="dropdown-item" href="#" onclick="LoadFromGithub(this)" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Zasco's channel</a></li>
 						</ul>
 					</div>
 					<button class="btn btn-primary" type="button" onclick="ParseYaml()">Parse YAML</button>
@@ -314,6 +314,26 @@
 				</div>
 
 				<div id="editor"></div>
+
+				<div class="modal fade" id="LoadFromChannelDialog" tabindex="-1">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h1 class="modal-title fs-5" id="ModalSourceTitle">Modal title</h1>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+							</div>
+							<div class="modal-body">
+								<nav aria-label="breadcrumb">
+									<ol id="ChannelBreadcrumb" class="breadcrumb">
+										<li class="breadcrumb-item active"><a href="#">Root</a></li>
+									</ol>
+								</nav>
+								<div id="ChannelItemList" class="list-group"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
 			</div>
 		</div>
 	</main>

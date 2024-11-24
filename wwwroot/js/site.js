@@ -33,6 +33,10 @@ const cm = CodeMirror(document.querySelector('#editor'), {
 
 
 /**
+ * Load From Dialog
+ */
+const loadFileDialog = document.getElementById('LoadFromChannelDialog');
+/**
  * Main Tree View
  */
 var mtv;
@@ -654,4 +658,82 @@ function LoadFromFile() {
 		reader.readAsText(file);
 	}
 	tmp.click();
+}
+
+var channelData;
+var folderData;
+async function LoadFromGithub(src) {
+	console.log(src);
+	var srcUrl;
+	
+	
+	if (src.tagName === 'A') { //If the source is 'a' (link) then its being triggered from the open menu; if it is 'BUTTON' then its being triggered from the modal dialog
+		switch (src.textContent.toLowerCase()) {
+			case 'default content':
+				srcUrl = 'https://api.github.com/repos/memo33/sc4pac/git/trees/2b987426294c3fb8b66b1875d629d5937ad921ac';
+				break;
+			case "zasco's channel":
+				srcUrl = 'https://api.github.com/repos/Zasco/sc4pac-channel/git/trees/ad3f15a09bf296df6ef87be2175542f1ee671407';
+				break;
+		}
+		loadFileDialog.querySelector('.modal-title').textContent = src.innerHTML;
+
+	} else {
+		srcUrl = src.value;
+
+		let newCrumb = document.createElement('li');
+		newCrumb.className = 'breadcrumb-item active';
+		let newLink = document.createElement('a');
+		newLink.href = '#';
+		newLink.textContent = src.path;
+		document.getElementById('ChannelBreadcrumb').appendChild(newCrumb).appendChild(newLink);
+	}
+
+
+	fetch(srcUrl)
+		.then(response => response.json())
+		.then(data => {
+			let listDiv = loadFileDialog.querySelector('.list-group');
+			listDiv.textContent = '';
+
+			channelData = data.tree;
+			//console.log(channelData);
+			channelData
+				.filter((obj) => obj.path.charAt(0) !== '.')
+				.forEach(obj => {
+					let btn = document.createElement('button');
+					btn.className = 'list-group-item list-group-item-action';
+					btn.textContent = obj.path;
+					btn.value = obj.url;
+					if (src.tagName === 'A') {
+						btn.addEventListener('click', function () { LoadFromGithub(this); });
+					} else {
+						btn.addEventListener('click', function () { GetContent(this.value); });
+					}
+					
+					listDiv.appendChild(btn);
+				});
+		})
+		.catch(error => console.error('Error fetching the tree data:', error));
+	
+}
+
+
+function GetContent(url) {
+	console.log(url);
+	fetch(url)
+		.then(response => response.json())
+		.then(data => {
+			cm.setValue(atob(data.content));
+		})
+		.catch(error => console.error('Error fetching the tree data:', error));
+
+	//Hide the modal display
+	loadFileDialog.classList.remove('show');
+	loadFileDialog.style.display = 'none';
+	document.body.classList.remove('modal-open');
+	var backdrop = document.querySelector('.modal-backdrop');
+	if (backdrop) {
+		backdrop.parentNode.removeChild(backdrop);
+	}
 }
