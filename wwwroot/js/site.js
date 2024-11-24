@@ -621,11 +621,13 @@ function SaveAs() {
 	var tmp = document.createElement('a');
 	var fileName;
 	if (yamlData[0] == null) {
-		fileName = "document";
+		fileName = "document.yaml";
+	} else if (document.getElementById('YamlFileName').textContent !== '') {
+		fileName = document.getElementById('YamlFileName').textContent;
 	} else {
-		fileName = IsPackage(yamlData[0]) ? yamlData[0].name : yamlData[0].assetId;
+		fileName = IsPackage(yamlData[0]) ? yamlData[0].name : yamlData[0].assetId + '.yaml';
 	}
-	tmp.download = fileName + '.yaml';
+	tmp.download = fileName;
 	tmp.href = window.URL.createObjectURL(bb);
 	tmp.click();
 	tmp.remove();
@@ -661,12 +663,15 @@ function LoadFromFile() {
 }
 
 
-
+/**
+ * Load content from a Github file tree
+ * @param {any} srcElem Source element this function is being called from.
+ * 
+ * If the element is `a` then this is triggered from the open menu or the breadcrumb menu and we want to navigate to the base folder of the Github files; if the element is `BUTTON` then its being triggered from a button click in the modal dialog and we want to navigate to a subfolder of the Github files. Basically, links go to the root folder level, buttons go to a subfolder level.
+ * @param {any} channel Name of the channel to fetch data from, e.g. 'default' or 'zasco'
+ */
 async function LoadFromGithub(srcElem, channel) {
 	var crumbNav = document.getElementById('ChannelBreadcrumb');
-	/**
-	 * If the source is `a` then its being triggered from the open menu; if it is `BUTTON` then its being triggered from a button click in the modal dialog. Basically, links go to the root folder level, buttons go to a subfolder level.
-	 */
 	var level = (srcElem.tagName === 'A') ? 1 : 2;
 
 	//Set the base srcUrl and update the breadcrumb menu.
@@ -724,7 +729,7 @@ async function LoadFromGithub(srcElem, channel) {
 					if (level === 1) {
 						btn.addEventListener('click', function () { LoadFromGithub(this, channel); });
 					} else {
-						btn.addEventListener('click', function () { GetContent(this.value); });
+						btn.addEventListener('click', function () { GetContent(this.value, obj.path); });
 					}
 
 					listDiv.appendChild(btn);
@@ -734,11 +739,13 @@ async function LoadFromGithub(srcElem, channel) {
 }
 
 
-function GetContent(url) {
+function GetContent(url, fileName) {
 	fetch(url)
 		.then(response => response.json())
 		.then(data => {
+			document.getElementById('YamlFileName').textContent = fileName;
 			cm.setValue(atob(data.content));
+			ParseYaml();
 		})
 		.catch(error => console.error('Error fetching the tree data:', error));
 
