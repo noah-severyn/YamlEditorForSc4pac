@@ -341,12 +341,11 @@ function UpdateMainTree() {
 	mtv = new TreeView(mainTreeData, 'MainTreeView');
 	
 	mtv.on("select", function (t) {
-		console.log(t.data.name.indexOf('(') > 0);
 		if (t.data.name.indexOf('(') > 0) { //A heading category was selected
 			return
 		} else if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
 			currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
-			if (document.querySelector(".nav-link.active").value === 'Asset Properties') {
+			if (document.querySelector(".nav-link.active").id === 'AssetPropertiesTab') {
 				SelectTab('PackagePropertiesTab', true);
 			}
 

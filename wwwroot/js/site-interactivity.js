@@ -19,8 +19,9 @@ function ResetAllInputs() {
 }
 /**
  * Resets the Package input form fields.
+ * @param {boolean} newForm Whether to toggle the new form state side effects
  */
-function ResetPackageInputs() {
+function ResetPackageInputs(newForm = false) {
 	currPackageIdx = '0';
 	document.getElementById('PackageGroup').value = '';
 	if (groupTomSelect = document.getElementById('PackageGroup').tomselect) groupTomSelect.clear(true);
@@ -38,6 +39,12 @@ function ResetPackageInputs() {
 	document.getElementById('PackageAuthor').value = '';
 	document.getElementById('PackageImages').value = '';
 	document.getElementById('PackageWebsite').value = '';
+	document.getElementById('AddPackageButton').disabled = true;
+
+	if (newForm) {
+		document.getElementById('CurrentDocumentType').innerHTML = 'package';
+		document.getElementById('CurrentDocumentName').innerHTML = '[new package]';
+	}
 }
 /**
  * Resets the Included Asset input form fields.
@@ -70,13 +77,18 @@ function ResetVariantInputs() {
 /**
  * Resets the Asset input form fields.
  */
-function ResetAssetInputs() {
+function ResetAssetInputs(newForm = false) {
 	document.getElementById('AssetUrl').value = '';
 	document.getElementById('AssetId').value = '';
 	document.getElementById('AssetVersion').value = '';
 	document.getElementById('AssetLastModified').value = 0;
 	document.getElementById('AssetLastModifiedText').value = '';
 	document.getElementById('AddAssetButton').disabled = true;
+
+	if (newForm) {
+		document.getElementById('CurrentDocumentType').innerHTML = 'asset';
+		document.getElementById('CurrentDocumentName').innerHTML = '[new asset]';
+	}
 }
 
 
@@ -86,25 +98,31 @@ function ResetAssetInputs() {
  * Apply basic validation rules for the specified entry field.
  */
 function EntryValidation(elementId) {
-	//Prevent adding package if any required fields are blank
+	//Prevent adding a package if any required fields are blank
 	if (document.getElementById('PackageGroup').value === '' || document.getElementById('PackageName').value === '' || document.getElementById('PackageVersion').value === '' || document.getElementById('PackageSummary').value === '') {
 		document.getElementById('AddPackageButton').disabled = true;
+		document.getElementById('RemovePackageButton').disabled = true;
 	} else {
 		document.getElementById('AddPackageButton').disabled = false;
+		document.getElementById('RemovePackageButton').disabled = false;
 	}
 
-	//Prevent adding asset if any required fields are blank
+	//Prevent adding an asset if any required fields are blank
 	if (document.getElementById('AssetUrl').value === '' || document.getElementById('AssetId').value === '' || document.getElementById('AssetVersion').value === '' || document.getElementById('AssetLastModified').value === '') {
 		document.getElementById('AddAssetButton').disabled = true;
+		document.getElementById('RemoveAssetButton').disabled = true;
 	} else {
 		document.getElementById('AddAssetButton').disabled = false;
+		document.getElementById('RemoveAssetButton').disabled = false;
 	}
 
-	//
+	//Prevent adding a variant if any required fields are blank
 	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '') {
-		document.getElementById('AddVariantButton').disabled = true;
+		document.getElementById('AddVariantButton').disabled = true
+		document.getElementById('RemoveVariantButton').disabled = true;
 	} else {
 		document.getElementById('AddVariantButton').disabled = false;
+		document.getElementById('RemoveVariantButton').disabled = false;
 	}
 
 	
@@ -159,6 +177,9 @@ function FillPackageForm() {
 	//For some reason these must be last otherwise the regular text inputs will not populate correctly
 	(pkgGroupSelect.createItem(selectedDoc.group) || pkgGroupSelect.addItem(selectedDoc.group));
 	pkgSubfolderSelect.addItem(selectedDoc.subfolder);
+
+	document.getElementById('CurrentDocumentType').innerHTML = "package";
+	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
 }
 /**
  * Fill the Package Asset input form fields with the values from the currently selected package and asset number.
@@ -329,9 +350,6 @@ function SetIncludedAssetId(obj) {
 /**
  * Fill the Varaint input form fields with the specified variant.
  */
-function NewVariant() {
-	ResetVariantInputs();
-}
 function FillVariantFormHeader(vData) {
 	var key = Object.keys(vData.variant)[0];
 	var idx = key.lastIndexOf(':');
@@ -478,6 +496,9 @@ function FillAssetForm() {
 	document.getElementById('AssetId').value = selectedDoc.assetId;
 	document.getElementById('AssetVersion').value = selectedDoc.version;
 	document.getElementById('AssetLastModified').value = new Date(selectedDoc.lastModified).toISOString().slice(0, 19);
+
+	document.getElementById('CurrentDocumentType').innerHTML = "asset";
+	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.assetId;
 }
 /**
  * Live update the YAML codepane with the values in the current Asset form field as the user types.
@@ -522,6 +543,6 @@ function FillDateTimePicker() {
 			document.getElementById('AddAssetButton').disabled = false;
 		}
 	} catch (e) {
-		console.log(e)
+		console.log(e);
 	}
 }

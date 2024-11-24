@@ -37,20 +37,22 @@
 
 	<main role="main" class="container flex-shrink-0">
 		<div style="display:flex" class="row">
+
+			<!-- Left Column -->
 			<div id="Column0" class="col-sm-12 col-md-2">
-				<h2>File Structure</h2>
+				<h2>File Contents</h2>
 				<div class="mb-2 btn-group">
-					<input type="button" class="btn btn-primary" onclick="ResetPackageInputs()" value="New Package" />
-					<input type="button" class="btn btn-primary" onclick="ResetAssetInputs()" value="New Asset" />
+					<input type="button" class="btn btn-primary" onclick="ResetPackageInputs(true)" value="New Package" />
+					<input type="button" class="btn btn-primary" onclick="ResetAssetInputs(true)" value="New Asset" />
 				</div>
 				<div id="MainTreeView"></div>
 			</div>
 
 
-			<!-- Left Column -->
+			<!-- Middle Column -->
 			<div id="Column1" class="col-sm-12 col-md-5">
 
-				<h2>Data Input</h2>
+				<h2>Editing <span id="CurrentDocumentType">package</span>: <span id="CurrentDocumentName" style="font-style:italic">[new package]</span></h2>
 				<p>For Dependencies, Image, Include, and Exclude fields add multiple items separated by a semicolon.</p>
 				<p>Fields with an asterisk (*) are required.</p>
 
@@ -282,8 +284,8 @@
 						<input id="ResetPackageFormButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetPackageInputs()" />
 					</div>
 					<div class="btn-group">
-						<input id="AddPackageButton" class="btn btn-primary" type="button" value="Add New Package" onclick="AddPackage()" disabled="disabled" />
-						<input id="RemovePackageButton" class="btn btn-outline-danger" type="button" value="Remove Package" onclick="RemoveSelectedDoc()" />
+						<input id="AddPackageButton" class="btn btn-primary" type="button" value="Add New Package" onclick="AddPackage()" disabled />
+						<input id="RemovePackageButton" class="btn btn-outline-danger" type="button" value="Remove Package" onclick="RemoveSelectedDoc()" disabled />
 					</div>
 				</div>
 			</div>
