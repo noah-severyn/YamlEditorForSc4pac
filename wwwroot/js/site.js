@@ -349,9 +349,7 @@ function UpdateMainTree() {
 			return
 		} else if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
 			currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
-			if (document.querySelector(".nav-link.active").id === 'AssetPropertiesTab') {
-				SelectTab('PackagePropertiesTab', true);
-			}
+			SelectTab('PackageTab', true);
 
 			selectedDoc = yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
 			FillPackageForm();
@@ -359,7 +357,7 @@ function UpdateMainTree() {
 			UpdateVariantTree();
 		} else {
 			currAssetIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
-			SelectTab('AssetPropertiesTab', true);
+			SelectTab('AssetTab', true);
 
 			selectedDoc = yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
 			FillAssetForm();
