@@ -64,12 +64,6 @@ function IsPackage(obj) {
  * @param {boolean} triggerEvent Whether to trigger the click event to show the tab
  */
 function SelectTab(elementId, triggerEvent = false) {
-	if (elementId === 'AssetPropertiesTab') {
-		document.getElementById('PackageControls').classList.add("d-none");
-	} else {
-		document.getElementById('PackageControls').classList.remove("d-none");
-	}
-
 	if (triggerEvent) {
 		(new bootstrap.Tab(document.getElementById(elementId))).show();
 	}
