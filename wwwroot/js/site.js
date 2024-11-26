@@ -677,6 +677,7 @@ function LoadFromFile() {
 		if (!file) {
 			return;
 		}
+		document.getElementById('YamlFileName').textContent = file.name
 		var reader = new FileReader();
 		reader.onload = function (e) {
 			var contents = e.target.result;
