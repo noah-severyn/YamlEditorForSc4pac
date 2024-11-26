@@ -1,3 +1,4 @@
 .tree-leaf.selected {
-    background-color: lightgray;
+    background-color: #cde1fe;
+    color: darkblue;
 }
