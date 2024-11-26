@@ -326,11 +326,11 @@ function ParseYaml() {
 //https://github.com/justinchmura/js-treeview
 function UpdateMainTree() {
 	function getAssetTreeName(id, asset) {
-		return id + ' - ' + asset.assetId
+		return id + ' - ' + asset.assetId;
 	}
 	
 	function getPackageTreeName(id, package) {
-		return id + ' - ' + package.group + ":" + package.name
+		return id + ' - ' + package.group + ":" + package.name;
 	}
 	
 	var idx = 1;
@@ -352,24 +352,24 @@ function UpdateMainTree() {
 		{ name: 'Assets (' + astList.length + ')', expanded: true, children: astList }
 	];
 	mtv = new TreeView(mainTreeData, document.getElementById('MainTreeView'));
-	leaves = mtv.node.querySelectorAll('.tree-leaf')
+	leaves = mtv.node.querySelectorAll('.tree-leaf');
 	if (selectedDoc) {
 		leaves.forEach(function(leaf) {
-			let selectedDocTreeName
-			if (IsPackage(selectedDoc)) selectedDocTreeName = getPackageTreeName('', selectedDoc)
-			else if (IsAsset(selectedDoc)) selectedDocTreeName = getAssetTreeName('', selectedDoc)
-			else return
-			if (leaf.querySelectorAll('.tree-leaf-text')[0].innerHTML.includes(selectedDocTreeName)) leaf.classList.add('selected')
+			let selectedDocTreeName;
+			if (IsPackage(selectedDoc)) selectedDocTreeName = getPackageTreeName('', selectedDoc);
+			else if (IsAsset(selectedDoc)) selectedDocTreeName = getAssetTreeName('', selectedDoc);
+			else return;
+			if (leaf.querySelectorAll('.tree-leaf-text')[0].innerHTML.includes(selectedDocTreeName)) leaf.classList.add('selected');
 		})
 	}
 	
 	mtv.on("select", function (t) {
 		leaves.forEach(function(leaf) {
-			if (!(leaf instanceof HTMLElement)) return
-			leaf.classList.remove('selected')
+			if (!(leaf instanceof HTMLElement)) return;
+			leaf.classList.remove('selected');
 		})
-		leaf = t.target.target.closest('.tree-leaf')
-		leaf.classList.add('selected')
+		leaf = t.target.target.closest('.tree-leaf');
+		leaf.classList.add('selected');
 		
 		if (t.data.name.indexOf('(') > 0) { //A heading category was selected
 			return
