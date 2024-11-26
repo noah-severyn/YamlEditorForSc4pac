@@ -313,6 +313,7 @@ ResetVariantInputs();
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
 	
+	selectedDoc = yamlData.filter((doc) => IsPackage(doc))[0];
 	if (selectedDoc !== undefined) {
 		FillPackageForm();
 	}
@@ -324,17 +325,25 @@ function ParseYaml() {
 
 //https://github.com/justinchmura/js-treeview
 function UpdateMainTree() {
+	function getAssetTreeName(id, asset) {
+		return id + ' - ' + asset.assetId;
+	}
+	
+	function getPackageTreeName(id, package) {
+		return id + ' - ' + package.group + ":" + package.name;
+	}
+	
 	var idx = 1;
 	var astList = [];
 	listOfAssets.forEach((asset) => {
-		astList.push({ name: idx + ' - ' + asset.assetId, children: [] });
+		astList.push({ name: getAssetTreeName(idx, asset), children: [] });
 		idx++;
 	});
 
 	idx = 1;
 	var pkgList = [];
 	listOfPackages.forEach((pkg) => {
-		pkgList.push({ name: idx + ' - ' + pkg.group + ":" + pkg.name, children: [] });
+		pkgList.push({ name: getPackageTreeName(idx, pkg), children: [] });
 		idx++;
 	});
 
@@ -342,9 +351,26 @@ function UpdateMainTree() {
 		{ name: 'Packages (' + pkgList.length + ')', expanded: true, children: pkgList },
 		{ name: 'Assets (' + astList.length + ')', expanded: true, children: astList }
 	];
-	mtv = new TreeView(mainTreeData, 'MainTreeView');
+	mtv = new TreeView(mainTreeData, document.getElementById('MainTreeView'));
+	leaves = mtv.node.querySelectorAll('.tree-leaf');
+	if (selectedDoc) {
+		leaves.forEach(function(leaf) {
+			let selectedDocTreeName;
+			if (IsPackage(selectedDoc)) selectedDocTreeName = getPackageTreeName('', selectedDoc);
+			else if (IsAsset(selectedDoc)) selectedDocTreeName = getAssetTreeName('', selectedDoc);
+			else return;
+			if (leaf.querySelectorAll('.tree-leaf-text')[0].innerHTML.includes(selectedDocTreeName)) leaf.classList.add('selected');
+		})
+	}
 	
 	mtv.on("select", function (t) {
+		leaves.forEach(function(leaf) {
+			if (!(leaf instanceof HTMLElement)) return;
+			leaf.classList.remove('selected');
+		})
+		leaf = t.target.target.closest('.tree-leaf');
+		leaf.classList.add('selected');
+		
 		if (t.data.name.indexOf('(') > 0) { //A heading category was selected
 			return
 		} else if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
