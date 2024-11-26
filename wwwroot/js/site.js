@@ -57,8 +57,8 @@ var yamlData = jsyaml.loadAll(cm.getValue());
  */
 var selectedDoc;
 
-var currPackageIdx = '0';
-var currAssetIdx = '0';
+var currPackageIdx = null;
+var currAssetIdx = null;
 var countOfPackages = 0;
 var countOfAssets = 0;
 var listOfAssets = new Array();
@@ -294,7 +294,7 @@ var pkgGroupSelect = new TomSelect('#PackageGroup', {
 
 
 ParseYaml();
-SetSelectedDoc('p', 0);
+SetSelectedDoc('p', null);
 ResetAssetInputs();
 ResetPackageInputs();
 ResetVariantInputs();
@@ -313,7 +313,7 @@ ResetVariantInputs();
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
 	
-	selectedDoc = yamlData.filter((doc) => IsPackage(doc))[0];
+	if (selectedDoc == null) selectedDoc = yamlData.filter((doc) => IsPackage(doc))[0];
 	if (selectedDoc !== undefined) {
 		FillPackageForm();
 	}
@@ -623,12 +623,14 @@ function SetSelectedDoc(type, index) {
 	var docs;
 	if (type.toLowerCase() === 'p') {
 		docs = yamlData.filter((doc) => IsPackage(doc));
+		currPackageIdx = index
 	} else if (type.toLowerCase() === 'a') {
 		docs = yamlData.filter((doc) => IsAsset(doc));
+		currAssetIdx = index
 	}
 
 	if (index <= docs.length) {
-		selectedDoc = docs[0];
+		selectedDoc = docs[index];
 	} else {
 		selectedDoc = null;
 	}
