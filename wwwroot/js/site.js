@@ -90,16 +90,15 @@ var pkgTomSelect = new TomSelect('#PacPackageList', {
 		var zascoChannelURL = 'https://zasco.github.io/sc4pac-channel/channel/sc4pac-channel-contents.json'
 		allPackages = []
 
-		function handleResponse(jsonContents, channel) {
-			//Filter the response to remove assets and add a new field combining the group and name
-			return jsonContents.filter((item) => item.group !== 'sc4pacAsset')
-				.map(i => ({ id: i.group + ":" + i.name, optGroup: channel, ...i }))
+		function handleResponse(jsonResponse, channel) {
+			// Add a new field combining the group and name.
+			return jsonResponse.packages.map(i => ({ id: i.group + ":" + i.name, optGroup: channel, ...i }))
 		}
 		
 		await fetch(defaultChannelURL)
 			.then(response => response.json())
 			.then(json => {
-				allPackages = allPackages.concat(handleResponse(json.contents, 'default'))
+				allPackages = allPackages.concat(handleResponse(json, 'default'))
 				defaultFailed = false
 			})
 			.catch(() => {
@@ -109,7 +108,7 @@ var pkgTomSelect = new TomSelect('#PacPackageList', {
 		await fetch(zascoChannelURL)
 			.then(response => response.json())
 			.then(json => {
-				allPackages = allPackages.concat(handleResponse(json.contents, 'zasco'))
+				allPackages = allPackages.concat(handleResponse(json, 'zasco'))
 				zascoFailed = false
 			})
 			.catch(() => {
@@ -151,11 +150,8 @@ var variantPackageSelect = new TomSelect('#VariantsPacPackageList', {
 		fetch(url)
 			.then(response => response.json())
 			.then(json => {
-				//Filter the response to remove assets and add a new field combining the group and name
-				callback(json.contents
-					.filter((item) => item.group !== 'sc4pacAsset')
-					.map(i => ({ id: i.group + ":" + i.name, ...i }))
-				);
+				// Add a new field combining the group and name.
+				callback(json.packages.map(i => ({ id: i.group + ":" + i.name, ...i })));
 				//console.log(json.contents
 				//	.filter((item) => item.group !== 'sc4pacAsset')
 				//	.map(i => ({ id: i.group + ":" + i.name, ...i }))
@@ -191,10 +187,7 @@ var variantAssetSelect = new TomSelect('#VariantsPacAssetList', {
 		fetch(url)
 			.then(response => response.json())
 			.then(json => {
-				//Filter the response to remove assets and add a new field combining the group and name
-				callback(json.contents
-					.filter((item) => item.group === 'sc4pacAsset')
-				);
+				callback(json.assets);
 				//console.log(json.contents.filter((item) => item.group === 'sc4pacAsset'));
 				//console.log(sc4pacAssets.map(i => ({ id: i.name, ...i })));
 				self.settings.load = null;
@@ -274,10 +267,7 @@ var pkgGroupSelect = new TomSelect('#PackageGroup', {
 		fetch(url)
             .then(response => response.json())
             .then(json => {
-                //Filter the response to remove assets
-				callback(json.contents
-					.filter((item) => item.group !== 'sc4pacAsset')
-				);
+                callback(json.packages);
                 self.settings.load = null;
             }).catch(() => {
                 callback();
