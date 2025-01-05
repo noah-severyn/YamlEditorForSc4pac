@@ -105,8 +105,13 @@
 					<fieldset id="PackageInfoContent" class="tab-pane m-3" tabindex="0">
 						<form>
 							<div class="input-group mb-2">
-								<span class="input-group-text w2">Website</span>
-								<input id="PackageWebsite" class="form-control" type="url" oninput="UpdatePackageData('PackageWebsite')" />
+
+								<span id="PackageWebsiteLabel" class="input-group-text w2">Website</span>
+								<div class="form-check mt-2 me-2 ms-2">
+									<input id="IsMultipleWebsites" class="form-check-input" type="checkbox" onchange="ToggleMultipleWebsites()" title="Whether this package has multiple websites (uploaded to multiple exchanges)">
+									<label class="form-check-label" for="IsMultipleWebsites" title="Whether this package has multiple websites (uploaded to multiple exchanges">Multiple</label>
+								</div>
+								<textarea id="PackageWebsite" class="form-control" oninput="UpdatePackageData('PackageWebsite')"></textarea>
 							</div>
 							<div class="input-group mb-2">
 								<span class="input-group-text required-label w2">Summary</span>
