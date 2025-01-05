@@ -29,7 +29,7 @@
 	<header>
 		<nav class="navbar navbar-light border-bottom box-shadow bg-light mb-3">
 			<div class="container justify-content-start">
-				<h1 class="navbar-brand mb-0">YAML editor for sc4pac</h1>
+				<a class="navbar-brand mb-0" href="index.html">YAML editor for sc4pac</a>
 				<span class="navbar-text">This tool is designed to help create and edit YAML metadata files used by <a href="https://community.simtropolis.com/forums/topic/762677-sc4pac-lets-write-our-own-package-manager/">sc4pac</a>. Please contact <a href="https://community.simtropolis.com/profile/455740-nos17/">nos.17</a> with any comments or issues.</span>
 			</div>
 		</nav>
@@ -304,6 +304,7 @@
 						<ul class="dropdown-menu">
 							<li><a class="dropdown-item" href="#" onclick="LoadFromFile()">Local File</a></li>
 							<li><a class="dropdown-item" href="#" onclick="LoadFromGithub(this, 'default')" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Default channel</a></li>
+							<li><a class="dropdown-item" href="#" onclick="LoadFromGithub(this, 'simtropolis')" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Simtropolis channel</a></li>
 							<li><a class="dropdown-item" href="#" onclick="LoadFromGithub(this, 'zasco')" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Zasco's channel</a></li>
 						</ul>
 					</div>

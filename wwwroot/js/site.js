@@ -699,6 +699,9 @@ async function LoadFromGithub(srcElem, channel) {
 			case 'default':
 				srcUrl = 'https://api.github.com/repos/memo33/sc4pac/git/trees/2b987426294c3fb8b66b1875d629d5937ad921ac';
 				break;
+			case 'simtropolis':
+				srcUrl = 'https://api.github.com/repos/sebamarynissen/simtropolis-channel/git/trees/04887d7d070e600ea0fb4a7cc22314c5fb0af436';
+				break;
 			case 'zasco':
 				srcUrl = 'https://api.github.com/repos/Zasco/sc4pac-channel/git/trees/ad3f15a09bf296df6ef87be2175542f1ee671407';
 				break;
