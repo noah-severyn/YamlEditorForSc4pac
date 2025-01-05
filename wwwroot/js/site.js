@@ -1,11 +1,7 @@
-const cm = CodeMirror(document.querySelector('#editor'), {
+const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
 	lineNumbers: true,
 	tabSize: 2,
 	lineWrapping: true,
-	value:
-		`#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.
-
-`,
 	mode: 'yaml'
 });
 
