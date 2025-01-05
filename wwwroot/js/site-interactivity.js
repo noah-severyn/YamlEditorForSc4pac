@@ -284,6 +284,8 @@ function UpdatePackageData(fieldName) {
 				delete selectedDoc.info.websites;
 			}
 		}
+
+		document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
 		UpdateCodePane();
 	}
 }
