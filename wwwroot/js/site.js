@@ -1,11 +1,7 @@
-const cm = CodeMirror(document.querySelector('#editor'), {
+const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
 	lineNumbers: true,
 	tabSize: 2,
 	lineWrapping: true,
-	value:
-		`#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.
-
-`,
 	mode: 'yaml'
 });
 
@@ -510,7 +506,7 @@ function CountItems() {
 }
 
 
-function UpdateCodePane() {
+function DumpYaml() {
 	var newYaml = '';
 	var docu = '';
 	//TODO - figure out how to retain comments
@@ -529,7 +525,7 @@ function UpdateCodePane() {
 		if (docu.indexOf('description: ') > 0) {
 			var rgx = new RegExp('description: \"(.*?)\"');
 			var oldText = docu.match(rgx)[0];
-			var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"','');
+			var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"', '');
 			docu = docu.replace(oldText, newText);
 		}
 
@@ -538,7 +534,12 @@ function UpdateCodePane() {
 			newYaml = newYaml + '\n---\n';
 		}
 	}
-	cm.setValue(newYaml);
+	return newYaml;
+}
+
+
+function UpdateCodePane() {
+	cm.setValue(DumpYaml());
 }
 
 
@@ -635,7 +636,7 @@ document.addEventListener("keydown", function (e) {
 	}
 }, false);
 function SaveAs() {
-	var bb = new Blob([yamlData], { type: 'application/yaml' });
+	var bb = new Blob([DumpYaml()], { type: 'application/yaml' });
 	var tmp = document.createElement('a');
 	var fileName;
 	if (yamlData[0] == null) {
@@ -698,6 +699,9 @@ async function LoadFromGithub(srcElem, channel) {
 		switch (channel.toLowerCase()) {
 			case 'default':
 				srcUrl = 'https://api.github.com/repos/memo33/sc4pac/git/trees/2b987426294c3fb8b66b1875d629d5937ad921ac';
+				break;
+			case 'simtropolis':
+				srcUrl = 'https://api.github.com/repos/sebamarynissen/simtropolis-channel/git/trees/04887d7d070e600ea0fb4a7cc22314c5fb0af436';
 				break;
 			case 'zasco':
 				srcUrl = 'https://api.github.com/repos/Zasco/sc4pac-channel/git/trees/ad3f15a09bf296df6ef87be2175542f1ee671407';

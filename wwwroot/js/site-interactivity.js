@@ -3,9 +3,9 @@
  */
 function ClearAll() {
 	ResetAllInputs();
+	cm.setValue('');
 	yamlData.length = 0;
 	document.getElementById('YamlFileName').textContent = '';
-	cm.setValue('#Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications.\n');
 	ParseYaml();
 }
 /**
@@ -41,6 +41,8 @@ function ResetPackageInputs(newForm = false) {
 	document.getElementById('PackageAuthor').value = '';
 	document.getElementById('PackageImages').value = '';
 	document.getElementById('PackageWebsite').value = '';
+	document.getElementById('PackageWebsite').rows = '1';
+	document.getElementById('IsMultipleWebsites').checked = false;
 	document.getElementById('AddPackageButton').disabled = true;
 
 	if (newForm) {
@@ -141,7 +143,7 @@ function EntryValidation(elementId) {
 	} else if (fieldName === 'Dependencies') {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-:;\n]/g, '').toLowerCase();
 	} else if (fieldName === 'Website' || fieldName === 'AssetUrl') {
-		inputText = inputText.toLowerCase().replace(new RegExp('[^a-z0-9-&_:/?=.]'), '');
+		inputText = inputText.toLowerCase().replace(new RegExp('[^a-z0-9-&_:;/?=.\n]'), '');
 	} else if (fieldName === 'Include' || fieldName === 'Exclude') {
 		//Want to replace ONLY for file/folder names, not regex strings
 		//inputText = inputText.replaceAll('\\', '/');
@@ -152,6 +154,20 @@ function EntryValidation(elementId) {
 	if (!["PackageGroup", "Subfolder"].includes(elementId)) {
 		inputElement.setSelectionRange(locn, locn);
 	}
+}
+
+
+function ToggleMultipleWebsites() {
+	var currVal = document.getElementById('IsMultipleWebsites').checked;
+	if (currVal) {
+		document.getElementById('PackageWebsiteLabel').textContent = 'Websites';
+		document.getElementById('PackageWebsite').rows = '3';
+	} else {
+		document.getElementById('PackageWebsiteLabel').textContent = 'Website';
+		document.getElementById('PackageWebsite').value = document.getElementById('PackageWebsite').value.split(';')[0];
+		document.getElementById('PackageWebsite').rows = '1';
+	}
+	UpdatePackageData('PackageWebsite');
 }
 
 
@@ -174,7 +190,15 @@ function FillPackageForm() {
 	document.getElementById('PackageDescription').value = selectedDoc.info.description ?? '';
 	document.getElementById('PackageAuthor').value = selectedDoc.info.author ?? '';
 	document.getElementById('PackageImages').value = ArrayToText(selectedDoc.info.images);
-	document.getElementById('PackageWebsite').value = selectedDoc.info.website ?? '';
+	if (Object.hasOwn(selectedDoc.info, 'websites')) {
+		document.getElementById('PackageWebsite').value = ArrayToText(selectedDoc.info.websites) ?? '';
+		document.getElementById('PackageWebsite').rows = '3';
+		document.getElementById('IsMultipleWebsites').checked = true;
+	} else {
+		document.getElementById('PackageWebsite').value = selectedDoc.info.website ?? '';
+		document.getElementById('PackageWebsite').rows = '1';
+		document.getElementById('IsMultipleWebsites').checked = false;
+	}
 
 	//For some reason these must be last otherwise the regular text inputs will not populate correctly
 	(pkgGroupSelect.createItem(selectedDoc.group) || pkgGroupSelect.addItem(selectedDoc.group));
@@ -252,8 +276,16 @@ function UpdatePackageData(fieldName) {
 			selectedDoc.info.images = TextToArray(document.getElementById('PackageImages').value);
 		}
 		if (document.getElementById('PackageWebsite').value !== '') {
-			selectedDoc.info.website = document.getElementById('PackageWebsite').value;
+			if (document.getElementById('IsMultipleWebsites').checked) {
+				selectedDoc.info.websites = TextToArray(document.getElementById('PackageWebsite').value);
+				delete selectedDoc.info.website;
+			} else {
+				selectedDoc.info.website = document.getElementById('PackageWebsite').value;
+				delete selectedDoc.info.websites;
+			}
 		}
+
+		document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
 		UpdateCodePane();
 	}
 }
@@ -287,7 +319,13 @@ function AddPackage() {
 	if (document.getElementById('PackageImages').value !== '') {
 		newPackage.info.images = TextToArray(document.getElementById('PackageImages').value);
 	}
-	newPackage.info.website = document.getElementById('PackageWebsite').value;
+	if (document.getElementById('PackageWebsite').value !== '') {
+		if (document.getElementById('IsMultipleWebsites').checked) {
+			newPackage.info.websites = TextToArray(document.getElementById('PackageWebsite').value);
+		} else {
+			newPackage.info.website = document.getElementById('PackageWebsite').value;
+		}
+	}
 	yamlData.push(newPackage);
 
 	SetSelectedDoc('p', yamlData.filter((doc) => IsPackage(doc)).length - 1)

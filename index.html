@@ -17,6 +17,7 @@
 	<link rel="stylesheet" href="wwwroot/css/codemirror.css" type="text/css" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js" integrity="sha512-8RnEqURPUc5aqFEN04aQEiPlSAdE0jlFS/9iGgUyNtwFnSKCXhmB6ZTNl7LnDtDWKabJIASzXrzD0K+LYexU9g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/yaml/yaml.min.js" integrity="sha512-+aXDZ93WyextRiAZpsRuJyiAZ38ztttUyO/H3FZx4gOAOv4/k9C6Um1CvHVtaowHZ2h7kH0d+orWvdBLPVwb4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/display/placeholder.min.js"></script>
 
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/css/tom-select.min.css" integrity="sha512-fnaIKCc5zGOLlOvY3QDkgHHDiDdb4GyMqn99gIRfN6G6NrgPCvZ8tNLMCPYgfHM3i3WeAU6u4Taf8Cuo0Y0IyQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.js" integrity="sha512-96+GeOCMUo6K6W5zoFwGYN9dfyvJNorkKL4cv+hFVmLYx/JZS5vIxOk77GqiK0qYxnzBB+4LbWRVgu5XcIihAQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -29,7 +30,7 @@
 	<header>
 		<nav class="navbar navbar-light border-bottom box-shadow bg-light mb-3">
 			<div class="container justify-content-start">
-				<h1 class="navbar-brand mb-0">YAML editor for sc4pac</h1>
+				<a class="navbar-brand mb-0" href="index.html">YAML editor for sc4pac</a>
 				<span class="navbar-text">This tool is designed to help create and edit YAML metadata files used by <a href="https://community.simtropolis.com/forums/topic/762677-sc4pac-lets-write-our-own-package-manager/">sc4pac</a>. Please contact <a href="https://community.simtropolis.com/profile/455740-nos17/">nos.17</a> with any comments or issues.</span>
 			</div>
 		</nav>
@@ -105,8 +106,13 @@
 					<fieldset id="PackageInfoContent" class="tab-pane m-3" tabindex="0">
 						<form>
 							<div class="input-group mb-2">
-								<span class="input-group-text w2">Website</span>
-								<input id="PackageWebsite" class="form-control" type="url" oninput="UpdatePackageData('PackageWebsite')" />
+
+								<span id="PackageWebsiteLabel" class="input-group-text w2">Website</span>
+								<div class="form-check mt-2 me-2 ms-2">
+									<input id="IsMultipleWebsites" class="form-check-input" type="checkbox" onchange="ToggleMultipleWebsites()" title="Whether this package has multiple websites (uploaded to multiple exchanges)">
+									<label class="form-check-label" for="IsMultipleWebsites" title="Whether this package has multiple websites (uploaded to multiple exchanges">Multiple</label>
+								</div>
+								<textarea id="PackageWebsite" class="form-control" oninput="UpdatePackageData('PackageWebsite')"></textarea>
 							</div>
 							<div class="input-group mb-2">
 								<span class="input-group-text required-label w2">Summary</span>
@@ -304,6 +310,7 @@
 						<ul class="dropdown-menu">
 							<li><a class="dropdown-item" href="#" onclick="LoadFromFile()">Local File</a></li>
 							<li><a class="dropdown-item" href="#" onclick="LoadFromGithub(this, 'default')" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Default channel</a></li>
+							<li><a class="dropdown-item" href="#" onclick="LoadFromGithub(this, 'simtropolis')" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Simtropolis channel</a></li>
 							<li><a class="dropdown-item" href="#" onclick="LoadFromGithub(this, 'zasco')" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Zasco's channel</a></li>
 						</ul>
 					</div>
@@ -313,7 +320,7 @@
 					<button class="btn btn-danger" type="button" onclick="ClearAll()">Clear All</button>
 				</div>
 
-				<div id="editor"></div>
+				<textarea id="editor" placeholder="Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications."></textarea>
 
 				<div class="modal fade" id="LoadFromChannelDialog" tabindex="-1">
 					<div class="modal-dialog modal-dialog-scrollable">
