@@ -3,6 +3,7 @@
  */
 function ClearAll() {
 	ResetAllInputs();
+	cm.setValue('');
 	yamlData.length = 0;
 	document.getElementById('YamlFileName').textContent = '';
 	ParseYaml();

@@ -506,7 +506,7 @@ function CountItems() {
 }
 
 
-function UpdateCodePane() {
+function DumpYaml() {
 	var newYaml = '';
 	var docu = '';
 	//TODO - figure out how to retain comments
@@ -525,7 +525,7 @@ function UpdateCodePane() {
 		if (docu.indexOf('description: ') > 0) {
 			var rgx = new RegExp('description: \"(.*?)\"');
 			var oldText = docu.match(rgx)[0];
-			var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"','');
+			var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"', '');
 			docu = docu.replace(oldText, newText);
 		}
 
@@ -534,7 +534,12 @@ function UpdateCodePane() {
 			newYaml = newYaml + '\n---\n';
 		}
 	}
-	cm.setValue(newYaml);
+	return newYaml;
+}
+
+
+function UpdateCodePane() {
+	cm.setValue(DumpYaml());
 }
 
 
@@ -631,7 +636,7 @@ document.addEventListener("keydown", function (e) {
 	}
 }, false);
 function SaveAs() {
-	var bb = new Blob([yamlData], { type: 'application/yaml' });
+	var bb = new Blob([DumpYaml()], { type: 'application/yaml' });
 	var tmp = document.createElement('a');
 	var fileName;
 	if (yamlData[0] == null) {
