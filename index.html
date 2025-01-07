@@ -275,6 +275,28 @@
 									<label for="AssetLastModifiedText">(raw date time value)</label>
 								</div>
 							</div>
+							<div class="mb-2 input-group">
+								<label id="AssetArchiveTypeLabel" class="input-group-text w2">Archive Type</label>
+								<input id="AssetArchiveType" class="form-control" type="text" value="Clickteam" disabled title="Currently only Clickteam installers are supported by sc4pac" />
+								<label id="AssetArchiveVersionLabel" class="input-group-text w2">Version</label>
+								<select id="AssetArchiveVersion" class="form-select" onchange="UpdateAssetItem('AssetArchiveVersion')">
+									<option value="0" selected>No installer</option>
+									<option value="40">40</option>
+									<option value="35">35</option>
+									<option value="30">30</option>
+									<option value="24">24</option>
+									<option value="20">20</option>
+								</select>
+							</div>
+							<div class="mb-2 input-group">
+								<label id="AssetChecksumLabel" class="input-group-text w2">sha256</label>
+								<input id="AssetChecksum" class="form-control" type="text" oninput="UpdateAssetItem('AssetChecksum')" />
+							</div>
+							<div class="mb-2 input-group">
+								<label class="input-group-text w2" title="Non Persistent Url">Non Perst. Url</label>
+								<input id="AssetNonPersistentUrl" class="form-control" type="text" oninput="UpdateAssetItem('AssetNonPersistentUrl')" />
+
+							</div>
 						</form>
 						<div class="mb-2 btn-group">
 							<input id="ResetAssetFormButton" class="btn btn-outline-primary btn-sm" type="button" value="Reset Form" onclick="ResetAssetInputs()" />

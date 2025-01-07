@@ -87,6 +87,9 @@ function ResetAssetInputs(newForm = false) {
 	document.getElementById('AssetVersion').value = '';
 	document.getElementById('AssetLastModified').value = 0;
 	document.getElementById('AssetLastModifiedText').value = '';
+	document.getElementById('AssetArchiveVersion').selectedIndex = 0;
+	document.getElementById('AssetChecksum').value = '';
+	document.getElementById('AssetNonPersistentUrl').value = '';
 	document.getElementById('AddAssetButton').disabled = true;
 
 	if (newForm) {
@@ -151,7 +154,7 @@ function EntryValidation(elementId) {
 	inputElement.value = inputText;
 
 	//The replacement of invalid characters resets cursor position to the end which is undesirable; reset it to where the user was editing. This is only valid for non-dropdown inputs
-	if (!["PackageGroup", "Subfolder"].includes(elementId)) {
+	if (["PackageGroup", "PackageSubfolder", "AssetArchiveVersion"].indexOf(elementId) === -1) {
 		inputElement.setSelectionRange(locn, locn);
 	}
 }
@@ -540,6 +543,15 @@ function FillAssetForm() {
 	document.getElementById('AssetId').value = selectedDoc.assetId;
 	document.getElementById('AssetVersion').value = selectedDoc.version;
 	document.getElementById('AssetLastModified').value = new Date(selectedDoc.lastModified).toISOString().slice(0, 19);
+	if (Object.hasOwn(selectedDoc, 'archiveType')) {
+		document.getElementById('AssetArchiveVersion').value = selectedDoc.archiveType.version;
+	}
+	if (Object.hasOwn(selectedDoc, 'checksum')) {
+		document.getElementById('AssetChecksum').value = selectedDoc.checksum.sha256;
+	}
+	if (Object.hasOwn(selectedDoc, 'nonPersistentUrl')) {
+		document.getElementById('AssetNonPersistentUrl').value = selectedDoc.nonPersistentUrl;
+	}
 
 	document.getElementById('CurrentDocumentType').innerHTML = "asset";
 	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.assetId;
@@ -556,6 +568,31 @@ function UpdateAssetItem(itemName) {
 		selectedDoc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
 		UpdateCodePane();
 	}
+	if (document.getElementById('AssetArchiveVersion').value !== '0') {
+		if (!Object.hasOwn(selectedDoc, 'archiveType')) {
+			selectedDoc.archiveType = new Object();
+			selectedDoc.archiveType.format = "Clickteam"
+		}
+		selectedDoc.archiveType.version = document.getElementById('AssetArchiveVersion').value;
+	} else {
+		delete selectedDoc.archiveType;
+	}
+
+	if (document.getElementById('AssetChecksum').value !== '') {
+		if (!Object.hasOwn(selectedDoc, 'checksum')) {
+			selectedDoc.checksum = new Object();
+		}
+		selectedDoc.checksum.sha256 = document.getElementById('AssetChecksum').value;
+	} else {
+		delete selectedDoc.checksum;
+	}
+
+	if (document.getElementById('AssetNonPersistentUrl').value !== '') {
+		selectedDoc.nonPersistentUrl = document.getElementById('AssetNonPersistentUrl').value;
+	} else {
+		delete selectedDoc.nonPersistentUrl;
+	}
+	UpdateCodePane();
 }
 /**
  * Add a new asset to the end of this YAML document.
@@ -566,6 +603,18 @@ function AddAsset() {
 		assetId: document.getElementById('AssetId').value,
 		version: document.getElementById('AssetVersion').value,
 		lastModified: document.getElementById('AssetLastModified').value + 'Z'
+	}
+	if (document.getElementById('AssetArchiveVersion').value !== 0) {
+		newAsset.archiveType = new Object();
+		newAsset.archiveType.format = "Clickteam";
+		newAsset.archiveType.version = document.getElementById('AssetArchiveVersion').value;
+	}
+	if (document.getElementById('AssetChecksum').value !== '') {
+		newAsset.checksum = new Object();
+		newAsset.checksum.sha256 = document.getElementById('AssetChecksum').value;
+	}
+	if (document.getElementById('AssetNonPersistentUrl').value !== '') {
+		newAsset.nonPersistentUrl = document.getElementById('AssetNonPersistentUrl').value;
 	}
 	yamlData.push(newAsset);
 
