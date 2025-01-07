@@ -1,9 +1,20 @@
+/**
+ * CodeMirror editor component
+ */
 const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
 	lineNumbers: true,
 	tabSize: 2,
 	lineWrapping: true,
 	mode: 'yaml'
 });
+cm.on('change', editor => {
+	console.log('yaml changed');
+	jsyaml.loadAll(cm.getValue());
+});
+/**
+ * Array of packages and assets in this YAML file
+ */
+var yamlData = jsyaml.loadAll(cm.getValue());
 
 
 //var sc4pacAssets = new Array();
@@ -44,10 +55,6 @@ var atv;
  * Variant Tree View
  */
 var vtv;
-/**
- * Array of packages and assets in this YAML file
- */
-var yamlData = jsyaml.loadAll(cm.getValue());
 /**
  * Currently selected document in the main tree - can be a package or an asset
  */
@@ -279,11 +286,8 @@ var pkgGroupSelect = new TomSelect('#PackageGroup', {
 
 
 
-ParseYaml();
 SetSelectedDoc('p', null);
-ResetAssetInputs();
-ResetPackageInputs();
-ResetVariantInputs();
+ResetAllInputs();
 
 
 
@@ -292,13 +296,111 @@ ResetVariantInputs();
 
 
 
+/**
+ * Update the `yamlData` object with the current state of the inputs and dump the resulting YAML to the codepane
+ */
+function UpdateData() {
+	//When updating a text input, the input event occurs immediately, but the change event doesn't occur until you commit the change by lose focus or submit the form.
+
+	//form.onchange() { input.validate(); metadata.update() }
+	//codemirror.onchange() { metadata.update() }
+	//metadata.update() { treeview.update(); form.update(); codemirror.update() }
+
+
+	CountItems();
+	//UpdateMainTree();
+	//UpdateCodePane();
+	ResetAssetInputs();
+
+
+	cm.setValue(DumpYaml());
+
+
+	/**
+	 * Count the number of Packages and Assets in the code pane and update the UI with this new result.
+	 */
+	function CountItems() {
+		countOfAssets = 0;
+		countOfPackages = 0;
+		listOfAssets.length = 0;
+		listOfPackages.length = 0;
+
+		if (yamlData !== null) {
+			yamlData.forEach((item) => {
+				if (IsAsset(item)) {
+					countOfAssets++;
+					listOfAssets.push(item);
+				} else if (IsPackage(item)) {
+					countOfPackages++;
+					listOfPackages.push(item);
+				}
+			});
+		}
+
+		//TODO - the below code should disappear when PR #45 is implemented
+		//Fill local dependency selection options
+		var packageDependencies = document.getElementById('LocalPackageList');
+		var variantDependencies = document.getElementById('VariantsLocalPackageList');
+		packageDependencies.replaceChildren();
+		packageDependencies.appendChild(new Option('', ''));
+		variantDependencies.replaceChildren();
+		variantDependencies.appendChild(new Option('', ''));
+		for (var idx = 0; idx < listOfPackages.length; idx++) {
+			var pkgName = listOfPackages[idx].group + ":" + listOfPackages[idx].name;
+			packageDependencies.add(new Option(pkgName, pkgName));
+			variantDependencies.add(new Option(pkgName, pkgName));
+		}
+
+		//Package:asset selection for local assets
+		var localAssetList = document.getElementById('SelectLocalPackageAssets');
+		var variantAssets = document.getElementById('VariantsLocalAssetList');
+		localAssetList.replaceChildren();
+		localAssetList.appendChild(new Option('', ''));
+		variantAssets.replaceChildren();
+		variantAssets.appendChild(new Option('', ''));
+		listOfAssets.forEach(i => localAssetList.add(new Option(i.assetId, i.assetId)));
+		listOfAssets.forEach(i => variantAssets.add(new Option(i.assetId, i.assetId)));
+
+		document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
+	}
+
+	function DumpYaml() {
+		var newYaml = '';
+		var docu = '';
+		//TODO - figure out how to retain comments
+
+		for (var idx = 0; idx < yamlData.length; idx++) {
+			if (yamlData[idx] === null) {
+				continue;
+			}
+			docu = jsyaml.dump(yamlData[idx], {
+				'lineWidth': -1,
+				'quotingType': '"',
+				'noArrayIndent': true,
+				'forceQuotes': true
+			});
+			//The parser blows away the multiline context so we need to rebuild it :(
+			if (docu.indexOf('description: ') > 0) {
+				var rgx = new RegExp('description: \"(.*?)\"');
+				var oldText = docu.match(rgx)[0];
+				var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"', '');
+				docu = docu.replace(oldText, newText);
+			}
+
+			newYaml = newYaml + docu;
+			if (idx !== yamlData.length - 1) {
+				newYaml = newYaml + '\n---\n';
+			}
+		}
+		return newYaml;
+	}
+}
 
 /**
- * Parse the current YAML input and update the UI accordingly based on the count of packages and assets.
+ * Parse the YAML input and update the UI accordingly based on the count of packages and assets.
  */
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
-	console.log(yamlData);
 	if (yamlData.length > 0 && (selectedDoc == null || selectedDoc == undefined)) {
 		selectedDoc = yamlData[0];
 		//if (IsPackage(selectedDoc)) {
@@ -462,89 +564,7 @@ function UpdateVariantTree() {
 
 
 
-/**
- * Count the number of Packages and Assets in the code pane and update the UI with this new result.
- */
-function CountItems() {
-	countOfAssets = 0;
-	countOfPackages = 0;
-	listOfAssets.length = 0;
-	listOfPackages.length = 0;
 
-	if (yamlData !== null) {
-		yamlData.forEach((item) => {
-			if (IsAsset(item)) {
-				countOfAssets++;
-				listOfAssets.push(item);
-			} else if (IsPackage(item)) {
-				countOfPackages++;
-				listOfPackages.push(item);
-			}
-		});
-	}
-
-	//Fill local dependency selection options
-	var packageDependencies = document.getElementById('LocalPackageList');
-	var variantDependencies = document.getElementById('VariantsLocalPackageList');
-	packageDependencies.replaceChildren();
-	packageDependencies.appendChild(new Option('', ''));
-	variantDependencies.replaceChildren();
-	variantDependencies.appendChild(new Option('', ''));
-	for (var idx = 0; idx < listOfPackages.length; idx++) {
-		var pkgName = listOfPackages[idx].group + ":" + listOfPackages[idx].name;
-		packageDependencies.add(new Option(pkgName, pkgName));
-		variantDependencies.add(new Option(pkgName, pkgName));
-	}
-
-	//Package:asset selection for local assets
-	var localAssetList = document.getElementById('SelectLocalPackageAssets');
-	var variantAssets = document.getElementById('VariantsLocalAssetList');
-	localAssetList.replaceChildren();
-	localAssetList.appendChild(new Option('', ''));
-	variantAssets.replaceChildren();
-	variantAssets.appendChild(new Option('', ''));
-	listOfAssets.forEach(i => localAssetList.add(new Option(i.assetId, i.assetId)));
-	listOfAssets.forEach(i => variantAssets.add(new Option(i.assetId, i.assetId)));
-
-	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
-}
-
-
-function DumpYaml() {
-	var newYaml = '';
-	var docu = '';
-	//TODO - figure out how to retain comments
-
-	for (var idx = 0; idx < yamlData.length; idx++) {
-		if (yamlData[idx] === null) {
-			continue;
-		}
-		docu = jsyaml.dump(yamlData[idx], {
-			'lineWidth': -1,
-			'quotingType': '"',
-			'noArrayIndent': true,
-			'forceQuotes': true
-		});
-		//The parser blows away the multiline context so we need to rebuild it :(
-		if (docu.indexOf('description: ') > 0) {
-			var rgx = new RegExp('description: \"(.*?)\"');
-			var oldText = docu.match(rgx)[0];
-			var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"', '');
-			docu = docu.replace(oldText, newText);
-		}
-
-		newYaml = newYaml + docu;
-		if (idx !== yamlData.length - 1) {
-			newYaml = newYaml + '\n---\n';
-		}
-	}
-	return newYaml;
-}
-
-
-function UpdateCodePane() {
-	cm.setValue(DumpYaml());
-}
 
 
 function CopyToClipboard() {
@@ -588,9 +608,10 @@ function RemoveSelectedDoc() {
 		yamlData = yamlData.filter((doc) => doc.assetId !== selectedDoc.assetId);
 	}
 
-	CountItems();
-	UpdateMainTree();
-	UpdateCodePane();
+	//CountItems();
+	//UpdateMainTree();
+	//UpdateCodePane();
+	UpdateData();
 	ResetAssetInputs();
 }
 

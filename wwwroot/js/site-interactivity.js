@@ -6,7 +6,6 @@ function ClearAll() {
 	cm.setValue('');
 	yamlData.length = 0;
 	document.getElementById('YamlFileName').textContent = '';
-	ParseYaml();
 }
 /**
  * Resets all input form fields.
@@ -289,7 +288,8 @@ function UpdatePackageData(fieldName) {
 		}
 
 		document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
-		UpdateCodePane();
+		UpdateData();
+		//UpdateCodePane();
 	}
 }
 /**
@@ -332,9 +332,10 @@ function AddPackage() {
 	yamlData.push(newPackage);
 
 	SetSelectedDoc('p', yamlData.filter((doc) => IsPackage(doc)).length - 1)
-	UpdateCodePane();
+	UpdateData();
+	//UpdateCodePane();
 	ParseYaml();
-	CountItems();
+	//CountItems();
 	// This second doc selection is to counter the override of yamlData in ParseYaml().
 	SetSelectedDoc('p', yamlData.filter((doc) => IsPackage(doc)).length - 1)
 }
@@ -367,8 +368,9 @@ function AddIncludedAsset() {
 
 		ResetIncludedAssetInputs();
 		document.getElementById('AddPackageAssetButton').disabled = true;
-		UpdateCodePane();
-		CountItems();
+		UpdateData();
+		//UpdateCodePane();
+		//CountItems();
 		UpdateIncludedAssetTree();
 	}
 }
@@ -436,7 +438,8 @@ function UpdateVariantData(elem) {
 		//Also it's a convoluted process where once the variant key name is changed the current setup will not be able to find the named variant any more
 
 	}
-	UpdateCodePane();
+	UpdateData();
+	//UpdateCodePane();
 }
 function AddAssetToVariant() {
 	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
@@ -454,8 +457,9 @@ function AddAssetToVariant() {
 	document.getElementById('VariantExclude').value = '';
 	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
 	document.getElementById('VariantsLocalAssetList').value = '';
+	UpdateData();
 	UpdateVariantTree();
-	UpdateCodePane();
+	//UpdateCodePane();
 }
 function RemoveAssetFromVariant() {
 	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
@@ -466,8 +470,9 @@ function RemoveVariant() {
 		(Object.keys(i.variant)[0] !== document.getElementById('VariantKey').value) &&
 		(Object.values(i.variant)[0] !== document.getElementById('VariantValue').value)
 	);
+	UpdateData();
 	UpdateVariantTree();
-	UpdateCodePane();
+	//UpdateCodePane();
 	ResetVariantInputs();
 }
 
@@ -522,8 +527,9 @@ function AddNewVariant() {
 		};
 	}
 
-	UpdateCodePane();
-	CountItems();
+	UpdateData();
+	//UpdateCodePane();
+	//CountItems();
 	ResetVariantInputs();
 	UpdateVariantTree();
 }
@@ -566,7 +572,6 @@ function UpdateAssetItem(itemName) {
 		selectedDoc.assetId = document.getElementById('AssetId').value;
 		selectedDoc.version = document.getElementById('AssetVersion').value;
 		selectedDoc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
-		UpdateCodePane();
 	}
 	if (document.getElementById('AssetArchiveVersion').value !== '0') {
 		if (!Object.hasOwn(selectedDoc, 'archiveType')) {
@@ -592,7 +597,8 @@ function UpdateAssetItem(itemName) {
 	} else {
 		delete selectedDoc.nonPersistentUrl;
 	}
-	UpdateCodePane();
+	UpdateData();
+	//UpdateCodePane();
 }
 /**
  * Add a new asset to the end of this YAML document.
@@ -618,8 +624,9 @@ function AddAsset() {
 	}
 	yamlData.push(newAsset);
 
-	UpdateCodePane();
-	CountItems();
+	UpdateData();
+	//UpdateCodePane();
+	//CountItems();
 	UpdateMainTree();
 	ResetAssetInputs();
 }
