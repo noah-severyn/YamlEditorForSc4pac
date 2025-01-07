@@ -298,10 +298,14 @@ ResetVariantInputs();
  */
 function ParseYaml() {
 	yamlData = jsyaml.loadAll(cm.getValue());
-	
-	if (selectedDoc == null) selectedDoc = yamlData.filter((doc) => IsPackage(doc))[0];
-	if (selectedDoc !== undefined) {
-		FillPackageForm();
+	console.log(yamlData);
+	if (yamlData.length > 0 && (selectedDoc == null || selectedDoc == undefined)) {
+		selectedDoc = yamlData[0];
+		//if (IsPackage(selectedDoc)) {
+		//	FillPackageForm();
+		//} else {
+		//	FillAssetForm();
+		//}
 	}
 	CountItems();
 	UpdateMainTree();
