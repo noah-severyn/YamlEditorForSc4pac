@@ -58,7 +58,6 @@ function ResetIncludedAssetInputs() {
 	document.getElementById('PackageAssetId').value = '';
 	document.getElementById('PackageAssetInclude').value = '';
 	document.getElementById('PackageAssetExclude').value = '';
-	UpdateIncludedAssetTree();
 }
 /**
  * Resets the Varaint input form fields.
@@ -334,7 +333,7 @@ function AddPackage() {
 	SetSelectedDoc('p', yamlData.filter((doc) => IsPackage(doc)).length - 1)
 	UpdateData();
 	//UpdateCodePane();
-	ParseYaml();
+	//ParseYaml();
 	//CountItems();
 	// This second doc selection is to counter the override of yamlData in ParseYaml().
 	SetSelectedDoc('p', yamlData.filter((doc) => IsPackage(doc)).length - 1)
@@ -371,7 +370,7 @@ function AddIncludedAsset() {
 		UpdateData();
 		//UpdateCodePane();
 		//CountItems();
-		UpdateIncludedAssetTree();
+		//UpdateIncludedAssetTree();
 	}
 }
 /**
@@ -396,24 +395,6 @@ function SetIncludedAssetId(obj) {
 // --------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------   Variants   ---------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
-/**
- * Fill the Varaint input form fields with the specified variant.
- */
-function FillVariantFormHeader(vData) {
-	var key = Object.keys(vData.variant)[0];
-	var idx = key.lastIndexOf(':');
-	document.getElementById('IsGlobalVariant').checked = (key.substring(0, idx) !== selectedDoc.group + ':' + selectedDoc.name);
-	document.getElementById('VariantKey').value = key.substring(idx + 1);
-	document.getElementById('VariantValue').value = Object.values(vData.variant)[0];
-	document.getElementById('VariantDescription').value = '';
-	document.getElementById('VariantDependencies').value = ArrayToText(vData.dependencies);
-	document.getElementById('VariantDescription').value = selectedDoc.variantDescriptions[key][Object.values(vData.variant)[0]];
-}
-function FillVariantFormAsset(vAsset) {
-	document.getElementById('VariantAssetId').value = vAsset.assetId;
-	document.getElementById('VariantInclude').value = ArrayToText(vAsset.include);
-	document.getElementById('VariantExclude').value = ArrayToText(vAsset.exclude);
-}
 function VariantAddDependency(input) {
 	var currentDependencies = document.getElementById('VariantDependencies').value;
 	if (currentDependencies === '') {
@@ -434,6 +415,7 @@ function UpdateVariantData(elem) {
 		elem.value = '';
 	} else {
 		EntryValidation(elem.id);
+		//TODO - update variant data
 		//Not going to bother implementing all of the onchange stuff here because I want to redesign how this works (see pr #43)
 		//Also it's a convoluted process where once the variant key name is changed the current setup will not be able to find the named variant any more
 
@@ -458,7 +440,7 @@ function AddAssetToVariant() {
 	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
 	document.getElementById('VariantsLocalAssetList').value = '';
 	UpdateData();
-	UpdateVariantTree();
+	//UpdateVariantTree();
 	//UpdateCodePane();
 }
 function RemoveAssetFromVariant() {
@@ -471,7 +453,7 @@ function RemoveVariant() {
 		(Object.values(i.variant)[0] !== document.getElementById('VariantValue').value)
 	);
 	UpdateData();
-	UpdateVariantTree();
+	//UpdateVariantTree();
 	//UpdateCodePane();
 	ResetVariantInputs();
 }
@@ -531,7 +513,7 @@ function AddNewVariant() {
 	//UpdateCodePane();
 	//CountItems();
 	ResetVariantInputs();
-	UpdateVariantTree();
+	//UpdateVariantTree();
 }
 
 
@@ -627,7 +609,7 @@ function AddAsset() {
 	UpdateData();
 	//UpdateCodePane();
 	//CountItems();
-	UpdateMainTree();
+	//UpdateMainTree();
 	ResetAssetInputs();
 }
 /**

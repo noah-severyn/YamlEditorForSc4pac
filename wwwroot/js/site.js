@@ -9,12 +9,15 @@ const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
 });
 cm.on('change', editor => {
 	console.log('yaml changed');
-	jsyaml.loadAll(cm.getValue());
+	
+	yamlData = jsyaml.loadAll(cm.getValue());
+	console.log(yamlData);
+	UpdateData(false);
 });
 /**
- * Array of packages and assets in this YAML file
+ * Array of packages and assets in this YAML file. The primary data object.
  */
-var yamlData = jsyaml.loadAll(cm.getValue());
+var yamlData = [];
 
 
 //var sc4pacAssets = new Array();
@@ -40,28 +43,36 @@ var yamlData = jsyaml.loadAll(cm.getValue());
 
 
 /**
- * Load From Dialog
+ * Load From Dialog element
  */
 const loadFileDialog = document.getElementById('LoadFromChannelDialog');
 /**
- * Main Tree View
+ * Main Tree View element
  */
 var mtv;
 /**
- * Asset Tree View
+ * Asset Tree View element
  */
 var atv;
 /**
- * Variant Tree View
+ * Variant Tree View element
  */
 var vtv;
 /**
- * Currently selected document in the main tree - can be a package or an asset
+ * Currently selected document type - 'p' for package, 'a' for asset, 'null' for no selection or unknown.
  */
-var selectedDoc;
+var currDocType = null;
+/**
+ * Index of the currently selected document within `yamlData`.
+ */
+var currDocIdx = null;
+/**
+ * Currently selected document in the main tree - may be a package or an asset.
+ */
+var selectedDoc = null;
 
-var currPackageIdx = null;
-var currAssetIdx = null;
+//var currPackageIdx = null;
+//var currAssetIdx = null;
 var countOfPackages = 0;
 var countOfAssets = 0;
 var listOfAssets = new Array();
@@ -286,7 +297,6 @@ var pkgGroupSelect = new TomSelect('#PackageGroup', {
 
 
 
-SetSelectedDoc('p', null);
 ResetAllInputs();
 
 
@@ -298,8 +308,9 @@ ResetAllInputs();
 
 /**
  * Update the `yamlData` object with the current state of the inputs and dump the resulting YAML to the codepane
+ * @param {boolean} dumpData Specify FALSE to skip updating the code pane. Default is TRUE.
  */
-function UpdateData() {
+function UpdateData(dumpData = true) {
 	//When updating a text input, the input event occurs immediately, but the change event doesn't occur until you commit the change by lose focus or submit the form.
 
 	//form.onchange() { input.validate(); metadata.update() }
@@ -307,37 +318,52 @@ function UpdateData() {
 	//metadata.update() { treeview.update(); form.update(); codemirror.update() }
 
 
-	CountItems();
-	//UpdateMainTree();
-	//UpdateCodePane();
-	ResetAssetInputs();
+
+	//Update the counts of packages and assets
+	countOfAssets = 0;
+	countOfPackages = 0;
+	listOfAssets.length = 0;
+	listOfPackages.length = 0;
+
+	if (yamlData !== null) {
+		yamlData.forEach((item) => {
+			if (IsAsset(item)) {
+				countOfAssets++;
+				listOfAssets.push(item);
+			} else if (IsPackage(item)) {
+				countOfPackages++;
+				listOfPackages.push(item);
+			}
+		});
+	}
+	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 
 
-	cm.setValue(DumpYaml());
+	UpdateLocalDropdowns();
+
+	UpdateMainTree();
+	UpdateIncludedAssetTree();
+	UpdateVariantTree();
+
+	SetSelectedDoc(currDocIdx);
+	if (IsPackage(selectedDoc)) {
+		FillPackageForm();
+	} else {
+		FillAssetForm();
+	}
+	
+
+	if (dumpData) {
+		cm.setValue(DumpYaml());
+	}
 
 
 	/**
 	 * Count the number of Packages and Assets in the code pane and update the UI with this new result.
 	 */
-	function CountItems() {
-		countOfAssets = 0;
-		countOfPackages = 0;
-		listOfAssets.length = 0;
-		listOfPackages.length = 0;
+	function UpdateLocalDropdowns() {
+		//TODO - this UpdateLocalDropdowns function should disappear when PR #45 is implemented
 
-		if (yamlData !== null) {
-			yamlData.forEach((item) => {
-				if (IsAsset(item)) {
-					countOfAssets++;
-					listOfAssets.push(item);
-				} else if (IsPackage(item)) {
-					countOfPackages++;
-					listOfPackages.push(item);
-				}
-			});
-		}
-
-		//TODO - the below code should disappear when PR #45 is implemented
 		//Fill local dependency selection options
 		var packageDependencies = document.getElementById('LocalPackageList');
 		var variantDependencies = document.getElementById('VariantsLocalPackageList');
@@ -360,8 +386,6 @@ function UpdateData() {
 		variantAssets.appendChild(new Option('', ''));
 		listOfAssets.forEach(i => localAssetList.add(new Option(i.assetId, i.assetId)));
 		listOfAssets.forEach(i => variantAssets.add(new Option(i.assetId, i.assetId)));
-
-		document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 	}
 
 	function DumpYaml() {
@@ -399,20 +423,20 @@ function UpdateData() {
 /**
  * Parse the YAML input and update the UI accordingly based on the count of packages and assets.
  */
-function ParseYaml() {
-	yamlData = jsyaml.loadAll(cm.getValue());
-	if (yamlData.length > 0 && (selectedDoc == null || selectedDoc == undefined)) {
-		selectedDoc = yamlData[0];
-		//if (IsPackage(selectedDoc)) {
-		//	FillPackageForm();
-		//} else {
-		//	FillAssetForm();
-		//}
-	}
-	CountItems();
-	UpdateMainTree();
-	UpdateVariantTree();
-}
+//function ParseYaml() {
+//	yamlData = jsyaml.loadAll(cm.getValue());
+//	if (yamlData.length > 0 && (selectedDoc == null || selectedDoc == undefined)) {
+//		selectedDoc = yamlData[0];
+//		//if (IsPackage(selectedDoc)) {
+//		//	FillPackageForm();
+//		//} else {
+//		//	FillAssetForm();
+//		//}
+//	}
+//	CountItems();
+//	UpdateMainTree();
+//	UpdateVariantTree();
+//}
 
 
 //https://github.com/justinchmura/js-treeview
@@ -464,22 +488,25 @@ function UpdateMainTree() {
 		leaf.classList.add('selected');
 		
 		if (t.data.name.indexOf('(') > 0) { //A heading category was selected
-			return
+			return;
 		} else if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
-			currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			if (document.querySelector(".nav-link.active").id === 'AssetPropertiesTab') {
 				SelectTab('PackagePropertiesTab', true);
 			}
 
-			selectedDoc = yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
+			SetSelectedDoc('p', selectedIdx - 1);
+			//selectedDoc = yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
 			FillPackageForm();
-			UpdateIncludedAssetTree();
-			UpdateVariantTree();
+			//UpdateData();
+			//UpdateIncludedAssetTree();
+			//UpdateVariantTree();
 		} else {
-			currAssetIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			SelectTab('AssetPropertiesTab', true);
 
-			selectedDoc = yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
+			SetSelectedDoc('a', selectedIdx - 1)
+			//selectedDoc = yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
 			FillAssetForm();
 		}
 
@@ -560,7 +587,29 @@ function UpdateVariantTree() {
 			FillVariantFormAsset(selectedAsset);
 		}
 	});
+
+	/**
+	 * Fill the Varaint input form fields with the specified variant.
+	 */
+	function FillVariantFormHeader(vData) {
+		var key = Object.keys(vData.variant)[0];
+		var idx = key.lastIndexOf(':');
+		document.getElementById('IsGlobalVariant').checked = (key.substring(0, idx) !== selectedDoc.group + ':' + selectedDoc.name);
+		document.getElementById('VariantKey').value = key.substring(idx + 1);
+		document.getElementById('VariantValue').value = Object.values(vData.variant)[0];
+		document.getElementById('VariantDescription').value = '';
+		document.getElementById('VariantDependencies').value = ArrayToText(vData.dependencies);
+		document.getElementById('VariantDescription').value = selectedDoc.variantDescriptions[key][Object.values(vData.variant)[0]];
+	}
+
+
+	function FillVariantFormAsset(vAsset) {
+		document.getElementById('VariantAssetId').value = vAsset.assetId;
+		document.getElementById('VariantInclude').value = ArrayToText(vAsset.include);
+		document.getElementById('VariantExclude').value = ArrayToText(vAsset.exclude);
+	}
 }
+
 
 
 
@@ -631,24 +680,32 @@ function GetDocument(type, index) {
 }
 
 /**
- * Sets the currently selected document to the specified package or asset if found. If not found it sets the selectedDoc to null.
- * @param {string} type Specify 'p' for packages or 'a' for assets.
- * @param {number} index The nth package or asset to return
+ * Sets `selectedDoc` and `currDocType` to the document at the specified index. Omit the type to return the nth document within the entire dataset
+ * @param {number} index The nth document to return, or -1 to clear the selected doc.
+ * @param {string} type [Optional] Specify 'p' for package, 'a' for asset, or omit to return either type.
  */
-function SetSelectedDoc(type, index) {
+function SetSelectedDoc(index, type) {
 	var docs;
-	if (type.toLowerCase() === 'p') {
-		docs = yamlData.filter((doc) => IsPackage(doc));
-		currPackageIdx = index
-	} else if (type.toLowerCase() === 'a') {
-		docs = yamlData.filter((doc) => IsAsset(doc));
-		currAssetIdx = index
-	}
-
-	if (index <= docs.length) {
-		selectedDoc = docs[index];
+	if (arguments.length === 1) {
+		selectedDoc = yamlData[index];
+		currDocType = IsPackage(selectedDoc) ? 'p' : 'a';
+		return;
 	} else {
-		selectedDoc = null;
+		currDocType = type;
+
+		if (type.toLowerCase() === 'p') {
+			docs = yamlData.filter((doc) => IsPackage(doc));
+			//currPackageIdx = index
+		} else if (type.toLowerCase() === 'a') {
+			docs = yamlData.filter((doc) => IsAsset(doc));
+			//currAssetIdx = index
+		}
+
+		if (index < 0 || index > docs.length) {
+			selectedDoc = null;
+		} else {
+			selectedDoc = docs[index];
+		}
 	}
 }
 
@@ -698,8 +755,8 @@ function LoadFromFile() {
 		reader.onload = function (e) {
 			var contents = e.target.result;
 			cm.setValue(contents);
-			ParseYaml();
-			SetSelectedDoc('p', 0);
+			//ParseYaml();
+			//SetSelectedDoc('p', 0);
 			tmp.remove();
 		}
 		reader.readAsText(file);
@@ -793,7 +850,7 @@ function GetContent(url, fileName) {
 		.then(data => {
 			document.getElementById('YamlFileName').textContent = fileName;
 			cm.setValue(atob(data.content));
-			ParseYaml();
+			//ParseYaml();
 		})
 		.catch(error => console.error('Error fetching the tree data:', error));
 
