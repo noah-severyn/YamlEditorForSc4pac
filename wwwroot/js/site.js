@@ -495,8 +495,7 @@ function UpdateMainTree() {
 				SelectTab('PackagePropertiesTab', true);
 			}
 
-			SetSelectedDoc('p', selectedIdx - 1);
-			//selectedDoc = yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
+			SetSelectedDoc(selectedIdx - 1, 'p');
 			FillPackageForm();
 			//UpdateData();
 			//UpdateIncludedAssetTree();
@@ -505,8 +504,7 @@ function UpdateMainTree() {
 			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			SelectTab('AssetPropertiesTab', true);
 
-			SetSelectedDoc('a', selectedIdx - 1)
-			//selectedDoc = yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
+			SetSelectedDoc(selectedIdx - 1, 'a');
 			FillAssetForm();
 		}
 
@@ -689,22 +687,31 @@ function SetSelectedDoc(index, type) {
 	if (arguments.length === 1) {
 		selectedDoc = yamlData[index];
 		currDocType = IsPackage(selectedDoc) ? 'p' : 'a';
+		currDocIdx = index;
 		return;
 	} else {
 		currDocType = type;
 
 		if (type.toLowerCase() === 'p') {
 			docs = yamlData.filter((doc) => IsPackage(doc));
-			//currPackageIdx = index
 		} else if (type.toLowerCase() === 'a') {
 			docs = yamlData.filter((doc) => IsAsset(doc));
-			//currAssetIdx = index
+		} else {
+			selectedDoc = null;
+			currDocIdx = null;
+			return;
 		}
 
 		if (index < 0 || index > docs.length) {
 			selectedDoc = null;
-		} else {
+			currDocIdx = null;
+			return;
+		} else if (type.toLowerCase() === 'p') {
 			selectedDoc = docs[index];
+			currDocIdx = yamlData.findIndex(i => i.group === selectedDoc.group && i.name === selectedDoc.name);
+		} else if (type.toLowerCase() === 'a') {
+			selectedDoc = docs[index];
+			currDocIdx = yamlData.findIndex(i => i.assetId === selectedDoc.assetId);
 		}
 	}
 }

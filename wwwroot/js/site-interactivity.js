@@ -22,7 +22,6 @@ function ResetAllInputs() {
  * @param {boolean} newForm Whether to toggle the new form state side effects
  */
 function ResetPackageInputs(newForm = false) {
-	currPackageIdx = null;
 	selectedDoc = null
 	document.getElementById('PackageGroup').value = '';
 	if (groupTomSelect = document.getElementById('PackageGroup').tomselect) groupTomSelect.clear(true);
@@ -251,7 +250,7 @@ function AddDepencencyFromPacList() {
  */
 function UpdatePackageData(fieldName) {
 	EntryValidation(fieldName);
-	if (currPackageIdx !== null) {
+	if (selectedDoc !== null) {
 		selectedDoc.group = document.getElementById('PackageGroup').value;
 		selectedDoc.name = document.getElementById('PackageName').value;
 		selectedDoc.version = document.getElementById('PackageVersion').value;
@@ -330,13 +329,10 @@ function AddPackage() {
 	}
 	yamlData.push(newPackage);
 
-	SetSelectedDoc('p', yamlData.filter((doc) => IsPackage(doc)).length - 1)
+	SetSelectedDoc(yamlData.filter((doc) => IsPackage(doc)).length - 1, 'p')
 	UpdateData();
-	//UpdateCodePane();
-	//ParseYaml();
-	//CountItems();
 	// This second doc selection is to counter the override of yamlData in ParseYaml().
-	SetSelectedDoc('p', yamlData.filter((doc) => IsPackage(doc)).length - 1)
+	SetSelectedDoc(yamlData.filter((doc) => IsPackage(doc)).length - 1, 'p')
 }
 
 
@@ -349,7 +345,7 @@ function AddPackage() {
  */
 function AddIncludedAsset() {
 	EntryValidation('PackageAssetId');
-	if (currPackageIdx !== null) {
+	if (selectedDoc !== null) {
 		var newAsset = {
 			assetId: document.getElementById('PackageAssetId').value
 		}
@@ -549,7 +545,7 @@ function FillAssetForm() {
  */
 function UpdateAssetItem(itemName) {
 	EntryValidation(itemName);
-	if (currAssetIdx !== '0') {
+	if (selectedDoc !== null) {
 		selectedDoc.url = document.getElementById('AssetUrl').value;
 		selectedDoc.assetId = document.getElementById('AssetId').value;
 		selectedDoc.version = document.getElementById('AssetVersion').value;
