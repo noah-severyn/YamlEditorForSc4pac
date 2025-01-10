@@ -287,7 +287,6 @@ function UpdatePackageData(fieldName) {
 
 		document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
 		UpdateData();
-		//UpdateCodePane();
 	}
 }
 /**
@@ -364,9 +363,6 @@ function AddIncludedAsset() {
 		ResetIncludedAssetInputs();
 		document.getElementById('AddPackageAssetButton').disabled = true;
 		UpdateData();
-		//UpdateCodePane();
-		//CountItems();
-		//UpdateIncludedAssetTree();
 	}
 }
 /**
@@ -417,7 +413,6 @@ function UpdateVariantData(elem) {
 
 	}
 	UpdateData();
-	//UpdateCodePane();
 }
 function AddAssetToVariant() {
 	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
@@ -436,8 +431,6 @@ function AddAssetToVariant() {
 	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
 	document.getElementById('VariantsLocalAssetList').value = '';
 	UpdateData();
-	//UpdateVariantTree();
-	//UpdateCodePane();
 }
 function RemoveAssetFromVariant() {
 	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
@@ -449,8 +442,6 @@ function RemoveVariant() {
 		(Object.values(i.variant)[0] !== document.getElementById('VariantValue').value)
 	);
 	UpdateData();
-	//UpdateVariantTree();
-	//UpdateCodePane();
 	ResetVariantInputs();
 }
 
@@ -506,10 +497,7 @@ function AddNewVariant() {
 	}
 
 	UpdateData();
-	//UpdateCodePane();
-	//CountItems();
 	ResetVariantInputs();
-	//UpdateVariantTree();
 }
 
 
@@ -522,7 +510,7 @@ function AddNewVariant() {
  */
 function FillAssetForm() {
 	if (selectedDoc === undefined || selectedDoc === null) { return;}
-	document.getElementById('AddAssetButton').disabled = (currAssetIdx != '0');
+	document.getElementById('AddAssetButton').disabled = false;
 	document.getElementById('AssetUrl').value = selectedDoc.url;
 	document.getElementById('AssetId').value = selectedDoc.assetId;
 	document.getElementById('AssetVersion').value = selectedDoc.version;
@@ -576,7 +564,6 @@ function UpdateAssetItem(itemName) {
 		delete selectedDoc.nonPersistentUrl;
 	}
 	UpdateData();
-	//UpdateCodePane();
 }
 /**
  * Add a new asset to the end of this YAML document.
@@ -603,9 +590,6 @@ function AddAsset() {
 	yamlData.push(newAsset);
 
 	UpdateData();
-	//UpdateCodePane();
-	//CountItems();
-	//UpdateMainTree();
 	ResetAssetInputs();
 }
 /**

@@ -7,12 +7,14 @@ const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
 	lineWrapping: true,
 	mode: 'yaml'
 });
-cm.on('change', editor => {
+cm.on('change', () => {
 	console.log('yaml changed');
 	
 	yamlData = jsyaml.loadAll(cm.getValue());
 	console.log(yamlData);
 	UpdateData(false);
+
+	//figure which document we're editing within the code and activate it within the ui
 });
 /**
  * Array of packages and assets in this YAML file. The primary data object.
@@ -71,8 +73,6 @@ var currDocIdx = null;
  */
 var selectedDoc = null;
 
-//var currPackageIdx = null;
-//var currAssetIdx = null;
 var countOfPackages = 0;
 var countOfAssets = 0;
 var listOfAssets = new Array();
@@ -338,21 +338,19 @@ function UpdateData(dumpData = true) {
 	}
 	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 
-
 	UpdateLocalDropdowns();
-
 	UpdateMainTree();
 	UpdateIncludedAssetTree();
 	UpdateVariantTree();
 
 	SetSelectedDoc(currDocIdx);
+
 	if (IsPackage(selectedDoc)) {
 		FillPackageForm();
 	} else {
 		FillAssetForm();
 	}
 	
-
 	if (dumpData) {
 		cm.setValue(DumpYaml());
 	}
@@ -420,24 +418,6 @@ function UpdateData(dumpData = true) {
 	}
 }
 
-/**
- * Parse the YAML input and update the UI accordingly based on the count of packages and assets.
- */
-//function ParseYaml() {
-//	yamlData = jsyaml.loadAll(cm.getValue());
-//	if (yamlData.length > 0 && (selectedDoc == null || selectedDoc == undefined)) {
-//		selectedDoc = yamlData[0];
-//		//if (IsPackage(selectedDoc)) {
-//		//	FillPackageForm();
-//		//} else {
-//		//	FillAssetForm();
-//		//}
-//	}
-//	CountItems();
-//	UpdateMainTree();
-//	UpdateVariantTree();
-//}
-
 
 //https://github.com/justinchmura/js-treeview
 function UpdateMainTree() {
@@ -497,9 +477,6 @@ function UpdateMainTree() {
 
 			SetSelectedDoc(selectedIdx - 1, 'p');
 			FillPackageForm();
-			//UpdateData();
-			//UpdateIncludedAssetTree();
-			//UpdateVariantTree();
 		} else {
 			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			SelectTab('AssetPropertiesTab', true);
@@ -655,9 +632,6 @@ function RemoveSelectedDoc() {
 		yamlData = yamlData.filter((doc) => doc.assetId !== selectedDoc.assetId);
 	}
 
-	//CountItems();
-	//UpdateMainTree();
-	//UpdateCodePane();
 	UpdateData();
 	ResetAssetInputs();
 }
@@ -762,8 +736,6 @@ function LoadFromFile() {
 		reader.onload = function (e) {
 			var contents = e.target.result;
 			cm.setValue(contents);
-			//ParseYaml();
-			//SetSelectedDoc('p', 0);
 			tmp.remove();
 		}
 		reader.readAsText(file);
@@ -775,9 +747,9 @@ function LoadFromFile() {
 /**
  * Load content from a Github file tree
  * @param {any} srcElem Source element this function is being called from.
- * 
+ *
  * If the element is `a` then this is triggered from the open menu or the breadcrumb menu and we want to navigate to the base folder of the Github files; if the element is `BUTTON` then its being triggered from a button click in the modal dialog and we want to navigate to a subfolder of the Github files. Basically, links go to the root folder level, buttons go to a subfolder level.
- * @param {any} channel Name of the channel to fetch data from, e.g. 'default' or 'zasco'
+ * @param {any} channel Name of the channel to fetch data from, e.g. 'default' or 'zasco' or 'simtropolis'
  */
 async function LoadFromGithub(srcElem, channel) {
 	var crumbNav = document.getElementById('ChannelBreadcrumb');
@@ -857,7 +829,6 @@ function GetContent(url, fileName) {
 		.then(data => {
 			document.getElementById('YamlFileName').textContent = fileName;
 			cm.setValue(atob(data.content));
-			//ParseYaml();
 		})
 		.catch(error => console.error('Error fetching the tree data:', error));
 
