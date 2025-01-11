@@ -8,13 +8,39 @@ const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
 	mode: 'yaml'
 });
 cm.on('change', () => {
-	console.log('yaml changed');
-	
 	yamlData = jsyaml.loadAll(cm.getValue());
-	console.log(yamlData);
-	UpdateData(false);
-
+	
 	//figure which document we're editing within the code and activate it within the ui
+	var line = cm.getCursor().line; //Object{line, ch}
+	var lineContent = lineContent = cm.getLine(line);
+	var assetId;
+	var pkgName;
+	var pkgGroup;
+	while (line >= 0 && lineContent !== '---') {
+		console.log("L" + line + ": " + lineContent);
+		if (lineContent.startsWith('assetId:')) {
+			assetId = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"','').trim();
+			break;
+		}
+		else if (lineContent.startsWith('name:')) {
+			pkgName = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"', '').trim();
+		}
+		else if (lineContent.startsWith('group:')) {
+			pkgGroup = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"', '').trim();
+		}
+
+		line--;
+		lineContent = cm.getLine(line);
+	}
+
+	if (assetId === undefined) {
+		currDocIdx = yamlData.findIndex(item => item.group === pkgGroup && item.name === pkgName);
+	} else {
+		currDocIdx = yamlData.findIndex(item => item.assetId === assetId);
+	}
+	console.log(currDocIdx);
+	UpdateData(false);
+	return;
 });
 /**
  * Array of packages and assets in this YAML file. The primary data object.
@@ -307,7 +333,7 @@ ResetAllInputs();
 
 
 /**
- * Update the `yamlData` object with the current state of the inputs and dump the resulting YAML to the codepane
+ * Sync changes between the codepane and UI with the current state of the `yamlData` array (UI ←→ yamlData ←→ codepane). Also sets the currently active (selected) document.
  * @param {boolean} dumpData Specify FALSE to skip updating the code pane. Default is TRUE.
  */
 function UpdateData(dumpData = true) {
@@ -347,8 +373,12 @@ function UpdateData(dumpData = true) {
 
 	if (IsPackage(selectedDoc)) {
 		FillPackageForm();
+		if (document.querySelector(".nav-link.active").id === 'AssetPropertiesTab') {
+			SelectTab('PackagePropertiesTab', true);
+		}
 	} else {
 		FillAssetForm();
+		SelectTab('AssetPropertiesTab', true);
 	}
 	
 	if (dumpData) {
@@ -484,7 +514,7 @@ function UpdateMainTree() {
 			SetSelectedDoc(selectedIdx - 1, 'a');
 			FillAssetForm();
 		}
-
+		console.log(selectedDoc)
 	});
 }
 
@@ -658,6 +688,9 @@ function GetDocument(type, index) {
  */
 function SetSelectedDoc(index, type) {
 	var docs;
+	if (index === undefined) {
+		index = 0;
+	}
 	if (arguments.length === 1) {
 		selectedDoc = yamlData[index];
 		currDocType = IsPackage(selectedDoc) ? 'p' : 'a';
