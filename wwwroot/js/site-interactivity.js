@@ -1,3 +1,161 @@
+// --------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------   Set Event Handlers   ----------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+document.getElementById('NewPackageButton').addEventListener('click', () => {
+	ResetPackageInputs(true);
+});
+document.getElementById('NewAssetButton').addEventListener('click', () => {
+	ResetAssetInputs(true);
+});
+for (const tab of document.querySelectorAll('nav-link')) {
+	tab.addEventListener('onclick', SelectTab(tab.id));
+}
+
+
+
+// Package events
+document.getElementById('ResetPackageFormButton').addEventListener('click', () => {
+	ResetPackageInputs(true);
+});
+document.getElementById('AddPackageButton').addEventListener('click', () => {
+	AddPackage();
+});
+document.getElementById('RemovePackageButton').addEventListener('click', () => {
+	RemoveSelectedDoc();
+});
+
+
+
+// Package Properties tab events
+for (const input of document.querySelectorAll('#PackagePropertiesForm .form-control')) {
+	input.addEventListener('input', event => {
+		UpdatePackageData(event.target.id);
+	});
+}
+document.getElementById('PacPackageList').addEventListener('change', event => {
+	PackageAddDependency(event.target);
+});
+document.getElementById('LocalPackageList').addEventListener('change', event => {
+	PackageAddDependency(event.target);
+});
+
+
+
+// Package Info tab events
+document.getElementById('IsMultipleWebsites').addEventListener('change', () => {
+	ToggleMultipleWebsites();
+});
+for (const input of document.querySelectorAll('#PackageInfoForm .form-control')) {
+	input.addEventListener('input', event => {
+		UpdatePackageData(event.target.id);
+	});
+}
+
+
+
+
+// Package Included Asset tab events
+document.getElementById('SelectLocalPackageAssets').addEventListener('change', event => {
+	SetIncludedAssetId(event.target);
+});
+document.getElementById('SelectPacPackageAssets').addEventListener('change', event => {
+	SetIncludedAssetId(event.target);
+});
+document.getElementById('PackageAssetInclude').addEventListener('change', event => {
+	UpdatePackageData(event.target.id);
+});
+document.getElementById('PackageAssetExclude').addEventListener('change', event => {
+	UpdatePackageData(event.target.id);
+});
+document.getElementById('ResetIncludedAssetButton').addEventListener('change', () => {
+	ResetIncludedAssetInputs();
+});
+document.getElementById('AddPackageAssetButton').addEventListener('change', () => {
+	AddIncludedAsset();
+});
+
+
+
+
+// Package Variant tab events
+for (const input of document.querySelectorAll('#VariantKey, #VariantValue, #VariantDescription, #VariantsPacPackageList, #VariantsLocalPackageList')) {
+	input.addEventListener('input', event => {
+		UpdateVariantData(event.target);
+	});
+}
+for (const input of document.querySelectorAll('#VariantsPacAssetList, #VariantsLocalAssetList, #VariantInclude, #VariantExclude')) {
+	input.addEventListener('change', event => {
+		UpdateVariantData(event.target);
+	});
+}
+document.getElementById('ResetVariantFormButton').addEventListener('click', () => {
+	ResetVariantInputs();
+});
+document.getElementById('AddAssetToVariantButton').addEventListener('click', () => {
+	AddAssetToVariant();
+});
+document.getElementById('RemoveAssetFromVariantButton').addEventListener('click', () => {
+	RemoveAssetFromVariant();
+});
+document.getElementById('AddVariantButton').addEventListener('click', () => {
+	AddNewVariant();
+});
+document.getElementById('RemoveVariantButton').addEventListener('click', () => {
+	RemoveVariant();
+});
+
+
+
+// Asset Properties tab events
+for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
+	input.addEventListener('input', event => {
+		UpdateAssetItem(event.target.id);
+	});
+}
+document.getElementById('AssetArchiveVersion').addEventListener('change', event => {
+	UpdateAssetItem(event.target.id);
+});
+document.getElementById('ResetAssetFormButton').addEventListener('click', () => {
+	ResetAssetInputs();
+});
+document.getElementById('AddAssetButton').addEventListener('click', () => {
+	AddAsset();
+});
+document.getElementById('RemoveAssetButton').addEventListener('click', () => {
+	RemoveSelectedDoc();
+});
+
+
+
+// Output area events
+document.getElementById('LoadFromFile').addEventListener('click', () => {
+	LoadFromFile();
+});
+document.getElementById('LoadFromGitDefault').addEventListener('click', event => {
+	LoadFromGithub(event.target, 'default');
+});
+document.getElementById('LoadFromGitSimtrop').addEventListener('click', event => {
+	LoadFromGithub(event.target, 'simtropolis');
+});
+document.getElementById('LoadFromGitZasco').addEventListener('click', event => {
+	LoadFromGithub(event.target, 'zasco');
+});
+document.getElementById('CopyToClipButton').addEventListener('click', () => {
+	CopyToClipboard();
+});
+document.getElementById('SaveAsButton').addEventListener('click', () => {
+	SaveAs();
+});
+document.getElementById('ClearAllButton').addEventListener('click', () => {
+	ClearAll();
+});
+
+
+
+
+
+
+
 /**
  * Clears all inputs and resets the code pane.
  */
