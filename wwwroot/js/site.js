@@ -10,12 +10,13 @@ const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
 cm.on('change', () => {
 	yamlData = jsyaml.loadAll(cm.getValue());
 	
-	//figure which document we're editing within the code and activate it within the ui
+	//Figure which document we're editing within the code so it can be set as the selected document
 	var line = cm.getCursor().line; //Object{line, ch}
-	var lineContent = lineContent = cm.getLine(line);
+	var lineContent = cm.getLine(line);
 	var assetId;
 	var pkgName;
 	var pkgGroup;
+	var direction = (line > 0) ? 'up' : 'down';
 	while (line >= 0 && lineContent !== '---') {
 		console.log("L" + line + ": " + lineContent);
 		if (lineContent.startsWith('assetId:')) {
@@ -28,10 +29,43 @@ cm.on('change', () => {
 		else if (lineContent.startsWith('group:')) {
 			pkgGroup = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"', '').trim();
 		}
+		if (pkgGroup !== undefined && pkgName !== undefined) {
+			break;
+		}
 
-		line--;
+		direction === 'up' ? line-- : line++;
 		lineContent = cm.getLine(line);
 	}
+
+	//Determine which part of the code is being edited and which UI tab is relevant, then select it
+	line = cm.getCursor().line;
+	lineContent = cm.getLine(line);
+	var nodeName;
+	while (line >= 0) {
+		if (!lineContent.startsWith(' ') && !lineContent.startsWith('-')) {
+			nodeName = lineContent.slice(0, lineContent.indexOf(':'));
+			if (['group', 'name', 'version', 'subfolder', 'dependencies'].includes(nodeName)) {
+				SelectTab('PackagePropertiesTab', true);
+			}
+			else if (nodeName === 'info') {
+				SelectTab('PackageInfoTab', true);
+			}
+			else if (nodeName === 'assets') {
+				SelectTab('IncludedAssetsTab', true);
+			}
+			else if (nodeName === 'variants') {
+				SelectTab('PackageVariantsTab', true);
+			}
+			else if (['url', 'assetId', 'version', 'lastModified', 'archiveType', 'checksum', 'nonPersistentUrl'].includes(nodeName)) {
+				SelectTab('AssetPropertiesTab', true);
+			}
+			break;
+		}
+
+		direction === 'up' ? line-- : line++;
+		lineContent = cm.getLine(line);
+	}
+
 
 	if (assetId === undefined) {
 		currDocIdx = yamlData.findIndex(item => item.group === pkgGroup && item.name === pkgName);
@@ -40,7 +74,6 @@ cm.on('change', () => {
 	}
 	console.log(currDocIdx);
 	UpdateData(false);
-	return;
 });
 /**
  * Array of packages and assets in this YAML file. The primary data object.
@@ -86,10 +119,6 @@ var atv;
  * Variant Tree View element
  */
 var vtv;
-/**
- * Currently selected document type - 'p' for package, 'a' for asset, 'null' for no selection or unknown.
- */
-var currDocType = null;
 /**
  * Index of the currently selected document within `yamlData`.
  */
@@ -364,21 +393,18 @@ function UpdateData(dumpData = true) {
 	}
 	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 
+	SetSelectedDoc(currDocIdx);
 	UpdateLocalDropdowns();
 	UpdateMainTree();
 	UpdateIncludedAssetTree();
 	UpdateVariantTree();
 
-	SetSelectedDoc(currDocIdx);
+	
 
 	if (IsPackage(selectedDoc)) {
 		FillPackageForm();
-		if (document.querySelector(".nav-link.active").id === 'AssetPropertiesTab') {
-			SelectTab('PackagePropertiesTab', true);
-		}
 	} else {
 		FillAssetForm();
-		SelectTab('AssetPropertiesTab', true);
 	}
 	
 	if (dumpData) {
@@ -682,7 +708,7 @@ function GetDocument(type, index) {
 }
 
 /**
- * Sets `selectedDoc` and `currDocType` to the document at the specified index. Omit the type to return the nth document within the entire dataset
+ * Sets `selectedDoc` and `currDocIdx` to the document at the specified index. Omit the type to return the nth document within the entire dataset
  * @param {number} index The nth document to return, or -1 to clear the selected doc.
  * @param {string} type [Optional] Specify 'p' for package, 'a' for asset, or omit to return either type.
  */
@@ -691,14 +717,17 @@ function SetSelectedDoc(index, type) {
 	if (index === undefined) {
 		index = 0;
 	}
+	if (index < 0) {
+		selectedDoc = null;
+		currDocIdx = null;
+		return;
+	}
+
 	if (arguments.length === 1) {
 		selectedDoc = yamlData[index];
-		currDocType = IsPackage(selectedDoc) ? 'p' : 'a';
 		currDocIdx = index;
-		return;
-	} else {
-		currDocType = type;
-
+	}
+	else {
 		if (type.toLowerCase() === 'p') {
 			docs = yamlData.filter((doc) => IsPackage(doc));
 		} else if (type.toLowerCase() === 'a') {
@@ -709,7 +738,7 @@ function SetSelectedDoc(index, type) {
 			return;
 		}
 
-		if (index < 0 || index > docs.length) {
+		if (index > docs.length) {
 			selectedDoc = null;
 			currDocIdx = null;
 			return;
