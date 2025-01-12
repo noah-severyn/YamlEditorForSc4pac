@@ -61,9 +61,9 @@ function IsPackage(obj) {
 /**
  * Maintain side effects of switching between the tabs and optionally activate the specified tab.
  * @param {string} elementId The Id of the tab element to select
- * @param {boolean} triggerEvent Whether to trigger the click event to show the tab
+ * @param {boolean} triggerEvent Whether to trigger the click event to show the tab. Default is TRUE
  */
-function SelectTab(elementId, triggerEvent = false) {
+function SelectTab(elementId, triggerEvent = true) {
 	if (elementId === 'AssetPropertiesTab') {
 		document.getElementById('PackageControls').classList.add("d-none");
 	} else {

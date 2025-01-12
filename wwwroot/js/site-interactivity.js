@@ -3,12 +3,14 @@
 // --------------------------------------------------------------------------------------------------------------------
 document.getElementById('NewPackageButton').addEventListener('click', () => {
 	ResetPackageInputs(true);
+	SelectTab('PackagePropertiesTab')
 });
 document.getElementById('NewAssetButton').addEventListener('click', () => {
-	ResetAssetInputs(true);
+	ResetAssetInputs();
+	SelectTab('AssetPropertiesTab');
 });
 for (const tab of document.querySelectorAll('nav-link')) {
-	tab.addEventListener('onclick', SelectTab(tab.id));
+	tab.addEventListener('onclick', SelectTab(tab.id, false));
 }
 
 
@@ -109,15 +111,26 @@ document.getElementById('RemoveVariantButton').addEventListener('click', () => {
 // Asset Properties tab events
 for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
 	input.addEventListener('input', event => {
+		if (event.target.id === 'AssetLastModifiedText') {
+			// Convert UTC text pasted into the input box for to a valid datetime to populate the datetime picker.
+			var inputValue = document.getElementById('AssetLastModifiedText').value.replaceAll('"', '');
+			try {
+				var newDate = new Date(inputValue).toISOString().slice(0, 19);
+				document.getElementById('AssetLastModified').value = newDate;
+			} catch (e) {
+				console.log(e);
+			}
+		}
+		
 		UpdateAssetItem(event.target.id);
 	});
 }
 document.getElementById('AssetArchiveVersion').addEventListener('change', event => {
 	UpdateAssetItem(event.target.id);
 });
-document.getElementById('ResetAssetFormButton').addEventListener('click', () => {
-	ResetAssetInputs();
-});
+//document.getElementById('ResetAssetFormButton').addEventListener('click', () => {
+//	ResetAssetInputs();
+//});
 document.getElementById('AddAssetButton').addEventListener('click', () => {
 	AddAsset();
 });
@@ -180,7 +193,7 @@ function ResetAllInputs() {
  * @param {boolean} newForm Whether to toggle the new form state side effects
  */
 function ResetPackageInputs(newForm = false) {
-	selectedDoc = null
+	selectedDoc = null;
 	document.getElementById('PackageGroup').value = '';
 	if (groupTomSelect = document.getElementById('PackageGroup').tomselect) groupTomSelect.clear(true);
 	document.getElementById('PackageName').value = '';
@@ -236,7 +249,7 @@ function ResetVariantInputs() {
 /**
  * Resets the Asset input form fields.
  */
-function ResetAssetInputs(newForm = false) {
+function ResetAssetInputs() {
 	document.getElementById('AssetUrl').value = '';
 	document.getElementById('AssetId').value = '';
 	document.getElementById('AssetVersion').value = '';
@@ -247,10 +260,8 @@ function ResetAssetInputs(newForm = false) {
 	document.getElementById('AssetNonPersistentUrl').value = '';
 	document.getElementById('AddAssetButton').disabled = true;
 
-	if (newForm) {
-		document.getElementById('CurrentDocumentType').innerHTML = 'asset';
-		document.getElementById('CurrentDocumentName').innerHTML = '[new asset]';
-	}
+	document.getElementById('CurrentDocumentType').innerHTML = 'asset';
+	document.getElementById('CurrentDocumentName').innerHTML = '[new asset]';
 }
 
 
@@ -269,14 +280,6 @@ function EntryValidation(elementId) {
 		document.getElementById('RemovePackageButton').disabled = false;
 	}
 
-	//Prevent adding an asset if any required fields are blank
-	if (document.getElementById('AssetUrl').value === '' || document.getElementById('AssetId').value === '' || document.getElementById('AssetVersion').value === '' || document.getElementById('AssetLastModified').value === '') {
-		document.getElementById('AddAssetButton').disabled = true;
-		document.getElementById('RemoveAssetButton').disabled = true;
-	} else {
-		document.getElementById('AddAssetButton').disabled = false;
-		document.getElementById('RemoveAssetButton').disabled = false;
-	}
 
 	//Prevent adding a variant if any required fields are blank
 	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '') {
@@ -287,12 +290,12 @@ function EntryValidation(elementId) {
 		document.getElementById('RemoveVariantButton').disabled = false;
 	}
 
-	
+
 
 	var inputElement = document.getElementById(elementId);
 	var inputText = inputElement.value;
 	var locn = inputElement.selectionStart;
-	
+
 	var fieldName = elementId.replaceAll('Package', '').replaceAll('Asset', '');
 	if (fieldName === 'Subfolder' || fieldName === 'LastModified') {
 		return;
@@ -644,7 +647,7 @@ function AddNewVariant() {
 	} else {
 		selectedDoc.variants.push(newVariant);
 	}
-	
+
 	//Add variant descriptions (if any)
 	if (document.getElementById('VariantDescription').value !== '') {
 		selectedDoc.variantDescriptions = newPackage = {
@@ -667,8 +670,8 @@ function AddNewVariant() {
  * Fill the Asset input form fields with the values from the currently selected asset number.
  */
 function FillAssetForm() {
-	if (selectedDoc === undefined || selectedDoc === null) { return;}
-	document.getElementById('AddAssetButton').disabled = false;
+	if (selectedDoc === undefined || selectedDoc === null) { return; }
+	//document.getElementById('AddAssetButton').disabled = false;
 	document.getElementById('AssetUrl').value = selectedDoc.url;
 	document.getElementById('AssetId').value = selectedDoc.assetId;
 	document.getElementById('AssetVersion').value = selectedDoc.version;
@@ -691,12 +694,27 @@ function FillAssetForm() {
  */
 function UpdateAssetItem(itemName) {
 	EntryValidation(itemName);
-	if (selectedDoc !== null) {
-		selectedDoc.url = document.getElementById('AssetUrl').value;
-		selectedDoc.assetId = document.getElementById('AssetId').value;
-		selectedDoc.version = document.getElementById('AssetVersion').value;
-		selectedDoc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
+
+	//Prevent adding an asset if any required fields are blank
+	if (document.getElementById('AssetUrl').value !== '' && document.getElementById('AssetId').value !== '' && document.getElementById('AssetVersion').value !== '' && document.getElementById('AssetLastModified').value !== '') {
+		document.getElementById('AddAssetButton').disabled = false;
+	} else {
+		document.getElementById('AddAssetButton').disabled = true;
+		document.getElementById('RemoveAssetButton').disabled = true;
 	}
+
+	if (selectedDoc === null || selectedDoc === undefined) {
+		return;
+	}
+	document.getElementById('RemoveAssetButton').disabled = false;
+
+
+
+	selectedDoc.url = document.getElementById('AssetUrl').value;
+	selectedDoc.assetId = document.getElementById('AssetId').value;
+	selectedDoc.version = document.getElementById('AssetVersion').value;
+	selectedDoc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
+	
 	if (document.getElementById('AssetArchiveVersion').value !== '0') {
 		if (!Object.hasOwn(selectedDoc, 'archiveType')) {
 			selectedDoc.archiveType = new Object();
@@ -733,7 +751,7 @@ function AddAsset() {
 		version: document.getElementById('AssetVersion').value,
 		lastModified: document.getElementById('AssetLastModified').value + 'Z'
 	}
-	if (document.getElementById('AssetArchiveVersion').value !== 0) {
+	if (document.getElementById('AssetArchiveVersion').value !== '0') {
 		newAsset.archiveType = new Object();
 		newAsset.archiveType.format = "Clickteam";
 		newAsset.archiveType.version = document.getElementById('AssetArchiveVersion').value;
@@ -748,21 +766,4 @@ function AddAsset() {
 	yamlData.push(newAsset);
 
 	UpdateData();
-	ResetAssetInputs();
-}
-/**
- * Converts UTC text pasted into the input box for to a valid datetime to populate the datetime picker.
- */
-function FillDateTimePicker() {
-	//  \d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(Z|-\d\d:\d\d)
-	var inputValue = document.getElementById('AssetLastModifiedText').value.replaceAll('"', '');
-	try {
-		var newDate = new Date(inputValue).toISOString().slice(0, 19);
-		document.getElementById('AssetLastModified').value = newDate;
-		if (document.getElementById('AssetUrl').value !== '' && document.getElementById('AssetId').value !== '' && document.getElementById('AssetVersion').value !== '' && document.getElementById('AssetLastModified').value !== '') {
-			document.getElementById('AddAssetButton').disabled = false;
-		}
-	} catch (e) {
-		console.log(e);
-	}
 }

@@ -269,7 +269,7 @@
 								</div>
 								<div class="form-floating">
 									<input id="AssetLastModifiedText" type="text" class="form-control" required />
-									<label for="AssetLastModifiedText">(raw date time value)</label>
+									<label for="AssetLastModifiedText">(paste raw date time value)</label>
 								</div>
 							</div>
 							<div class="mb-2 input-group">
@@ -295,12 +295,12 @@
 
 							</div>
 						</form>
-						<div class="mb-2 btn-group">
+						<!--<div class="mb-2 btn-group">
 							<button id="ResetAssetFormButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
-						</div>
+						</div>-->
 						<div class="mb-2 btn-group">
 							<button id="AddAssetButton" class="btn btn-primary" type="button" disabled>Add New Asset</button>
-							<button id="RemoveAssetButton" class="btn btn-outline-danger" type="button">Remove Asset</button>
+							<button id="RemoveAssetButton" class="btn btn-outline-danger" type="button" disabled>Remove Asset</button>
 						</div>
 					</fieldset>
 				</div>
@@ -319,7 +319,7 @@
 			<!-- Right Column -->
 			<div id="Column2" class="col-sm-12 col-md-5">
 				<h2>YAML Output: <span id="YamlFileName" style="font-style:italic"></span></h2>
-				<h5><span id="CurrentItemCount"></span></h5>
+				<h5><span id="CurrentItemCount">This file contains: 0 packages, 0 assets</span></h5>
 				<p>The content in this code pane is automatically generated from the inputs on the left, but may also be customized manually. YAML written here must be syntactically valid. YAML comments are not preserved.</p>
 
 

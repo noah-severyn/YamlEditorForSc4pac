@@ -11,13 +11,17 @@ cm.on('change', () => {
 	yamlData = jsyaml.loadAll(cm.getValue());
 	
 	//Figure which document we're editing within the code so it can be set as the selected document
-	var line = cm.getCursor().line; //Object{line, ch}
-	var lineContent = cm.getLine(line);
 	var assetId;
 	var pkgName;
 	var pkgGroup;
+	var line = cm.getCursor().line;
 	var direction = (line > 0) ? 'up' : 'down';
-	while (line >= 0 && lineContent !== '---') {
+	var lineContent = cm.getLine(line);
+	if (lineContent === undefined) {
+		return;
+	}
+
+	while (line >= 0) {
 		console.log("L" + line + ": " + lineContent);
 		if (lineContent.startsWith('assetId:')) {
 			assetId = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"','').trim();
@@ -33,6 +37,9 @@ cm.on('change', () => {
 			break;
 		}
 
+		if (lineContent === '---' || line >= cm.lineCount()) {
+			direction = (direction === 'up' ? 'down' : 'up');
+		}
 		direction === 'up' ? line-- : line++;
 		lineContent = cm.getLine(line);
 	}
@@ -40,24 +47,25 @@ cm.on('change', () => {
 	//Determine which part of the code is being edited and which UI tab is relevant, then select it
 	line = cm.getCursor().line;
 	lineContent = cm.getLine(line);
-	var nodeName;
+	var nodeName, prevNodeName;
 	while (line >= 0) {
 		if (!lineContent.startsWith(' ') && !lineContent.startsWith('-')) {
 			nodeName = lineContent.slice(0, lineContent.indexOf(':'));
-			if (['group', 'name', 'version', 'subfolder', 'dependencies'].includes(nodeName)) {
-				SelectTab('PackagePropertiesTab', true);
+			prevNodeName = cm.getLine(line - 1).slice(0, lineContent.indexOf(':')); //The 'version' property is common to packages and assets so look at the previous property to help decide
+			if (['group', 'name', 'version', 'subfolder', 'dependencies'].includes(nodeName) && ['group', 'name', 'version', 'subfolder', 'dependencies'].includes(prevNodeName)) {
+				SelectTab('PackagePropertiesTab');
 			}
 			else if (nodeName === 'info') {
-				SelectTab('PackageInfoTab', true);
+				SelectTab('PackageInfoTab');
 			}
 			else if (nodeName === 'assets') {
-				SelectTab('IncludedAssetsTab', true);
+				SelectTab('IncludedAssetsTab');
 			}
 			else if (nodeName === 'variants') {
-				SelectTab('PackageVariantsTab', true);
+				SelectTab('PackageVariantsTab');
 			}
-			else if (['url', 'assetId', 'version', 'lastModified', 'archiveType', 'checksum', 'nonPersistentUrl'].includes(nodeName)) {
-				SelectTab('AssetPropertiesTab', true);
+			else {
+				SelectTab('AssetPropertiesTab');
 			}
 			break;
 		}
@@ -363,6 +371,8 @@ ResetAllInputs();
 
 /**
  * Sync changes between the codepane and UI with the current state of the `yamlData` array (UI ←→ yamlData ←→ codepane). Also sets the currently active (selected) document.
+ * 
+ * Dumps yamlData to the codepane by default.
  * @param {boolean} dumpData Specify FALSE to skip updating the code pane. Default is TRUE.
  */
 function UpdateData(dumpData = true) {
@@ -528,14 +538,14 @@ function UpdateMainTree() {
 		} else if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
 			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			if (document.querySelector(".nav-link.active").id === 'AssetPropertiesTab') {
-				SelectTab('PackagePropertiesTab', true);
+				SelectTab('PackagePropertiesTab');
 			}
 
 			SetSelectedDoc(selectedIdx - 1, 'p');
 			FillPackageForm();
 		} else {
 			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
-			SelectTab('AssetPropertiesTab', true);
+			SelectTab('AssetPropertiesTab');
 
 			SetSelectedDoc(selectedIdx - 1, 'a');
 			FillAssetForm();
