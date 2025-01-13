@@ -9,8 +9,8 @@ document.getElementById('NewAssetButton').addEventListener('click', () => {
 	ResetAssetInputs();
 	SelectTab('AssetPropertiesTab');
 });
-for (const tab of document.querySelectorAll('nav-link')) {
-	tab.addEventListener('onclick', SelectTab(tab.id, false));
+for (const tab of document.querySelectorAll('.nav-link')) {
+	tab.addEventListener('click', () => { SelectTab(tab.id, false) });
 }
 
 
