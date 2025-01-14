@@ -22,7 +22,7 @@ cm.on('change', () => {
 	}
 
 	while (line >= 0) {
-		console.log("L" + line + ": " + lineContent);
+		//console.log("L" + line + ": " + lineContent);
 		if (lineContent.startsWith('assetId:')) {
 			assetId = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"','').trim();
 			break;
@@ -44,28 +44,35 @@ cm.on('change', () => {
 		lineContent = cm.getLine(line);
 	}
 
+
+
 	//Determine which part of the code is being edited and which UI tab is relevant, then select it
 	line = cm.getCursor().line;
 	lineContent = cm.getLine(line);
-	var nodeName, prevNodeName;
+	var baseNode, otherNode;
+	var pkgNodes = ['group', 'name', 'version', 'subfolder', 'dependencies'];
 	while (line >= 0) {
 		if (!lineContent.startsWith(' ') && !lineContent.startsWith('-')) {
-			nodeName = lineContent.slice(0, lineContent.indexOf(':'));
-			prevNodeName = cm.getLine(line - 1).slice(0, lineContent.indexOf(':')); //The 'version' property is common to packages and assets so look at the previous property to help decide
-			if (['group', 'name', 'version', 'subfolder', 'dependencies'].includes(nodeName) && ['group', 'name', 'version', 'subfolder', 'dependencies'].includes(prevNodeName)) {
-				SelectTab('PackagePropertiesTab');
+			baseNode = lineContent.slice(0, lineContent.indexOf(':'));
+			//The 'version' property is common to packages and assets so look at the previous or next property to help decide
+			otherNode = cm.getLine(line + (line === 0) * 2 - 1).slice(0, lineContent.indexOf(':') - 1);
+
+			//TODO - fix the automatic tab activating when editing a part of the code pane
+			//It currently always defaults to the 'PackageProperties' tab because when dumping the data the cursor is set to 0,0
+			if (pkgNodes.includes(baseNode) && pkgNodes.includes(otherNode)) {
+				//SelectTab('PackagePropertiesTab');
 			}
-			else if (nodeName === 'info') {
-				SelectTab('PackageInfoTab');
+			else if (baseNode === 'info') {
+				//SelectTab('PackageInfoTab');
 			}
-			else if (nodeName === 'assets') {
-				SelectTab('IncludedAssetsTab');
+			else if (baseNode === 'assets') {
+				//SelectTab('IncludedAssetsTab');
 			}
-			else if (nodeName === 'variants') {
-				SelectTab('PackageVariantsTab');
+			else if (baseNode === 'variants') {
+				//SelectTab('PackageVariantsTab');
 			}
 			else {
-				SelectTab('AssetPropertiesTab');
+				//SelectTab('AssetPropertiesTab');
 			}
 			break;
 		}

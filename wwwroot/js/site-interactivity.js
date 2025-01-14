@@ -2,8 +2,8 @@
 // ----------------------------------------------   Set Event Handlers   ----------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 document.getElementById('NewPackageButton').addEventListener('click', () => {
-	ResetPackageInputs(true);
-	SelectTab('PackagePropertiesTab')
+	ResetPackageInputs();
+	SelectTab('PackagePropertiesTab');
 });
 document.getElementById('NewAssetButton').addEventListener('click', () => {
 	ResetAssetInputs();
@@ -17,7 +17,7 @@ for (const tab of document.querySelectorAll('.nav-link')) {
 
 // Package events
 document.getElementById('ResetPackageFormButton').addEventListener('click', () => {
-	ResetPackageInputs(true);
+	ResetPackageInputs();
 });
 document.getElementById('AddPackageButton').addEventListener('click', () => {
 	AddPackage();
@@ -128,9 +128,9 @@ for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
 document.getElementById('AssetArchiveVersion').addEventListener('change', event => {
 	UpdateAssetItem(event.target.id);
 });
-//document.getElementById('ResetAssetFormButton').addEventListener('click', () => {
-//	ResetAssetInputs();
-//});
+document.getElementById('ResetAssetFormButton').addEventListener('click', () => {
+	ResetAssetInputs();
+});
 document.getElementById('AddAssetButton').addEventListener('click', () => {
 	AddAsset();
 });
@@ -192,7 +192,7 @@ function ResetAllInputs() {
  * Resets the Package input form fields.
  * @param {boolean} newForm Whether to toggle the new form state side effects
  */
-function ResetPackageInputs(newForm = false) {
+function ResetPackageInputs() {
 	selectedDoc = null;
 	document.getElementById('PackageGroup').value = '';
 	if (groupTomSelect = document.getElementById('PackageGroup').tomselect) groupTomSelect.clear(true);
@@ -214,10 +214,8 @@ function ResetPackageInputs(newForm = false) {
 	document.getElementById('IsMultipleWebsites').checked = false;
 	document.getElementById('AddPackageButton').disabled = true;
 
-	if (newForm) {
-		document.getElementById('CurrentDocumentType').innerHTML = 'package';
-		document.getElementById('CurrentDocumentName').innerHTML = '[new package]';
-	}
+	document.getElementById('CurrentDocumentType').innerHTML = 'package';
+	document.getElementById('CurrentDocumentName').innerHTML = '[new package]';
 }
 /**
  * Resets the Included Asset input form fields.
@@ -270,28 +268,7 @@ function ResetAssetInputs() {
 /**
  * Apply basic validation rules for the specified entry field.
  */
-function EntryValidation(elementId) {
-	//Prevent adding a package if any required fields are blank
-	if (document.getElementById('PackageGroup').value === '' || document.getElementById('PackageName').value === '' || document.getElementById('PackageVersion').value === '' || document.getElementById('PackageSummary').value === '') {
-		document.getElementById('AddPackageButton').disabled = true;
-		document.getElementById('RemovePackageButton').disabled = true;
-	} else {
-		document.getElementById('AddPackageButton').disabled = false;
-		document.getElementById('RemovePackageButton').disabled = false;
-	}
-
-
-	//Prevent adding a variant if any required fields are blank
-	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '') {
-		document.getElementById('AddVariantButton').disabled = true
-		document.getElementById('RemoveVariantButton').disabled = true;
-	} else {
-		document.getElementById('AddVariantButton').disabled = false;
-		document.getElementById('RemoveVariantButton').disabled = false;
-	}
-
-
-
+function ValidateInput(elementId) {
 	var inputElement = document.getElementById(elementId);
 	var inputText = inputElement.value;
 	var locn = inputElement.selectionStart;
@@ -410,7 +387,16 @@ function AddDepencencyFromPacList() {
  * Update the YAML codepane with the values in the current Package form field.
  */
 function UpdatePackageData(fieldName) {
-	EntryValidation(fieldName);
+	//Prevent adding a package if any required fields are blank
+	if (document.getElementById('PackageGroup').value === '' || document.getElementById('PackageName').value === '' || document.getElementById('PackageVersion').value === '' || document.getElementById('PackageSummary').value === '') {
+		document.getElementById('AddPackageButton').disabled = true;
+		document.getElementById('RemovePackageButton').disabled = true;
+	} else {
+		document.getElementById('AddPackageButton').disabled = false;
+		document.getElementById('RemovePackageButton').disabled = false;
+	}
+
+	ValidateInput(fieldName);
 	if (selectedDoc !== null) {
 		selectedDoc.group = document.getElementById('PackageGroup').value;
 		selectedDoc.name = document.getElementById('PackageName').value;
@@ -504,7 +490,7 @@ function AddPackage() {
  * Add a new asset to the currently selected package.
  */
 function AddIncludedAsset() {
-	EntryValidation('PackageAssetId');
+	ValidateInput('PackageAssetId');
 	if (selectedDoc !== null) {
 		var newAsset = {
 			assetId: document.getElementById('PackageAssetId').value
@@ -558,6 +544,15 @@ function VariantAddDependency(input) {
 	variantPackageSelect.clear(true);
 }
 function UpdateVariantData(elem) {
+	//Prevent adding a variant if any required fields are blank
+	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '') {
+		document.getElementById('AddVariantButton').disabled = true
+		document.getElementById('RemoveVariantButton').disabled = true;
+	} else {
+		document.getElementById('AddVariantButton').disabled = false;
+		document.getElementById('RemoveVariantButton').disabled = false;
+	}
+
 	if (elem.id === 'VariantsPacAssetList' || elem.id === 'VariantsLocalAssetList') {
 		document.getElementById('VariantAssetId').value = elem.value;
 		if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
@@ -567,7 +562,7 @@ function UpdateVariantData(elem) {
 		if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
 		elem.value = '';
 	} else {
-		EntryValidation(elem.id);
+		ValidateInput(elem.id);
 		//TODO - update variant data
 		//Not going to bother implementing all of the onchange stuff here because I want to redesign how this works (see pr #43)
 		//Also it's a convoluted process where once the variant key name is changed the current setup will not be able to find the named variant any more
@@ -693,7 +688,7 @@ function FillAssetForm() {
  * Live update the YAML codepane with the values in the current Asset form field as the user types.
  */
 function UpdateAssetItem(itemName) {
-	EntryValidation(itemName);
+	ValidateInput(itemName);
 
 	//Prevent adding an asset if any required fields are blank
 	if (document.getElementById('AssetUrl').value !== '' && document.getElementById('AssetId').value !== '' && document.getElementById('AssetVersion').value !== '' && document.getElementById('AssetLastModified').value !== '') {
