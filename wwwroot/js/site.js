@@ -17,7 +17,7 @@ cm.on('change', () => {
 	var line = cm.getCursor().line;
 	var direction = (line > 0) ? 'up' : 'down';
 	var lineContent = cm.getLine(line);
-	if (lineContent === undefined) {
+	if (lineContent === undefined || yamlData.length === 0) {
 		return;
 	}
 
@@ -411,6 +411,7 @@ function UpdateData(dumpData = true) {
 	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 
 	SetSelectedDoc(currDocIdx);
+	ToggleTabState();
 	UpdateLocalDropdowns();
 	UpdateMainTree();
 	UpdateIncludedAssetTree();
@@ -427,7 +428,7 @@ function UpdateData(dumpData = true) {
 	if (dumpData) {
 		cm.setValue(DumpYaml());
 	}
-
+	SetSelectedDoc(currDocIdx);
 
 	/**
 	 * Count the number of Packages and Assets in the code pane and update the UI with this new result.
@@ -557,7 +558,7 @@ function UpdateMainTree() {
 			SetSelectedDoc(selectedIdx - 1, 'a');
 			FillAssetForm();
 		}
-		console.log(selectedDoc)
+		ToggleTabState();
 	});
 }
 

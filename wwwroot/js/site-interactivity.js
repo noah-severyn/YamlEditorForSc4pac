@@ -4,10 +4,12 @@
 document.getElementById('NewPackageButton').addEventListener('click', () => {
 	ResetPackageInputs();
 	SelectTab('PackagePropertiesTab');
+	EnablePackageTabs();
 });
 document.getElementById('NewAssetButton').addEventListener('click', () => {
 	ResetAssetInputs();
 	SelectTab('AssetPropertiesTab');
+	EnableAssetTab();
 });
 for (const tab of document.querySelectorAll('.nav-link')) {
 	tab.addEventListener('click', () => { SelectTab(tab.id, false) });
@@ -164,7 +166,65 @@ document.getElementById('ClearAllButton').addEventListener('click', () => {
 });
 
 
+/**
+* Disables the package tabs and enables the asset tab.
+*/
+function EnableAssetTab() {
+	document.getElementById('PackagePropertiesTab').classList.add('disabled');
+	document.getElementById('PackagePropertiesTab').removeAttribute('data-bs-toggle');
+	document.getElementById('PackageInfoTab').classList.add('disabled');
+	document.getElementById('PackageInfoTab').removeAttribute('data-bs-toggle');
+	document.getElementById('IncludedAssetsTab').classList.add('disabled');
+	document.getElementById('IncludedAssetsTab').removeAttribute('data-bs-toggle');
+	document.getElementById('PackageVaraintsTab').classList.add('disabled');
+	document.getElementById('PackageVaraintsTab').removeAttribute('data-bs-toggle');
 
+	document.getElementById('AssetPropertiesTab').classList.remove('disabled');
+	document.getElementById('AssetPropertiesTab').setAttribute('data-bs-toggle', 'tab');
+}
+/**
+* Enables the package tabs and disables the asset tab.
+*/
+function EnablePackageTabs() {
+	document.getElementById('PackagePropertiesTab').classList.remove('disabled');
+	document.getElementById('PackagePropertiesTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('PackageInfoTab').classList.remove('disabled');
+	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('IncludedAssetsTab').classList.remove('disabled');
+	document.getElementById('IncludedAssetsTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('PackageVaraintsTab').classList.remove('disabled');
+	document.getElementById('PackageVaraintsTab').setAttribute('data-bs-toggle', 'tab');
+
+	document.getElementById('AssetPropertiesTab').classList.add('disabled');
+	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
+}
+/**
+* Toggles the package tabs and asset tab between enabled/disabled states based on the type of `selectedDoc`.
+*/
+function ToggleTabState() {
+	if (IsPackage(selectedDoc)) {
+		EnablePackageTabs();
+	}
+	else {
+		EnableAssetTab();
+	}
+}
+/**
+ * Maintain side effects of switching between the tabs and optionally activate the specified tab.
+ * @param {string} elementId The Id of the tab element to select
+ * @param {boolean} triggerEvent Whether to trigger the click event to show the tab. Default is TRUE
+ */
+function SelectTab(elementId, triggerEvent = true) {
+	if (elementId === 'AssetPropertiesTab') {
+		document.getElementById('PackageControls').classList.add("d-none");
+	} else {
+		document.getElementById('PackageControls').classList.remove("d-none");
+	}
+
+	if (triggerEvent) {
+		(new bootstrap.Tab(document.getElementById(elementId))).show();
+	}
+}
 
 
 
@@ -190,7 +250,6 @@ function ResetAllInputs() {
 }
 /**
  * Resets the Package input form fields.
- * @param {boolean} newForm Whether to toggle the new form state side effects
  */
 function ResetPackageInputs() {
 	selectedDoc = null;
