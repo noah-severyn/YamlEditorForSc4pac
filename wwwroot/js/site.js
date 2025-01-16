@@ -777,11 +777,6 @@ function GetContent(url, fileName) {
 		.catch(error => console.error('Error fetching the tree data:', error));
 
 	//Hide the modal display
-	loadFileDialog.classList.remove('show');
-	loadFileDialog.style.display = 'none';
-	document.body.classList.remove('modal-open');
-	var backdrop = document.querySelector('.modal-backdrop');
-	if (backdrop) {
-		backdrop.parentNode.removeChild(backdrop);
-	}
+	var modal = bootstrap.Modal.getInstance(loadFileDialog)
+	modal.hide();
 }
