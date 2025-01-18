@@ -779,7 +779,7 @@ document.addEventListener("keydown", function (e) {
 	}
 }, false);
 function SaveAs() {
-	var bb = new Blob([DumpYaml()], { type: 'application/yaml' });
+	var bb = new Blob([cm.getValue()], { type: 'application/yaml' });
 	var tmp = document.createElement('a');
 	var fileName;
 	if (yamlData[0] == null) {
