@@ -1,9 +1,99 @@
+/**
+ * CodeMirror editor component
+ */
 const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
 	lineNumbers: true,
 	tabSize: 2,
 	lineWrapping: true,
 	mode: 'yaml'
 });
+cm.on('change', () => {
+	yamlData = jsyaml.loadAll(cm.getValue());
+	
+	//Figure which document we're editing within the code so it can be set as the selected document
+	var assetId;
+	var pkgName;
+	var pkgGroup;
+	var line = cm.getCursor().line;
+	var direction = (line > 0) ? 'up' : 'down';
+	var lineContent = cm.getLine(line);
+	if (lineContent === undefined || yamlData.length === 0) {
+		return;
+	}
+
+	while (line >= 0) {
+		//console.log("L" + line + ": " + lineContent);
+		if (lineContent.startsWith('assetId:')) {
+			assetId = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"','').trim();
+			break;
+		}
+		else if (lineContent.startsWith('name:')) {
+			pkgName = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"', '').trim();
+		}
+		else if (lineContent.startsWith('group:')) {
+			pkgGroup = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"', '').trim();
+		}
+		if (pkgGroup !== undefined && pkgName !== undefined) {
+			break;
+		}
+
+		if (lineContent === '---' || line >= cm.lineCount()) {
+			direction = (direction === 'up' ? 'down' : 'up');
+		}
+		direction === 'up' ? line-- : line++;
+		lineContent = cm.getLine(line);
+	}
+
+
+
+	//Determine which part of the code is being edited and which UI tab is relevant, then select it
+	line = cm.getCursor().line;
+	lineContent = cm.getLine(line);
+	var baseNode, otherNode;
+	var pkgNodes = ['group', 'name', 'version', 'subfolder', 'dependencies'];
+	while (line >= 0) {
+		if (!lineContent.startsWith(' ') && !lineContent.startsWith('-')) {
+			baseNode = lineContent.slice(0, lineContent.indexOf(':'));
+			//The 'version' property is common to packages and assets so look at the previous or next property to help decide
+			otherNode = cm.getLine(line + (line === 0) * 2 - 1).slice(0, lineContent.indexOf(':') - 1);
+
+			//TODO - fix the automatic tab activating when editing a part of the code pane
+			//It currently always defaults to the 'PackageProperties' tab because when dumping the data the cursor is set to 0,0
+			if (pkgNodes.includes(baseNode) && pkgNodes.includes(otherNode)) {
+				//SelectTab('PackagePropertiesTab');
+			}
+			else if (baseNode === 'info') {
+				//SelectTab('PackageInfoTab');
+			}
+			else if (baseNode === 'assets') {
+				//SelectTab('IncludedAssetsTab');
+			}
+			else if (baseNode === 'variants') {
+				//SelectTab('PackageVariantsTab');
+			}
+			else {
+				//SelectTab('AssetPropertiesTab');
+			}
+			break;
+		}
+
+		direction === 'up' ? line-- : line++;
+		lineContent = cm.getLine(line);
+	}
+
+
+	if (assetId === undefined) {
+		currDocIdx = yamlData.findIndex(item => item.group === pkgGroup && item.name === pkgName);
+	} else {
+		currDocIdx = yamlData.findIndex(item => item.assetId === assetId);
+	}
+	console.log(currDocIdx);
+	UpdateData(false);
+});
+/**
+ * Array of packages and assets in this YAML file. The primary data object.
+ */
+var yamlData = [];
 
 
 //var sc4pacAssets = new Array();
@@ -29,32 +119,30 @@ const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
 
 
 /**
- * Load From Dialog
+ * Load From Dialog element
  */
 const loadFileDialog = document.getElementById('LoadFromChannelDialog');
 /**
- * Main Tree View
+ * Main Tree View element
  */
 var mtv;
 /**
- * Asset Tree View
+ * Asset Tree View element
  */
 var atv;
 /**
- * Variant Tree View
+ * Variant Tree View element
  */
 var vtv;
 /**
- * Array of packages and assets in this YAML file
+ * Index of the currently selected document within `yamlData`.
  */
-var yamlData = jsyaml.loadAll(cm.getValue());
+var currDocIdx = null;
 /**
- * Currently selected document in the main tree - can be a package or an asset
+ * Currently selected document in the main tree - may be a package or an asset.
  */
-var selectedDoc;
+var selectedDoc = null;
 
-var currPackageIdx = null;
-var currAssetIdx = null;
 var countOfPackages = 0;
 var countOfAssets = 0;
 var listOfAssets = new Array();
@@ -279,11 +367,7 @@ var pkgGroupSelect = new TomSelect('#PackageGroup', {
 
 
 
-ParseYaml();
-SetSelectedDoc('p', null);
-ResetAssetInputs();
-ResetPackageInputs();
-ResetVariantInputs();
+ResetAllInputs();
 
 
 
@@ -292,24 +376,120 @@ ResetVariantInputs();
 
 
 
-
 /**
- * Parse the current YAML input and update the UI accordingly based on the count of packages and assets.
+ * Sync changes between the codepane and UI with the current state of the `yamlData` array (UI ←→ yamlData ←→ codepane). Also sets the currently active (selected) document.
+ * 
+ * Dumps yamlData to the codepane by default.
+ * @param {boolean} dumpData Specify FALSE to skip updating the code pane. Default is TRUE.
  */
-function ParseYaml() {
-	yamlData = jsyaml.loadAll(cm.getValue());
-	console.log(yamlData);
-	if (yamlData.length > 0 && (selectedDoc == null || selectedDoc == undefined)) {
-		selectedDoc = yamlData[0];
-		//if (IsPackage(selectedDoc)) {
-		//	FillPackageForm();
-		//} else {
-		//	FillAssetForm();
-		//}
+function UpdateData(dumpData = true) {
+	//When updating a text input, the input event occurs immediately, but the change event doesn't occur until you commit the change by lose focus or submit the form.
+
+	//form.onchange() { input.validate(); metadata.update() }
+	//codemirror.onchange() { metadata.update() }
+	//metadata.update() { treeview.update(); form.update(); codemirror.update() }
+
+
+
+	//Update the counts of packages and assets
+	countOfAssets = 0;
+	countOfPackages = 0;
+	listOfAssets.length = 0;
+	listOfPackages.length = 0;
+
+	if (yamlData !== null) {
+		yamlData.forEach((item) => {
+			if (IsAsset(item)) {
+				countOfAssets++;
+				listOfAssets.push(item);
+			} else if (IsPackage(item)) {
+				countOfPackages++;
+				listOfPackages.push(item);
+			}
+		});
 	}
-	CountItems();
+	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
+
+	SetSelectedDoc(currDocIdx);
+	ToggleTabState();
+	UpdateLocalDropdowns();
 	UpdateMainTree();
+	UpdateIncludedAssetTree();
 	UpdateVariantTree();
+
+	
+
+	if (IsPackage(selectedDoc)) {
+		FillPackageForm();
+	} else {
+		FillAssetForm();
+	}
+	
+	if (dumpData) {
+		cm.setValue(DumpYaml());
+	}
+	SetSelectedDoc(currDocIdx);
+
+	/**
+	 * Count the number of Packages and Assets in the code pane and update the UI with this new result.
+	 */
+	function UpdateLocalDropdowns() {
+		//TODO - this UpdateLocalDropdowns function should disappear when PR #45 is implemented
+
+		//Fill local dependency selection options
+		var packageDependencies = document.getElementById('LocalPackageList');
+		var variantDependencies = document.getElementById('VariantsLocalPackageList');
+		packageDependencies.replaceChildren();
+		packageDependencies.appendChild(new Option('', ''));
+		variantDependencies.replaceChildren();
+		variantDependencies.appendChild(new Option('', ''));
+		for (var idx = 0; idx < listOfPackages.length; idx++) {
+			var pkgName = listOfPackages[idx].group + ":" + listOfPackages[idx].name;
+			packageDependencies.add(new Option(pkgName, pkgName));
+			variantDependencies.add(new Option(pkgName, pkgName));
+		}
+
+		//Package:asset selection for local assets
+		var localAssetList = document.getElementById('SelectLocalPackageAssets');
+		var variantAssets = document.getElementById('VariantsLocalAssetList');
+		localAssetList.replaceChildren();
+		localAssetList.appendChild(new Option('', ''));
+		variantAssets.replaceChildren();
+		variantAssets.appendChild(new Option('', ''));
+		listOfAssets.forEach(i => localAssetList.add(new Option(i.assetId, i.assetId)));
+		listOfAssets.forEach(i => variantAssets.add(new Option(i.assetId, i.assetId)));
+	}
+
+	function DumpYaml() {
+		var newYaml = '';
+		var docu = '';
+		//TODO - figure out how to retain comments
+
+		for (var idx = 0; idx < yamlData.length; idx++) {
+			if (yamlData[idx] === null) {
+				continue;
+			}
+			docu = jsyaml.dump(yamlData[idx], {
+				'lineWidth': -1,
+				'quotingType': '"',
+				'noArrayIndent': true,
+				'forceQuotes': true
+			});
+			//The parser blows away the multiline context so we need to rebuild it :(
+			if (docu.indexOf('description: ') > 0) {
+				var rgx = new RegExp('description: \"(.*?)\"');
+				var oldText = docu.match(rgx)[0];
+				var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"', '');
+				docu = docu.replace(oldText, newText);
+			}
+
+			newYaml = newYaml + docu;
+			if (idx !== yamlData.length - 1) {
+				newYaml = newYaml + '\n---\n';
+			}
+		}
+		return newYaml;
+	}
 }
 
 
@@ -362,25 +542,23 @@ function UpdateMainTree() {
 		leaf.classList.add('selected');
 		
 		if (t.data.name.indexOf('(') > 0) { //A heading category was selected
-			return
+			return;
 		} else if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
-			currPackageIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			if (document.querySelector(".nav-link.active").id === 'AssetPropertiesTab') {
-				SelectTab('PackagePropertiesTab', true);
+				SelectTab('PackagePropertiesTab');
 			}
 
-			selectedDoc = yamlData.filter((doc) => IsPackage(doc))[currPackageIdx - 1];
+			SetSelectedDoc(selectedIdx - 1, 'p');
 			FillPackageForm();
-			UpdateIncludedAssetTree();
-			UpdateVariantTree();
 		} else {
-			currAssetIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
-			SelectTab('AssetPropertiesTab', true);
+			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+			SelectTab('AssetPropertiesTab');
 
-			selectedDoc = yamlData.filter((doc) => IsAsset(doc))[currAssetIdx - 1];
+			SetSelectedDoc(selectedIdx - 1, 'a');
 			FillAssetForm();
 		}
-
+		ToggleTabState();
 	});
 }
 
@@ -458,93 +636,33 @@ function UpdateVariantTree() {
 			FillVariantFormAsset(selectedAsset);
 		}
 	});
-}
 
-
-
-/**
- * Count the number of Packages and Assets in the code pane and update the UI with this new result.
- */
-function CountItems() {
-	countOfAssets = 0;
-	countOfPackages = 0;
-	listOfAssets.length = 0;
-	listOfPackages.length = 0;
-
-	if (yamlData !== null) {
-		yamlData.forEach((item) => {
-			if (IsAsset(item)) {
-				countOfAssets++;
-				listOfAssets.push(item);
-			} else if (IsPackage(item)) {
-				countOfPackages++;
-				listOfPackages.push(item);
-			}
-		});
+	/**
+	 * Fill the Varaint input form fields with the specified variant.
+	 */
+	function FillVariantFormHeader(vData) {
+		var key = Object.keys(vData.variant)[0];
+		var idx = key.lastIndexOf(':');
+		document.getElementById('IsGlobalVariant').checked = (key.substring(0, idx) !== selectedDoc.group + ':' + selectedDoc.name);
+		document.getElementById('VariantKey').value = key.substring(idx + 1);
+		document.getElementById('VariantValue').value = Object.values(vData.variant)[0];
+		document.getElementById('VariantDescription').value = '';
+		document.getElementById('VariantDependencies').value = ArrayToText(vData.dependencies);
+		document.getElementById('VariantDescription').value = selectedDoc.variantDescriptions[key][Object.values(vData.variant)[0]];
 	}
 
-	//Fill local dependency selection options
-	var packageDependencies = document.getElementById('LocalPackageList');
-	var variantDependencies = document.getElementById('VariantsLocalPackageList');
-	packageDependencies.replaceChildren();
-	packageDependencies.appendChild(new Option('', ''));
-	variantDependencies.replaceChildren();
-	variantDependencies.appendChild(new Option('', ''));
-	for (var idx = 0; idx < listOfPackages.length; idx++) {
-		var pkgName = listOfPackages[idx].group + ":" + listOfPackages[idx].name;
-		packageDependencies.add(new Option(pkgName, pkgName));
-		variantDependencies.add(new Option(pkgName, pkgName));
+
+	function FillVariantFormAsset(vAsset) {
+		document.getElementById('VariantAssetId').value = vAsset.assetId;
+		document.getElementById('VariantInclude').value = ArrayToText(vAsset.include);
+		document.getElementById('VariantExclude').value = ArrayToText(vAsset.exclude);
 	}
-
-	//Package:asset selection for local assets
-	var localAssetList = document.getElementById('SelectLocalPackageAssets');
-	var variantAssets = document.getElementById('VariantsLocalAssetList');
-	localAssetList.replaceChildren();
-	localAssetList.appendChild(new Option('', ''));
-	variantAssets.replaceChildren();
-	variantAssets.appendChild(new Option('', ''));
-	listOfAssets.forEach(i => localAssetList.add(new Option(i.assetId, i.assetId)));
-	listOfAssets.forEach(i => variantAssets.add(new Option(i.assetId, i.assetId)));
-
-	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 }
 
 
-function DumpYaml() {
-	var newYaml = '';
-	var docu = '';
-	//TODO - figure out how to retain comments
-
-	for (var idx = 0; idx < yamlData.length; idx++) {
-		if (yamlData[idx] === null) {
-			continue;
-		}
-		docu = jsyaml.dump(yamlData[idx], {
-			'lineWidth': -1,
-			'quotingType': '"',
-			'noArrayIndent': true,
-			'forceQuotes': true
-		});
-		//The parser blows away the multiline context so we need to rebuild it :(
-		if (docu.indexOf('description: ') > 0) {
-			var rgx = new RegExp('description: \"(.*?)\"');
-			var oldText = docu.match(rgx)[0];
-			var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"', '');
-			docu = docu.replace(oldText, newText);
-		}
-
-		newYaml = newYaml + docu;
-		if (idx !== yamlData.length - 1) {
-			newYaml = newYaml + '\n---\n';
-		}
-	}
-	return newYaml;
-}
 
 
-function UpdateCodePane() {
-	cm.setValue(DumpYaml());
-}
+
 
 
 function CopyToClipboard() {
@@ -588,9 +706,7 @@ function RemoveSelectedDoc() {
 		yamlData = yamlData.filter((doc) => doc.assetId !== selectedDoc.assetId);
 	}
 
-	CountItems();
-	UpdateMainTree();
-	UpdateCodePane();
+	UpdateData();
 	ResetAssetInputs();
 }
 
@@ -610,24 +726,47 @@ function GetDocument(type, index) {
 }
 
 /**
- * Sets the currently selected document to the specified package or asset if found. If not found it sets the selectedDoc to null.
- * @param {string} type Specify 'p' for packages or 'a' for assets.
- * @param {number} index The nth package or asset to return
+ * Sets `selectedDoc` and `currDocIdx` to the document at the specified index. Omit the type to return the nth document within the entire dataset
+ * @param {number} index The nth document to return, or -1 to clear the selected doc.
+ * @param {string} type [Optional] Specify 'p' for package, 'a' for asset, or omit to return either type.
  */
-function SetSelectedDoc(type, index) {
+function SetSelectedDoc(index, type) {
 	var docs;
-	if (type.toLowerCase() === 'p') {
-		docs = yamlData.filter((doc) => IsPackage(doc));
-		currPackageIdx = index
-	} else if (type.toLowerCase() === 'a') {
-		docs = yamlData.filter((doc) => IsAsset(doc));
-		currAssetIdx = index
+	if (index === undefined) {
+		index = 0;
+	}
+	if (index < 0) {
+		selectedDoc = null;
+		currDocIdx = null;
+		return;
 	}
 
-	if (index <= docs.length) {
-		selectedDoc = docs[index];
-	} else {
-		selectedDoc = null;
+	if (arguments.length === 1) {
+		selectedDoc = yamlData[index];
+		currDocIdx = index;
+	}
+	else {
+		if (type.toLowerCase() === 'p') {
+			docs = yamlData.filter((doc) => IsPackage(doc));
+		} else if (type.toLowerCase() === 'a') {
+			docs = yamlData.filter((doc) => IsAsset(doc));
+		} else {
+			selectedDoc = null;
+			currDocIdx = null;
+			return;
+		}
+
+		if (index > docs.length) {
+			selectedDoc = null;
+			currDocIdx = null;
+			return;
+		} else if (type.toLowerCase() === 'p') {
+			selectedDoc = docs[index];
+			currDocIdx = yamlData.findIndex(i => i.group === selectedDoc.group && i.name === selectedDoc.name);
+		} else if (type.toLowerCase() === 'a') {
+			selectedDoc = docs[index];
+			currDocIdx = yamlData.findIndex(i => i.assetId === selectedDoc.assetId);
+		}
 	}
 }
 
@@ -640,7 +779,7 @@ document.addEventListener("keydown", function (e) {
 	}
 }, false);
 function SaveAs() {
-	var bb = new Blob([DumpYaml()], { type: 'application/yaml' });
+	var bb = new Blob([cm.getValue()], { type: 'application/yaml' });
 	var tmp = document.createElement('a');
 	var fileName;
 	if (yamlData[0] == null) {
@@ -677,8 +816,6 @@ function LoadFromFile() {
 		reader.onload = function (e) {
 			var contents = e.target.result;
 			cm.setValue(contents);
-			ParseYaml();
-			SetSelectedDoc('p', 0);
 			tmp.remove();
 		}
 		reader.readAsText(file);
@@ -690,9 +827,9 @@ function LoadFromFile() {
 /**
  * Load content from a Github file tree
  * @param {any} srcElem Source element this function is being called from.
- * 
+ *
  * If the element is `a` then this is triggered from the open menu or the breadcrumb menu and we want to navigate to the base folder of the Github files; if the element is `BUTTON` then its being triggered from a button click in the modal dialog and we want to navigate to a subfolder of the Github files. Basically, links go to the root folder level, buttons go to a subfolder level.
- * @param {any} channel Name of the channel to fetch data from, e.g. 'default' or 'zasco'
+ * @param {any} channel Name of the channel to fetch data from, e.g. 'default' or 'zasco' or 'simtropolis'
  */
 async function LoadFromGithub(srcElem, channel) {
 	var crumbNav = document.getElementById('ChannelBreadcrumb');
@@ -772,7 +909,6 @@ function GetContent(url, fileName) {
 		.then(data => {
 			document.getElementById('YamlFileName').textContent = fileName;
 			cm.setValue(atob(data.content));
-			ParseYaml();
 		})
 		.catch(error => console.error('Error fetching the tree data:', error));
 
