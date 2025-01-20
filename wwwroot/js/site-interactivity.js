@@ -36,10 +36,7 @@ for (const input of document.querySelectorAll('#PackagePropertiesForm .form-cont
 		UpdatePackageData(event.target.id);
 	});
 }
-document.getElementById('PacPackageList').addEventListener('change', event => {
-	PackageAddDependency(event.target);
-});
-document.getElementById('LocalPackageList').addEventListener('change', event => {
+document.getElementById('DepPackageList').addEventListener('change', event => {
 	PackageAddDependency(event.target);
 });
 
@@ -82,7 +79,7 @@ document.getElementById('AddPackageAssetButton').addEventListener('change', () =
 
 
 // Package Variant tab events
-for (const input of document.querySelectorAll('#VariantKey, #VariantValue, #VariantDescription, #VariantsPacPackageList, #VariantsLocalPackageList')) {
+for (const input of document.querySelectorAll('#VariantKey, #VariantValue, #VariantDescription, #VariantsPackageList')) {
 	input.addEventListener('input', event => {
 		UpdateVariantData(event.target);
 	});
@@ -260,8 +257,7 @@ function ResetPackageInputs() {
 	document.getElementById('PackageSubfolder').value = '';
 	if (subfolderTomSelect = document.getElementById('PackageSubfolder').tomselect) subfolderTomSelect.clear(true);
 	document.getElementById('PackageDependencies').value = '';
-	document.getElementById('LocalPackageList').value = '';
-	document.getElementById('PacPackageList').value = '';
+	document.getElementById('DepPackageList').value = '';
 	document.getElementById('PackageSummary').value = '';
 	document.getElementById('PackageConflicts').value = '';
 	document.getElementById('PackageWarning').value = '';
@@ -298,9 +294,8 @@ function ResetVariantInputs() {
 	document.getElementById('VariantAssetId').value = '';
 	document.getElementById('VariantInclude').value = '';
 	document.getElementById('VariantExclude').value = '';
-	if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
-	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
-	document.getElementById('VariantsLocalPackageList').value = '';
+	if (variantPackageTomSelect = document.getElementById('VariantsPackageList').tomselect) variantPackageTomSelect.clear(true);
+	if (variantPackageTomSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageTomSelect.clear(true);
 	document.getElementById('VariantsLocalAssetList').value = '';
 }
 /**
@@ -398,8 +393,8 @@ function FillPackageForm() {
 	}
 
 	//For some reason these must be last otherwise the regular text inputs will not populate correctly
-	(pkgGroupSelect.createItem(selectedDoc.group) || pkgGroupSelect.addItem(selectedDoc.group));
-	pkgSubfolderSelect.addItem(selectedDoc.subfolder);
+	(pkgGroupTomSelect.createItem(selectedDoc.group) || pkgGroupTomSelect.addItem(selectedDoc.group));
+	pkgSubfolderTomSelect.addItem(selectedDoc.subfolder);
 
 	document.getElementById('CurrentDocumentType').innerHTML = "package";
 	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
@@ -423,23 +418,21 @@ function PackageAddDependency(input) {
 	} else {
 		document.getElementById('PackageDependencies').value = currentDependencies + input.value + ';\n';
 	}
-	document.getElementById('PacPackageList').tomselect.clear(true);
-	document.getElementById('LocalPackageList').value = '';
+	document.getElementById('DepPackageList').tomselect.clear(true);
 }
 /**
  * Adds the selected sc4pac dependency to the list.
  */
 function AddDepencencyFromPacList() {
-	var selectedPkg = document.getElementById('PacPackageList').value;
+	var selectedPkg = document.getElementById('DepPackageList').value;
 	var currentDependencies = document.getElementById('PackageDependencies').value;
 	if (currentDependencies === '') {
 		document.getElementById('PackageDependencies').value = selectedPkg + ';\n'
 	} else {
 		document.getElementById('PackageDependencies').value = currentDependencies + selectedPkg + ';\n';
 	}
-	document.getElementById('PacPackageList').value = '';
-
-	document.getElementById('PacPackageList').tomselect.clear(true);
+	document.getElementById('DepPackageList').value = '';
+	document.getElementById('DepPackageList').tomselect.clear(true);
 	input.value = '';
 }
 /**
@@ -600,7 +593,7 @@ function VariantAddDependency(input) {
 	} else {
 		document.getElementById('VariantDependencies').value = currentDependencies + input.value + ';\n';
 	}
-	variantPackageSelect.clear(true);
+	variantPackageTomSelect.clear(true);
 }
 function UpdateVariantData(elem) {
 	//Prevent adding a variant if any required fields are blank
@@ -614,11 +607,11 @@ function UpdateVariantData(elem) {
 
 	if (elem.id === 'VariantsPacAssetList' || elem.id === 'VariantsLocalAssetList') {
 		document.getElementById('VariantAssetId').value = elem.value;
-		if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
+		if (variantPackageTomSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageTomSelect.clear(true);
 		elem.value = '';
-	} else if (elem.id === 'VariantsPacPackageList' || elem.id === 'VariantsLocalPackageList') {
+	} else if (elem.id === 'VariantsPackageList') {
 		document.getElementById('VariantDependencies').value = document.getElementById('VariantDependencies').value + elem.value + ';\n';
-		if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
+		if (variantPackageTomSelect = document.getElementById('VariantsPackageList').tomselect) variantPackageTomSelect.clear(true);
 		elem.value = '';
 	} else {
 		ValidateInput(elem.id);
@@ -643,7 +636,7 @@ function AddAssetToVariant() {
 	document.getElementById('VariantAssetId').value = '';
 	document.getElementById('VariantInclude').value = '';
 	document.getElementById('VariantExclude').value = '';
-	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
+	if (variantPackageTomSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageTomSelect.clear(true);
 	document.getElementById('VariantsLocalAssetList').value = '';
 	UpdateData();
 }

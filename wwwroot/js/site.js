@@ -95,6 +95,8 @@ cm.on('change', () => {
  */
 var yamlData = [];
 
+const defaultChannelUrl = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json';
+const zascoChannelUrl = 'https://zasco.github.io/sc4pac-channel/channel/sc4pac-channel-contents.json';
 
 //var sc4pacAssets = new Array();
 //var sc4pacPackages = new Array();
@@ -151,14 +153,15 @@ var listOfGroups = new Array();
 
 
 
-var pkgTomSelect = new TomSelect('#PacPackageList', {
+var pkgDependencyTomSelect = new TomSelect('#DepPackageList', {
 	valueField: 'id',
 	labelField: 'id',
 	searchField: ['id'],
 	maxItems: 1,
 	optgroups: [
-		{value: 'default', label: 'Default channel'},
-		{value: 'zasco', label: 'Zasco\'s channel'},
+		{ value: 'default', label: 'Default channel' },
+		{ value: 'local', label: 'Current file' },
+		{ value: 'zasco', label: 'Zasco\'s channel' },
 	],
 	optgroupField: 'optGroup',
 
@@ -170,16 +173,14 @@ var pkgTomSelect = new TomSelect('#PacPackageList', {
 			return;
 		}
 
-		var defaultChannelURL = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		var zascoChannelURL = 'https://zasco.github.io/sc4pac-channel/channel/sc4pac-channel-contents.json'
-		allPackages = []
+		allPackages = [];
 
 		function handleResponse(jsonResponse, channel) {
-			// Add a new field combining the group and name.
-			return jsonResponse.packages.map(i => ({ id: i.group + ":" + i.name, optGroup: channel, ...i }))
+			// Add a new field combining the channel group and name - items with the same group:name can exist in different channels, and it's good to know if an item exists in a given channel when adding it from the dropdown
+			return jsonResponse.packages.map(i => ({ id: `${channel}:${i.group}:${i.name}`, optGroup: channel, ...i }))
 		}
 		
-		await fetch(defaultChannelURL)
+		await fetch(defaultChannelUrl)
 			.then(response => response.json())
 			.then(json => {
 				allPackages = allPackages.concat(handleResponse(json, 'default'))
@@ -189,7 +190,7 @@ var pkgTomSelect = new TomSelect('#PacPackageList', {
 				defaultFailed = true
 			});
 		
-		await fetch(zascoChannelURL)
+		await fetch(zascoChannelUrl)
 			.then(response => response.json())
 			.then(json => {
 				allPackages = allPackages.concat(handleResponse(json, 'zasco'))
@@ -208,7 +209,7 @@ var pkgTomSelect = new TomSelect('#PacPackageList', {
 	// custom rendering function for options
 	render: {
 		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.group + ":" + item.name/*  +"["+ item.optGroup +" channel]" */) + '</div>';
+			return '<div class="py-2 d-flex">' + escape(item.group + ":" + item.name) + '</div>';
 		},
 		optgroup_header: function(data, escape) {
 			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
@@ -216,39 +217,66 @@ var pkgTomSelect = new TomSelect('#PacPackageList', {
 	},
 });
 
-var variantPackageSelect = new TomSelect('#VariantsPacPackageList', {
+var variantPackageTomSelect = new TomSelect('#VariantsPackageList', {
 	valueField: 'id',
 	labelField: 'id',
 	searchField: ['id'],
 	maxItems: 1,
+	optgroups: [
+		{ value: 'default', label: 'Default channel' },
+		{ value: 'local', label: 'Current file' },
+		{ value: 'zasco', label: 'Zasco\'s channel' },
+	],
+	optgroupField: 'optGroup',
 
 	// fetch remote data
-	load: function (query, callback) {
+	load: async function (query, callback) {
 		var self = this;
 		if (self.loading > 1) {
 			callback();
 			return;
 		}
 
-		var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		fetch(url)
+		allPackages = [];
+
+		function handleResponse(jsonResponse, channel) {
+			// Add a new field combining the channel group and name - items with the same group:name can exist in different channels, and it's good to know if an item exists in a given channel when adding it from the dropdown
+			return jsonResponse.packages.map(i => ({ id: `${channel}:${i.group}:${i.name}`, optGroup: channel, ...i }))
+		}
+
+		await fetch(defaultChannelUrl)
 			.then(response => response.json())
 			.then(json => {
-				// Add a new field combining the group and name.
-				callback(json.packages.map(i => ({ id: i.group + ":" + i.name, ...i })));
-				//console.log(json.contents
-				//	.filter((item) => item.group !== 'sc4pacAsset')
-				//	.map(i => ({ id: i.group + ":" + i.name, ...i }))
-				//);
-				self.settings.load = null;
-			}).catch(() => {
-				callback();
+				allPackages = allPackages.concat(handleResponse(json, 'default'))
+				defaultFailed = false
+			})
+			.catch(() => {
+				defaultFailed = true
 			});
+
+		await fetch(zascoChannelUrl)
+			.then(response => response.json())
+			.then(json => {
+				allPackages = allPackages.concat(handleResponse(json, 'zasco'))
+				zascoFailed = false
+			})
+			.catch(() => {
+				zascoFailed = true
+			});
+
+		if (!defaultFailed || !zascoFailed) {
+			callback(allPackages);
+			self.settings.load = null;
+		}
+		else callback();
 	},
 	// custom rendering function for options
 	render: {
 		option: function (item, escape) {
 			return '<div class="py-2 d-flex">' + escape(item.group + ":" + item.name) + '</div>';
+		},
+		optgroup_header: function (data, escape) {
+			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
 		}
 	},
 });
@@ -267,8 +295,7 @@ var variantAssetSelect = new TomSelect('#VariantsPacAssetList', {
 			return;
 		}
 
-		var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		fetch(url)
+		fetch(defaultChannelUrl)
 			.then(response => response.json())
 			.then(json => {
 				callback(json.assets);
@@ -288,7 +315,7 @@ var variantAssetSelect = new TomSelect('#VariantsPacAssetList', {
 	},
 });
 
-var pkgSubfolderSelect = new TomSelect('#PackageSubfolder', {
+var pkgSubfolderTomSelect = new TomSelect('#PackageSubfolder', {
 	valueField: 'name',
 	labelField: 'name',
 	searchField: ['name'],
@@ -329,7 +356,7 @@ var pkgSubfolderSelect = new TomSelect('#PackageSubfolder', {
 	},
 });
 
-var pkgGroupSelect = new TomSelect('#PackageGroup', {
+var pkgGroupTomSelect = new TomSelect('#PackageGroup', {
     valueField: 'group',
     labelField: 'group',
     searchField: ['group'],
@@ -347,8 +374,7 @@ var pkgGroupSelect = new TomSelect('#PackageGroup', {
             return;
         }
 
-        var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		fetch(url)
+		fetch(defaultChannelUrl)
             .then(response => response.json())
             .then(json => {
                 callback(json.packages);
@@ -416,7 +442,7 @@ function UpdateData(dumpData = true) {
 	UpdateMainTree();
 	UpdateIncludedAssetTree();
 	UpdateVariantTree();
-
+	UpdatePackageTomSelects();
 	
 
 	if (IsPackage(selectedDoc)) {
@@ -436,19 +462,6 @@ function UpdateData(dumpData = true) {
 	function UpdateLocalDropdowns() {
 		//TODO - this UpdateLocalDropdowns function should disappear when PR #45 is implemented
 
-		//Fill local dependency selection options
-		var packageDependencies = document.getElementById('LocalPackageList');
-		var variantDependencies = document.getElementById('VariantsLocalPackageList');
-		packageDependencies.replaceChildren();
-		packageDependencies.appendChild(new Option('', ''));
-		variantDependencies.replaceChildren();
-		variantDependencies.appendChild(new Option('', ''));
-		for (var idx = 0; idx < listOfPackages.length; idx++) {
-			var pkgName = listOfPackages[idx].group + ":" + listOfPackages[idx].name;
-			packageDependencies.add(new Option(pkgName, pkgName));
-			variantDependencies.add(new Option(pkgName, pkgName));
-		}
-
 		//Package:asset selection for local assets
 		var localAssetList = document.getElementById('SelectLocalPackageAssets');
 		var variantAssets = document.getElementById('VariantsLocalAssetList');
@@ -458,6 +471,48 @@ function UpdateData(dumpData = true) {
 		variantAssets.appendChild(new Option('', ''));
 		listOfAssets.forEach(i => localAssetList.add(new Option(i.assetId, i.assetId)));
 		listOfAssets.forEach(i => variantAssets.add(new Option(i.assetId, i.assetId)));
+	}
+
+	function UpdatePackageTomSelects() {
+		var addedPkgs = false;
+		
+		//First loop over the local packages and add any that are not in the TomSelect
+		var localPkgs = yamlData.filter(i => IsPackage(i));
+		localPkgs.forEach(pkg => {
+			var pkgId = `local:${pkg.group}:${pkg.name}`;
+			var searchResult = pkgDependencyTomSelect.getOption(pkgId);
+			if (searchResult === null) {
+				var newOpt = { id: pkgId, optGroup: 'local', ...pkg }; //the `...pkg` propagates the rest of the properties of package into newOpt, instead of just the id and optGroup properties which were explicitly defined
+				pkgDependencyTomSelect.addOption(newOpt);
+				addedPkgs = true;
+			}
+			else {
+				console.warn(newOpt.id + ' was not added because it already exists within the ' + searchResult.parentElement.getAttribute('data-group') + ' channel');
+			}
+		});
+		localPkgs.forEach(pkg => {
+			var pkgId = `local:${pkg.group}:${pkg.name}`;
+			var searchResult = variantPackageTomSelect.getOption(pkgId);
+			if (searchResult === null) {
+				var newOpt = { id: pkgId, optGroup: 'local', ...pkg }; //the `...pkg` propagates the rest of the properties of package into newOpt, instead of just the id and optGroup properties which were explicitly defined
+				variantPackageTomSelect.addOption(newOpt);
+				addedPkgs = true;
+			}
+			else {
+				console.warn(newOpt.id + ' was not added because it already exists within the ' + searchResult.parentElement.getAttribute('data-group') + ' channel');
+			}
+		});
+		if (addedPkgs) return;
+
+		//Next loop over the TomSelect and remove any that are not in the local packages
+		var tomSelectPkgs = Object.keys(pkgDependencyTomSelect.options).filter(i => i.startsWith('local')); //list of strings with the format `channel:name:group`
+		tomSelectPkgs.forEach(pkgId => {
+			var pkg = { group: pkgId.split(':')[1], name: pkgId.split(':')[2] };
+			if (!localPkgs.some(p => p.group === pkg.group && p.name === pkg.name)) {
+				pkgDependencyTomSelect.removeOption(pkgId);
+				variantPackageTomSelect.removeOption(pkgId);
+			}
+		});
 	}
 
 	function DumpYaml() {
