@@ -242,11 +242,11 @@ function ClearAll() {
  * Resets all input form fields.
  */
 function ResetAllInputs() {
-	ResetPackageInputs();
 	ResetIncludedAssetInputs();
 	ResetVariantInputs();
 	ResetIncludedAssetInputs();
 	ResetAssetInputs();
+	ResetPackageInputs(); //Reset package inputs last to the heading and the selected tab are aligned
 }
 /**
  * Resets the Package input form fields.
