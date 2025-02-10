@@ -483,19 +483,8 @@ function UpdateData(dumpData = true) {
 			var searchResult = pkgDependencyTomSelect.getOption(pkgId);
 			if (searchResult === null) {
 				var newOpt = { id: pkgId, optGroup: 'local', ...pkg }; //the `...pkg` propagates the rest of the properties of package into newOpt, instead of just the id and optGroup properties which were explicitly defined
-				pkgDependencyTomSelect.addOption(newOpt);
-				addedPkgs = true;
-			}
-			else {
-				console.warn(newOpt.id + ' was not added because it already exists within the ' + searchResult.parentElement.getAttribute('data-group') + ' channel');
-			}
-		});
-		localPkgs.forEach(pkg => {
-			var pkgId = `local:${pkg.group}:${pkg.name}`;
-			var searchResult = variantPackageTomSelect.getOption(pkgId);
-			if (searchResult === null) {
-				var newOpt = { id: pkgId, optGroup: 'local', ...pkg }; //the `...pkg` propagates the rest of the properties of package into newOpt, instead of just the id and optGroup properties which were explicitly defined
 				variantPackageTomSelect.addOption(newOpt);
+				pkgDependencyTomSelect.addOption(newOpt);
 				addedPkgs = true;
 			}
 			else {
@@ -509,6 +498,37 @@ function UpdateData(dumpData = true) {
 		tomSelectPkgs.forEach(pkgId => {
 			var pkg = { group: pkgId.split(':')[1], name: pkgId.split(':')[2] };
 			if (!localPkgs.some(p => p.group === pkg.group && p.name === pkg.name)) {
+				pkgDependencyTomSelect.removeOption(pkgId);
+				variantPackageTomSelect.removeOption(pkgId);
+			}
+		});
+	}
+
+	function UpdateAssetTomSelects() {
+		var addedPkgs = false;
+
+		//First loop over the local assets and add any that are not in the TomSelect
+		var localAssets = yamlData.filter(i => IsAsset(i));
+		localAssets.forEach(asset => {
+			var pkgId = `local:${asset.group}:${asset.name}`;
+			var searchResult = pkgDependencyTomSelect.getOption(pkgId);
+			if (searchResult === null) {
+				var newOpt = { id: pkgId, optGroup: 'local', ...asset }; //the `...pkg` propagates the rest of the properties of package into newOpt, instead of just the id and optGroup properties which were explicitly defined
+				variantPackageTomSelect.addOption(newOpt);
+				pkgDependencyTomSelect.addOption(newOpt);
+				addedPkgs = true;
+			}
+			else {
+				console.warn(newOpt.id + ' was not added because it already exists within the ' + searchResult.parentElement.getAttribute('data-group') + ' channel');
+			}
+		});
+		if (addedPkgs) return;
+
+		//Next loop over the TomSelect and remove any that are not in the local packages
+		var tomSelectPkgs = Object.keys(pkgDependencyTomSelect.options).filter(i => i.startsWith('local')); //list of strings with the format `channel:name:group`
+		tomSelectPkgs.forEach(pkgId => {
+			var pkg = { group: pkgId.split(':')[1], name: pkgId.split(':')[2] };
+			if (!localAssets.some(p => p.group === pkg.group && p.name === pkg.name)) {
 				pkgDependencyTomSelect.removeOption(pkgId);
 				variantPackageTomSelect.removeOption(pkgId);
 			}
