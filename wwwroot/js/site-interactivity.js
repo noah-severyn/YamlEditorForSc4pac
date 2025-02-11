@@ -271,7 +271,6 @@ function ResetPackageInputs() {
 	document.getElementById('PackageWebsite').value = '';
 	document.getElementById('PackageWebsite').rows = '1';
 	document.getElementById('IsMultipleWebsites').checked = false;
-	document.getElementById('AddPackageButton').disabled = true;
 
 	document.getElementById('CurrentDocumentType').innerHTML = 'package';
 	document.getElementById('CurrentDocumentName').innerHTML = '[new package]';
@@ -315,7 +314,6 @@ function ResetAssetInputs() {
 	document.getElementById('AssetArchiveVersion').selectedIndex = 0;
 	document.getElementById('AssetChecksum').value = '';
 	document.getElementById('AssetNonPersistentUrl').value = '';
-	document.getElementById('AddAssetButton').disabled = true;
 
 	document.getElementById('CurrentDocumentType').innerHTML = 'asset';
 	document.getElementById('CurrentDocumentName').innerHTML = '[new asset]';
@@ -446,15 +444,6 @@ function AddDepencencyFromPacList() {
  * Update the YAML codepane with the values in the current Package form field.
  */
 function UpdatePackageData(fieldName) {
-	//Prevent adding a package if any required fields are blank
-	if (document.getElementById('PackageGroup').value === '' || document.getElementById('PackageName').value === '' || document.getElementById('PackageVersion').value === '' || document.getElementById('PackageSummary').value === '') {
-		document.getElementById('AddPackageButton').disabled = true;
-		document.getElementById('RemovePackageButton').disabled = true;
-	} else {
-		document.getElementById('AddPackageButton').disabled = false;
-		document.getElementById('RemovePackageButton').disabled = false;
-	}
-
 	ValidateInput(fieldName);
 	if (selectedDoc !== null) {
 		selectedDoc.group = document.getElementById('PackageGroup').value;
@@ -499,13 +488,19 @@ function UpdatePackageData(fieldName) {
  * Append a new package to the end of the YAML document.
  */
 function AddPackage() {
-	var newPackage = {
-		group: document.getElementById('PackageGroup').value,
-		name: document.getElementById('PackageName').value,
-		version: document.getElementById('PackageVersion').value,
-		subfolder: document.getElementById('PackageSubfolder').value,
-		info: {}
-	};
+	var newPackage = {};
+	if (document.getElementById('PackageGroup').value !== '') {
+		newPackage.group = document.getElementById('PackageGroup').value;
+	}
+	if (document.getElementById('PackageName').value !== '') {
+		newPackage.name = document.getElementById('PackageName').value;
+	}
+	if (document.getElementById('PackageVersion').value !== '') {
+		newPackage.version = document.getElementById('PackageVersion').value;
+	}
+	if (document.getElementById('PackageSubfolder').value !== '') {
+		newPackage.subfolder = document.getElementById('PackageSubfolder').value;
+	}
 	if (document.getElementById('PackageDependencies').value !== '') {
 		newPackage.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
 	}
@@ -725,7 +720,6 @@ function AddNewVariant() {
  */
 function FillAssetForm() {
 	if (selectedDoc === undefined || selectedDoc === null) { return; }
-	//document.getElementById('AddAssetButton').disabled = false;
 	document.getElementById('AssetUrl').value = selectedDoc.url;
 	document.getElementById('AssetId').value = selectedDoc.assetId;
 	document.getElementById('AssetVersion').value = selectedDoc.version;
@@ -748,19 +742,9 @@ function FillAssetForm() {
  */
 function UpdateAssetItem(itemName) {
 	ValidateInput(itemName);
-
-	//Prevent adding an asset if any required fields are blank
-	if (document.getElementById('AssetUrl').value !== '' && document.getElementById('AssetId').value !== '' && document.getElementById('AssetVersion').value !== '' && document.getElementById('AssetLastModified').value !== '') {
-		document.getElementById('AddAssetButton').disabled = false;
-	} else {
-		document.getElementById('AddAssetButton').disabled = true;
-		document.getElementById('RemoveAssetButton').disabled = true;
-	}
-
 	if (selectedDoc === null || selectedDoc === undefined) {
 		return;
 	}
-	document.getElementById('RemoveAssetButton').disabled = false;
 
 
 
