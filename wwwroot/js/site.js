@@ -800,12 +800,30 @@ function SaveAs() {
 	var bb = new Blob([cm.getValue()], { type: 'application/yaml' });
 	var tmp = document.createElement('a');
 	var fileName;
+
 	if (yamlData[0] == null) {
 		fileName = "document.yaml";
-	} else if (document.getElementById('YamlFileName').textContent !== '') {
+	}
+	//This will be filled in as the file was loaded from Github, so fileName is already in compliance with st-channel name (if appropriate)
+	else if (document.getElementById('YamlFileName').textContent !== '') {
 		fileName = document.getElementById('YamlFileName').textContent;
-	} else {
-		fileName = IsPackage(yamlData[0]) ? yamlData[0].name : yamlData[0].assetId + '.yaml';
+	}
+
+	else {
+		if (localStorage.getItem('use-st-channel-filenames') === 'true') {
+			var pkg = GetDocument('p', 0);
+			if (Object.hasOwn(pkg.info, 'website')) {
+				fileName = pkg.info.website.substring(45, pkg.info.website.indexOf('-'));
+			}
+			else if (Object.hasOwn(pkg.info, 'websites')) {
+				fileName = pkg.info.websites[0].substring(45, pkg.info.websites[0].indexOf('-'));
+			}
+			fileName = fileName + '-' + pkg.name + pkg.assetId + '.yaml';
+		}
+		else {
+			fileName = (IsPackage(yamlData[0]) ? yamlData[0].name : yamlData[0].assetId) + '.yaml';
+		}
+		
 	}
 	tmp.download = fileName;
 	tmp.href = window.URL.createObjectURL(bb);
@@ -918,19 +936,18 @@ async function LoadFromGithub(srcElem, channel) {
 				});
 		})
 		.catch(error => console.error('Error fetching the tree data:', error));
-}
 
+	function GetContent(url, fileName) {
+		fetch(url)
+			.then(response => response.json())
+			.then(data => {
+				document.getElementById('YamlFileName').textContent = fileName;
+				cm.setValue(atob(data.content));
+			})
+			.catch(error => console.error('Error fetching the tree data:', error));
 
-function GetContent(url, fileName) {
-	fetch(url)
-		.then(response => response.json())
-		.then(data => {
-			document.getElementById('YamlFileName').textContent = fileName;
-			cm.setValue(atob(data.content));
-		})
-		.catch(error => console.error('Error fetching the tree data:', error));
-
-	//Hide the modal display
-	var modal = bootstrap.Modal.getInstance(loadFileDialog)
-	modal.hide();
+		//Hide the modal display
+		var modal = bootstrap.Modal.getInstance(loadFileDialog)
+		modal.hide();
+	}
 }

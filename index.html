@@ -372,8 +372,14 @@
 						<div class="modal-body">
 							<div class="form-check">
 								<input id="AllowPartialPackages" class="form-check-input" type="checkbox" value="">
-								<label class="form-check-label" for="flexCheckDefault" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" data-bs-title="Only turn on when creating metadata for new, not yet created, STEX uploads. <span class='text-warning'>Keep off for regular metadata editing.</span>">
+								<label class="form-check-label" for="AllowPartialPackages" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" data-bs-title="Only turn on when creating metadata for new, not yet created, STEX uploads. <span class='text-warning'>Keep off for regular metadata editing.</span>">
 									Create partial package metadata
+								</label>
+							</div>
+							<div class="form-check">
+								<input id="PreferStChannelFilenames" class="form-check-input" type="checkbox" value="">
+								<label class="form-check-label" for="PreferStChannelFilenames" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" data-bs-title="Prefer a format prefixed with the STEX id like <code>29061-paris-building.yaml</code> instead of <code>paris-building.yaml</code>.">
+									Use <code>st-channel</code> naming style when saving files
 								</label>
 							</div>
 						</div>

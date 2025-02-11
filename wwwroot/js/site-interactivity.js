@@ -174,7 +174,9 @@ document.getElementById('OpenPreferencesButton').addEventListener('click', () =>
 document.getElementById('AllowPartialPackages').addEventListener('click', () => {
 	localStorage.setItem('allow-partial-packages', document.getElementById('AllowPartialPackages').checked);
 });
-
+document.getElementById('PreferStChannelFilenames').addEventListener('click', () => {
+	localStorage.setItem('use-st-channel-filenames', document.getElementById('PreferStChannelFilenames').checked);
+});
 
 
 /**
@@ -405,6 +407,10 @@ function ToggleMultipleWebsites() {
  * Fill the Package input form fields with the values from the currently selected package number.
  */
 function FillPackageForm() {
+	if (selectedDoc === undefined) {
+		return;
+	}
+
 	document.getElementById('PackageGroup').value = selectedDoc.group;
 	document.getElementById('PackageName').value = selectedDoc.name;
 	document.getElementById('PackageVersion').value = selectedDoc.version;
