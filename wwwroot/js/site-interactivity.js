@@ -165,6 +165,17 @@ document.getElementById('ClearAllButton').addEventListener('click', () => {
 	ClearAll();
 });
 
+// Preferences dialog events
+document.getElementById('OpenPreferencesButton').addEventListener('click', () => {
+	document.getElementById('AllowPartialPackages').checked = localStorage.getItem('allow-partial-packages');
+
+	preferencesDialog.show();
+});
+document.getElementById('AllowPartialPackages').addEventListener('click', () => {
+	localStorage.setItem('allow-partial-packages', document.getElementById('AllowPartialPackages').checked);
+});
+
+
 
 /**
 * Disables the package tabs and enables the asset tab.
@@ -199,14 +210,34 @@ function EnablePackageTabs() {
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
 }
 /**
-* Toggles the package tabs and asset tab between enabled/disabled states based on the type of `selectedDoc`.
+* Enables the only first two package tabs (Properties and Info), for when partial package metadata is being created.
 */
-function ToggleTabState() {
-	if (IsPackage(selectedDoc)) {
-		EnablePackageTabs();
+function EnablePartialPackageTabs() {
+	document.getElementById('PackagePropertiesTab').classList.remove('disabled');
+	document.getElementById('PackagePropertiesTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('PackageInfoTab').classList.remove('disabled');
+	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('IncludedAssetsTab').classList.add('disabled');
+	document.getElementById('IncludedAssetsTab').removeAttribute('data-bs-toggle', 'tab');
+	document.getElementById('PackageVaraintsTab').classList.add('disabled');
+	document.getElementById('PackageVaraintsTab').removeAttribute('data-bs-toggle', 'tab');
+
+	document.getElementById('AssetPropertiesTab').classList.add('disabled');
+	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
+}
+
+/**
+* Sets the state of the package tabs and asset tab to enabled or disabled based on the type of `selectedDoc`.
+*/
+function SetTabState() {
+	if (localStorage.getItem('allow-partial-packages') === 'true') {
+		EnablePartialPackageTabs();
+	} 
+	else if (IsAsset(selectedDoc)) {
+		EnableAssetTab();
 	}
 	else {
-		EnableAssetTab();
+		EnablePackageTabs();
 	}
 }
 /**

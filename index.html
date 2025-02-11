@@ -336,25 +336,27 @@
 					<button id="CopyToClipButton" class="btn btn-primary" type="button">Copy to Clipboard</button>
 					<button id="SaveAsButton" class="btn btn-primary" type="button">Save As</button>
 					<button id="ClearAllButton" class="btn btn-danger" type="button">Clear All</button>
+					<button id="OpenPreferencesButton" class="btn btn-success" type="button">Preferences</button>
 				</div>
 
 				<textarea id="editor" placeholder="Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications."></textarea>
+			</div>
 
-				<div class="modal fade" id="LoadFromChannelDialog" tabindex="-1">
-					<div class="modal-dialog modal-dialog-scrollable">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h1 class="modal-title fs-5" id="ModalSourceTitle">Modal title</h1>
-								<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-							</div>
-							<div class="modal-body">
-								<nav aria-label="breadcrumb">
-									<ol id="ChannelBreadcrumb" class="breadcrumb">
-										<li class="breadcrumb-item active">Root</li>
-									</ol>
-								</nav>
-								<div id="ChannelItemList" class="list-group"></div>
-							</div>
+			<!--Modal Dialogs-->
+			<div class="modal fade" id="LoadFromChannelDialog" tabindex="-1">
+				<div class="modal-dialog modal-dialog-scrollable">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h1 class="modal-title fs-5">Modal title</h1>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+						</div>
+						<div class="modal-body">
+							<nav aria-label="breadcrumb">
+								<ol id="ChannelBreadcrumb" class="breadcrumb">
+									<li class="breadcrumb-item active">Root</li>
+								</ol>
+							</nav>
+							<div id="ChannelItemList" class="list-group"></div>
 						</div>
 					</div>
 				</div>

@@ -119,9 +119,13 @@ var yamlData = [];
 
 
 /**
- * Load From Dialog element
+ * Load From ... dialog element
  */
 const loadFileDialog = document.getElementById('LoadFromChannelDialog');
+/**
+ * Preferences dialog element
+ */
+const preferencesDialog = new bootstrap.Modal('#PreferencesDialog');
 /**
  * Main Tree View element
  */
@@ -368,6 +372,11 @@ var pkgGroupSelect = new TomSelect('#PackageGroup', {
 
 
 ResetAllInputs();
+SetTabState();
+
+//Initialize all tooltips
+const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
 
 
@@ -411,7 +420,7 @@ function UpdateData(dumpData = true) {
 	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 
 	SetSelectedDoc(currDocIdx);
-	ToggleTabState();
+	SetTabState();
 	UpdateLocalDropdowns();
 	UpdateMainTree();
 	UpdateIncludedAssetTree();
@@ -419,10 +428,16 @@ function UpdateData(dumpData = true) {
 
 	
 
-	if (IsPackage(selectedDoc)) {
+
+	if (IsPackage(selectedDoc) || localStorage.getItem('allow-partial-packages') === 'true') {
 		FillPackageForm();
+		document.getElementById('RemovePackageButton').disabled = false;
+		document.getElementById('RemoveAssetButton').disabled = true;
+
 	} else {
 		FillAssetForm();
+		document.getElementById('RemovePackageButton').disabled = true;
+		document.getElementById('RemoveAssetButton').disabled = false;
 	}
 	
 	if (dumpData) {
@@ -558,7 +573,7 @@ function UpdateMainTree() {
 			SetSelectedDoc(selectedIdx - 1, 'a');
 			FillAssetForm();
 		}
-		ToggleTabState();
+		SetTabState();
 	});
 }
 
