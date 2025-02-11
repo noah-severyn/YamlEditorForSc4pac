@@ -97,30 +97,6 @@ cm.on('change', () => {
  * Array of packages and assets in this YAML file. The primary data object.
  */
 var yamlData = [];
-
-
-//var sc4pacAssets = new Array();
-//var sc4pacPackages = new Array();
-//var sc4pacData = FetchSc4pacData().then(result => {
-//	sc4pacData = result.contents;
-//	sc4pacAssets = result.contents.filter((item) => item.group === 'sc4pacAsset');
-//	sc4pacPackages = result.contents.filter((item) => item.group !== 'sc4pacAsset');
-//});
-//async function FetchSc4pacData() {
-//	const request = new Request('https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json');
-//	const response = await fetch(request);
-//	return await response.json();
-//}
-//async function FetchSc4EvermoreData() {
-//	const request = new Request('https://www.sc4evermore.com/latest-modified-downloads.php');
-//	const response = await fetch(request);
-//	return await response.json();
-//}
-//fetch('/config.json').then(function (config) {
-//    console.log('API key:', config.apiKey);
-//});
-
-
 /**
  * Load From ... dialog element
  */
@@ -380,11 +356,6 @@ SetTabState();
 //Initialize all tooltips
 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
 const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-
-
-
-//TODO - validate YAML in code pane for valid yaml syntax
-//TODO - validate YAML in code pane for valid sc4pac schema
 
 
 
@@ -682,11 +653,8 @@ function UpdateVariantTree() {
 
 
 
-
-function CopyToClipboard() {
-	navigator.clipboard.writeText(cm.getValue())
-}
-
+//TODO - validate YAML in code pane for valid yaml syntax
+//TODO - validate YAML in code pane for valid sc4pac schema
 function validate() {
 	//ensure any manually typed yaml (as opposed to generated yaml) is syntactically valid
 }
@@ -716,18 +684,6 @@ function GetVariant(key, value) {
 		return localVariant;
 	}
 }
-
-function RemoveSelectedDoc() {
-	if (IsPackage(selectedDoc)) {
-		yamlData = yamlData.filter((doc) => doc.group + doc.name !== selectedDoc.group + selectedDoc.name);
-	} else {
-		yamlData = yamlData.filter((doc) => doc.assetId !== selectedDoc.assetId);
-	}
-
-	UpdateData();
-	ResetAssetInputs();
-}
-
 
 /**
  * Returns the specified package or asset

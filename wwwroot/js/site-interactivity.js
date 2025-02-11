@@ -222,6 +222,20 @@ function ToggleMultipleWebsites() {
 }
 
 
+
+function RemoveSelectedDoc() {
+	if (IsPackage(selectedDoc)) {
+		yamlData = yamlData.filter((doc) => doc.group + doc.name !== selectedDoc.group + selectedDoc.name);
+	} else {
+		yamlData = yamlData.filter((doc) => doc.assetId !== selectedDoc.assetId);
+	}
+
+	UpdateData();
+	ResetAssetInputs();
+}
+
+
+
 // --------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------   Packages   ---------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------

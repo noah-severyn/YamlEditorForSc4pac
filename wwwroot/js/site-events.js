@@ -40,6 +40,33 @@ document.getElementById('RemoveAssetButton').addEventListener('click', () => {
 
 
 // --------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------   Output column events   ---------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+document.getElementById('LoadFromFile').addEventListener('click', () => {
+	LoadFromFile();
+});
+document.getElementById('LoadFromGitDefault').addEventListener('click', event => {
+	LoadFromGithub(event.target, 'default');
+});
+document.getElementById('LoadFromGitSimtrop').addEventListener('click', event => {
+	LoadFromGithub(event.target, 'simtropolis');
+});
+document.getElementById('LoadFromGitZasco').addEventListener('click', event => {
+	LoadFromGithub(event.target, 'zasco');
+});
+document.getElementById('CopyToClipButton').addEventListener('click', () => {
+	navigator.clipboard.writeText(cm.getValue());
+});
+document.getElementById('SaveAsButton').addEventListener('click', () => {
+	SaveAs();
+});
+document.getElementById('ClearAllButton').addEventListener('click', () => {
+	ClearAll();
+});
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
 // --------------------------------------------   Keyboard shortcut events   ------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 document.addEventListener("keydown", function (e) {
@@ -162,33 +189,6 @@ for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
 		UpdateAssetItem(event.target.id);
 	});
 }
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-// ---------------------------------------------   Output column events   ---------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------
-document.getElementById('LoadFromFile').addEventListener('click', () => {
-	LoadFromFile();
-});
-document.getElementById('LoadFromGitDefault').addEventListener('click', event => {
-	LoadFromGithub(event.target, 'default');
-});
-document.getElementById('LoadFromGitSimtrop').addEventListener('click', event => {
-	LoadFromGithub(event.target, 'simtropolis');
-});
-document.getElementById('LoadFromGitZasco').addEventListener('click', event => {
-	LoadFromGithub(event.target, 'zasco');
-});
-document.getElementById('CopyToClipButton').addEventListener('click', () => {
-	CopyToClipboard();
-});
-document.getElementById('SaveAsButton').addEventListener('click', () => {
-	SaveAs();
-});
-document.getElementById('ClearAllButton').addEventListener('click', () => {
-	ClearAll();
-});
 
 
 
