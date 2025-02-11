@@ -268,6 +268,7 @@ function ClearAll() {
 	cm.setValue('');
 	yamlData.length = 0;
 	document.getElementById('YamlFileName').textContent = '';
+	UpdateData();
 }
 /**
  * Resets all input form fields.
