@@ -81,10 +81,13 @@ cm.on('change', () => {
 		lineContent = cm.getLine(line);
 	}
 
-
-	if (assetId === undefined) {
+	if (yamlData[0] === null) {
+		return;
+	}
+	else if (assetId === undefined) {
 		currDocIdx = yamlData.findIndex(item => item.group === pkgGroup && item.name === pkgName);
-	} else {
+	}
+	else {
 		currDocIdx = yamlData.findIndex(item => item.assetId === assetId);
 	}
 	console.log(currDocIdx);
