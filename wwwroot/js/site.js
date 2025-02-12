@@ -11,85 +11,56 @@ cm.on('change', () => {
 	yamlData = jsyaml.loadAll(cm.getValue());
 	
 	//Figure which document we're editing within the code so it can be set as the selected document
-	var assetId;
-	var pkgName;
-	var pkgGroup;
+	var tabName = 'PackagePropertiesTab';
 	var line = cm.getCursor().line;
-	var direction = (line > 0) ? 'up' : 'down';
-	var lineContent = cm.getLine(line);
+	var lineContent = cm.getLine(line).trim();
+	var baseNode = lineContent.slice(0, lineContent.indexOf(':'));
 	if (lineContent === undefined || yamlData.length === 0) {
 		return;
 	}
 
-	while (line >= 0) {
-		//console.log("L" + line + ": " + lineContent);
-		if (lineContent.startsWith('assetId:')) {
-			assetId = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"','').trim();
+	var startLine = line;
+	while (startLine > 0) {
+		baseNode = lineContent.slice(0, lineContent.indexOf(':'));
+		if (baseNode === 'info') {
+			tabName = 'PackageInfoTab';
+		} else if (baseNode === 'assets') {
+			tabName = 'IncludedAssetsTab';
+		} else if (baseNode === 'variants') {
+			tabName = 'PackageVariantsTab';
+		} else if (['url', 'assetId', 'lastModified', 'checksum', 'nonPersistentUrl', 'archiveType'].includes(baseNode)) {
+			tabName = 'AssetPropertiesTab';
+		} else {
+			tabName = 'PackagePropertiesTab';
+		}
+
+		if (lineContent === '---') {
 			break;
 		}
-		else if (lineContent.startsWith('name:')) {
-			pkgName = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"', '').trim();
-		}
-		else if (lineContent.startsWith('group:')) {
-			pkgGroup = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"', '').trim();
-		}
-		if (pkgGroup !== undefined && pkgName !== undefined) {
+		startLine--;
+		lineContent = cm.getLine(startLine).trim();
+	}
+
+	var endLine = line;
+	while (endLine < cm.lineCount()) {
+		if (lineContent === '---') {
 			break;
 		}
-
-		if (lineContent === '---' || line >= cm.lineCount()) {
-			direction = (direction === 'up' ? 'down' : 'up');
-		}
-		direction === 'up' ? line-- : line++;
-		lineContent = cm.getLine(line);
+		endLine++;
+		lineContent = cm.getLine(endLine).trim();
 	}
 
-
-
-	//Determine which part of the code is being edited and which UI tab is relevant, then select it
-	line = cm.getCursor().line;
-	lineContent = cm.getLine(line);
-	var baseNode, otherNode;
-	var pkgNodes = ['group', 'name', 'version', 'subfolder', 'dependencies'];
-	while (line >= 0) {
-		if (!lineContent.startsWith(' ') && !lineContent.startsWith('-')) {
-			baseNode = lineContent.slice(0, lineContent.indexOf(':'));
-			//The 'version' property is common to packages and assets so look at the previous or next property to help decide
-			otherNode = cm.getLine(line + (line === 0) * 2 - 1).slice(0, lineContent.indexOf(':') - 1);
-
-			//TODO - fix the automatic tab activating when editing a part of the code pane
-			//It currently always defaults to the 'PackageProperties' tab because when dumping the data the cursor is set to 0,0
-			if (pkgNodes.includes(baseNode) && pkgNodes.includes(otherNode)) {
-				//SelectTab('PackagePropertiesTab');
-			}
-			else if (baseNode === 'info') {
-				//SelectTab('PackageInfoTab');
-			}
-			else if (baseNode === 'assets') {
-				//SelectTab('IncludedAssetsTab');
-			}
-			else if (baseNode === 'variants') {
-				//SelectTab('PackageVariantsTab');
-			}
-			else {
-				//SelectTab('AssetPropertiesTab');
-			}
-			break;
-		}
-
-		direction === 'up' ? line-- : line++;
-		lineContent = cm.getLine(line);
-	}
-
-	if (yamlData[0] === null) {
-		return;
-	}
-	else if (assetId === undefined) {
-		currDocIdx = yamlData.findIndex(item => item.group === pkgGroup && item.name === pkgName);
+	//TODO - fix the automatic tab activating when editing a part of the code pane. It currently always defaults to the 'PackageProperties' tab because when dumping the data the cursor is set to 0,0
+	var currDoc = jsyaml.load(cm.getRange({ line: startLine, ch: 0 }, { line: endLine, ch: 0 }));
+	if (IsPackage(currDoc)) {
+		currDocIdx = yamlData.findIndex(item => item.group === currDoc.group && item.name === currDoc.name);
+		//SelectTab(tabName);
 	}
 	else {
-		currDocIdx = yamlData.findIndex(item => item.assetId === assetId);
+		currDocIdx = yamlData.findIndex(item => item.assetId === currDoc.assetId);
+		//SelectTab('AssetPropertiesTab');
 	}
+
 	console.log(currDocIdx);
 	UpdateData(false);
 });
