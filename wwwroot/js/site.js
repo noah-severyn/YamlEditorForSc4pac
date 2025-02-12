@@ -7,9 +7,11 @@ const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
 	lineWrapping: true,
 	mode: 'yaml'
 });
-cm.on('change', () => {
+cm.on('change', CodeMirrorOnChange);
+
+function CodeMirrorOnChange(instance, changeObj) {
 	yamlData = jsyaml.loadAll(cm.getValue());
-	
+
 	//Figure which document we're editing within the code so it can be set as the selected document
 	var tabName = 'PackagePropertiesTab';
 	var line = cm.getCursor().line;
@@ -42,7 +44,7 @@ cm.on('change', () => {
 	}
 
 	var endLine = line;
-	while (endLine < cm.lineCount()) {
+	while (endLine < cm.lineCount() - 1) {
 		if (lineContent === '---') {
 			break;
 		}
@@ -63,19 +65,22 @@ cm.on('change', () => {
 
 	console.log(currDocIdx);
 	UpdateData(false);
-});
+}
+
+
+
 /**
  * Array of packages and assets in this YAML file. The primary data object.
  */
 var yamlData = [];
 /**
- * Load From ... dialog element
+ * Index of the currently selected document within `yamlData`. If this is null, then the `selectedDoc` is new and has not yet been added to `yamlData`.
  */
-const loadFileDialog = document.getElementById('LoadFromChannelDialog');
+var currDocIdx = null;
 /**
- * Preferences dialog element
+ * The currently selected ("active") document being edited - may be a package or an asset.
  */
-const preferencesDialog = new bootstrap.Modal('#PreferencesDialog');
+var selectedDoc = null;
 /**
  * Main Tree View element
  */
@@ -89,16 +94,14 @@ var atv;
  */
 var vtv;
 /**
- * Index of the currently selected document within `yamlData`.
+ * Load From ... dialog element
  */
-var currDocIdx = null;
+const loadFileDialog = document.getElementById('LoadFromChannelDialog');
 /**
- * Currently selected document in the main tree - may be a package or an asset.
+ * Preferences dialog element
  */
-var selectedDoc = null;
+const preferencesDialog = new bootstrap.Modal('#PreferencesDialog');
 
-var countOfPackages = 0;
-var countOfAssets = 0;
 var listOfAssets = new Array();
 var listOfPackages = new Array();
 var listOfGroups = new Array();
@@ -331,10 +334,12 @@ const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstra
 
 
 /**
- * Sync changes between the codepane and UI with the current state of the `yamlData` array (UI ←→ yamlData ←→ codepane). Also sets the currently active (selected) document.
+ * Sync changes between the codepane and UI with the current state of the `yamlData` array (UI ←→ yamlData ←→ codepane).
  * 
  * Dumps yamlData to the codepane by default.
- * @param {boolean} dumpData Specify FALSE to skip updating the code pane. Default is TRUE.
+ * @param {boolean} dumpData Whether to update the code pane. Should be disabled if this is called from the codepane (as the codepane would already be up to date). Default is FALSE.
+ * 
+ * The default *must* be FALSE because setting the code text will re-trigger the change event a second time
  */
 function UpdateData(dumpData = true) {
 	//When updating a text input, the input event occurs immediately, but the change event doesn't occur until you commit the change by lose focus or submit the form.
@@ -343,11 +348,12 @@ function UpdateData(dumpData = true) {
 	//codemirror.onchange() { metadata.update() }
 	//metadata.update() { treeview.update(); form.update(); codemirror.update() }
 
+	if (currDocIdx === null) {
+		return;
+	}
 
-
-	//Update the counts of packages and assets
-	countOfAssets = 0;
-	countOfPackages = 0;
+	var countOfAssets = 0;
+	var countOfPackages = 0;
 	listOfAssets.length = 0;
 	listOfPackages.length = 0;
 
@@ -364,7 +370,6 @@ function UpdateData(dumpData = true) {
 	}
 	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 
-	SetSelectedDoc(currDocIdx);
 	SetTabState();
 	UpdateLocalDropdowns();
 	UpdateMainTree();
@@ -372,21 +377,17 @@ function UpdateData(dumpData = true) {
 	UpdateVariantTree();
 
 	
-
-
-	if (IsPackage(selectedDoc) || localStorage.getItem('allow-partial-packages') === 'true') {
-		FillPackageForm();
-		document.getElementById('RemovePackageButton').disabled = false;
-		document.getElementById('RemoveAssetButton').disabled = true;
-
-	} else {
-		FillAssetForm();
-		document.getElementById('RemovePackageButton').disabled = true;
-		document.getElementById('RemoveAssetButton').disabled = false;
-	}
-	
 	if (dumpData) {
+		cm.off('change', CodeMirrorOnChange);
 		cm.setValue(DumpYaml());
+		cm.on('change', CodeMirrorOnChange);
+	}
+	else {
+		if (IsPackage(selectedDoc)) {
+			FillPackageForm();
+		} else {
+			FillAssetForm();
+		}
 	}
 	SetSelectedDoc(currDocIdx);
 
@@ -713,4 +714,11 @@ function SetSelectedDoc(index, type) {
 			currDocIdx = yamlData.findIndex(i => i.assetId === selectedDoc.assetId);
 		}
 	}
+}
+/**
+ * Clear the `selectedDoc` and `currDocIdx` by setting them to null to indicate no document is selected ("active").
+ */
+function ClearSelectedDoc() {
+	selectedDoc = null;
+	currDocIdx = null;
 }

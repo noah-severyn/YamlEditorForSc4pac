@@ -243,10 +243,6 @@ function RemoveSelectedDoc() {
  * Fill the Package input form fields with the values from the currently selected package number.
  */
 function FillPackageForm() {
-	if (selectedDoc === undefined) {
-		return;
-	}
-
 	document.getElementById('PackageGroup').value = selectedDoc.group;
 	document.getElementById('PackageName').value = selectedDoc.name;
 	document.getElementById('PackageVersion').value = selectedDoc.version;
@@ -315,98 +311,66 @@ function AddDepencencyFromPacList() {
 	input.value = '';
 }
 /**
- * Update the YAML codepane with the values in the current Package form field.
+ * Updates the selectedDoc with the current state of the Package Properties and Package Info tabs.
  */
-function UpdatePackageData(fieldName) {
-	ValidateInput(fieldName);
-	if (selectedDoc !== null) {
-		selectedDoc.group = document.getElementById('PackageGroup').value;
-		selectedDoc.name = document.getElementById('PackageName').value;
-		selectedDoc.version = document.getElementById('PackageVersion').value;
-		selectedDoc.subfolder = document.getElementById('PackageSubfolder').value;
-		if (document.getElementById('PackageDependencies').value !== '') {
-			selectedDoc.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
-		}
-
-		selectedDoc.info.summary = document.getElementById('PackageSummary').value;
-		if (document.getElementById('PackageWarning').value !== '') {
-			selectedDoc.info.warning = document.getElementById('PackageWarning').value
-		}
-		if (document.getElementById('PackageConflicts').value !== '') {
-			selectedDoc.info.conflicts = document.getElementById('PackageConflicts').value
-		}
-		if (document.getElementById('PackageDescription').value !== '') {
-			selectedDoc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
-		}
-		if (document.getElementById('PackageAuthor').value !== '') {
-			selectedDoc.info.author = document.getElementById('PackageAuthor').value
-		}
-		if (document.getElementById('PackageImages').value !== '') {
-			selectedDoc.info.images = TextToArray(document.getElementById('PackageImages').value);
-		}
-		if (document.getElementById('PackageWebsite').value !== '') {
-			if (document.getElementById('IsMultipleWebsites').checked) {
-				selectedDoc.info.websites = TextToArray(document.getElementById('PackageWebsite').value);
-				delete selectedDoc.info.website;
-			} else {
-				selectedDoc.info.website = document.getElementById('PackageWebsite').value;
-				delete selectedDoc.info.websites;
-			}
-		}
-
-		document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
-		UpdateData();
+function UpdatePackageData() {
+	if (selectedDoc === null) {
+		selectedDoc = new Object();
 	}
-}
-/**
- * Append a new package to the end of the YAML document.
- */
-function AddPackage() {
-	var newPackage = {};
+
+	// Package Properties
 	if (document.getElementById('PackageGroup').value !== '') {
-		newPackage.group = document.getElementById('PackageGroup').value;
+		selectedDoc.group = document.getElementById('PackageGroup').value;
 	}
 	if (document.getElementById('PackageName').value !== '') {
-		newPackage.name = document.getElementById('PackageName').value;
+		selectedDoc.name = document.getElementById('PackageName').value;
 	}
 	if (document.getElementById('PackageVersion').value !== '') {
-		newPackage.version = document.getElementById('PackageVersion').value;
+		selectedDoc.version = document.getElementById('PackageVersion').value;
 	}
 	if (document.getElementById('PackageSubfolder').value !== '') {
-		newPackage.subfolder = document.getElementById('PackageSubfolder').value;
+		selectedDoc.subfolder = document.getElementById('PackageSubfolder').value;
 	}
 	if (document.getElementById('PackageDependencies').value !== '') {
-		newPackage.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
+		selectedDoc.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
 	}
-	newPackage.info.summary = document.getElementById('PackageSummary').value;
+
+	// Package Info
+	if (document.getElementById('PackageSummary').value !== '') {
+		selectedDoc.info.summary = document.getElementById('PackageSummary').value;
+	}
 	if (document.getElementById('PackageWarning').value !== '') {
-		newPackage.info.warning = document.getElementById('PackageWarning').value;
+		selectedDoc.info.warning = document.getElementById('PackageWarning').value
 	}
 	if (document.getElementById('PackageConflicts').value !== '') {
-		newPackage.info.conflicts = document.getElementById('PackageConflicts').value;
+		selectedDoc.info.conflicts = document.getElementById('PackageConflicts').value
 	}
 	if (document.getElementById('PackageDescription').value !== '') {
-		newPackage.info.description = document.getElementById('PackageDescription').value;
+		selectedDoc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
 	}
 	if (document.getElementById('PackageAuthor').value !== '') {
-		newPackage.info.author = document.getElementById('PackageAuthor').value;
+		selectedDoc.info.author = document.getElementById('PackageAuthor').value
 	}
 	if (document.getElementById('PackageImages').value !== '') {
-		newPackage.info.images = TextToArray(document.getElementById('PackageImages').value);
+		selectedDoc.info.images = TextToArray(document.getElementById('PackageImages').value);
 	}
 	if (document.getElementById('PackageWebsite').value !== '') {
 		if (document.getElementById('IsMultipleWebsites').checked) {
-			newPackage.info.websites = TextToArray(document.getElementById('PackageWebsite').value);
+			selectedDoc.info.websites = TextToArray(document.getElementById('PackageWebsite').value);
+			delete selectedDoc.info.website;
 		} else {
-			newPackage.info.website = document.getElementById('PackageWebsite').value;
+			selectedDoc.info.website = document.getElementById('PackageWebsite').value;
+			delete selectedDoc.info.websites;
 		}
 	}
-	yamlData.push(newPackage);
 
-	SetSelectedDoc(yamlData.filter((doc) => IsPackage(doc)).length - 1, 'p')
+	//To push the package to the list it at minimum must have a group and name so the cm.OnChange can pick it up
+	if (currDocIdx === null && Object.hasOwn(selectedDoc, "group") && Object.hasOwn(selectedDoc, "name")) {
+		yamlData.push(selectedDoc);
+		SetSelectedDoc(yamlData.filter((doc) => IsPackage(doc)).length - 1, 'p');
+	}
 	UpdateData();
-	// This second doc selection is to counter the override of yamlData in ParseYaml().
-	SetSelectedDoc(yamlData.filter((doc) => IsPackage(doc)).length - 1, 'p')
+	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
 }
 
 
