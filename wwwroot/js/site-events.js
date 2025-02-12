@@ -2,11 +2,13 @@
 // --------------------------------------------   General event handlers   --------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 document.getElementById('NewPackageButton').addEventListener('click', () => {
+	ClearSelectedDoc();
 	ResetPackageInputs();
 	SelectTab('PackagePropertiesTab');
 	EnablePackageTabs();
 });
 document.getElementById('NewAssetButton').addEventListener('click', () => {
+	ClearSelectedDoc();
 	ResetAssetInputs();
 	SelectTab('AssetPropertiesTab');
 	EnableAssetTab();
@@ -16,9 +18,6 @@ for (const tab of document.querySelectorAll('.nav-link')) {
 }
 document.getElementById('ResetPackageFormButton').addEventListener('click', () => {
 	ResetPackageInputs();
-});
-document.getElementById('AddPackageButton').addEventListener('click', () => {
-	AddPackage();
 });
 document.getElementById('RemovePackageButton').addEventListener('click', () => {
 	RemoveSelectedDoc();
@@ -89,7 +88,8 @@ document.addEventListener("keydown", function (e) {
 // --------------------------------------------------------------------------------------------------------------------
 for (const input of document.querySelectorAll('#PackagePropertiesForm .form-control')) {
 	input.addEventListener('input', event => {
-		UpdatePackageData(event.target.id);
+		ValidateInput(event.target.id);
+		UpdatePackageData();
 	});
 }
 document.getElementById('PacPackageList').addEventListener('change', event => {
@@ -109,7 +109,8 @@ document.getElementById('IsMultipleWebsites').addEventListener('change', () => {
 });
 for (const input of document.querySelectorAll('#PackageInfoForm .form-control')) {
 	input.addEventListener('input', event => {
-		UpdatePackageData(event.target.id);
+		ValidateInput(event.target.id);
+		UpdatePackageData();
 	});
 }
 

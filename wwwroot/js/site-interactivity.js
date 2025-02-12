@@ -180,6 +180,7 @@ function ResetAssetInputs() {
 
 /**
  * Apply basic validation rules for the specified entry field.
+ * @param {string} elementId The Id of the input element being changed
  */
 function ValidateInput(elementId) {
 	var inputElement = document.getElementById(elementId);
@@ -218,7 +219,7 @@ function ToggleMultipleWebsites() {
 		document.getElementById('PackageWebsite').value = document.getElementById('PackageWebsite').value.split(';')[0];
 		document.getElementById('PackageWebsite').rows = '1';
 	}
-	UpdatePackageData('PackageWebsite');
+	UpdatePackageData();
 }
 
 
