@@ -7,121 +7,80 @@ const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
 	lineWrapping: true,
 	mode: 'yaml'
 });
-cm.on('change', () => {
+cm.on('change', CodeMirrorOnChange);
+
+function CodeMirrorOnChange(instance, changeObj) {
 	yamlData = jsyaml.loadAll(cm.getValue());
-	
+
 	//Figure which document we're editing within the code so it can be set as the selected document
-	var assetId;
-	var pkgName;
-	var pkgGroup;
+	var tabName = 'PackagePropertiesTab';
 	var line = cm.getCursor().line;
-	var direction = (line > 0) ? 'up' : 'down';
-	var lineContent = cm.getLine(line);
+	var lineContent = cm.getLine(line).trim();
+	var baseNode = lineContent.slice(0, lineContent.indexOf(':'));
 	if (lineContent === undefined || yamlData.length === 0) {
 		return;
 	}
 
-	while (line >= 0) {
-		//console.log("L" + line + ": " + lineContent);
-		if (lineContent.startsWith('assetId:')) {
-			assetId = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"','').trim();
+	var startLine = line;
+	while (startLine > 0) {
+		baseNode = lineContent.slice(0, lineContent.indexOf(':'));
+		if (baseNode === 'info') {
+			tabName = 'PackageInfoTab';
+		} else if (baseNode === 'assets') {
+			tabName = 'IncludedAssetsTab';
+		} else if (baseNode === 'variants') {
+			tabName = 'PackageVariantsTab';
+		} else if (['url', 'assetId', 'lastModified', 'checksum', 'nonPersistentUrl', 'archiveType'].includes(baseNode)) {
+			tabName = 'AssetPropertiesTab';
+		} else {
+			tabName = 'PackagePropertiesTab';
+		}
+
+		if (lineContent === '---') {
 			break;
 		}
-		else if (lineContent.startsWith('name:')) {
-			pkgName = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"', '').trim();
-		}
-		else if (lineContent.startsWith('group:')) {
-			pkgGroup = lineContent.slice(lineContent.indexOf(':') + 1).replaceAll('"', '').trim();
-		}
-		if (pkgGroup !== undefined && pkgName !== undefined) {
+		startLine--;
+		lineContent = cm.getLine(startLine).trim();
+	}
+
+	var endLine = line;
+	while (endLine < cm.lineCount() - 1) {
+		if (lineContent === '---') {
 			break;
 		}
-
-		if (lineContent === '---' || line >= cm.lineCount()) {
-			direction = (direction === 'up' ? 'down' : 'up');
-		}
-		direction === 'up' ? line-- : line++;
-		lineContent = cm.getLine(line);
+		endLine++;
+		lineContent = cm.getLine(endLine).trim();
 	}
 
-
-
-	//Determine which part of the code is being edited and which UI tab is relevant, then select it
-	line = cm.getCursor().line;
-	lineContent = cm.getLine(line);
-	var baseNode, otherNode;
-	var pkgNodes = ['group', 'name', 'version', 'subfolder', 'dependencies'];
-	while (line >= 0) {
-		if (!lineContent.startsWith(' ') && !lineContent.startsWith('-')) {
-			baseNode = lineContent.slice(0, lineContent.indexOf(':'));
-			//The 'version' property is common to packages and assets so look at the previous or next property to help decide
-			otherNode = cm.getLine(line + (line === 0) * 2 - 1).slice(0, lineContent.indexOf(':') - 1);
-
-			//TODO - fix the automatic tab activating when editing a part of the code pane
-			//It currently always defaults to the 'PackageProperties' tab because when dumping the data the cursor is set to 0,0
-			if (pkgNodes.includes(baseNode) && pkgNodes.includes(otherNode)) {
-				//SelectTab('PackagePropertiesTab');
-			}
-			else if (baseNode === 'info') {
-				//SelectTab('PackageInfoTab');
-			}
-			else if (baseNode === 'assets') {
-				//SelectTab('IncludedAssetsTab');
-			}
-			else if (baseNode === 'variants') {
-				//SelectTab('PackageVariantsTab');
-			}
-			else {
-				//SelectTab('AssetPropertiesTab');
-			}
-			break;
-		}
-
-		direction === 'up' ? line-- : line++;
-		lineContent = cm.getLine(line);
+	//TODO - fix the automatic tab activating when editing a part of the code pane. It currently always defaults to the 'PackageProperties' tab because when dumping the data the cursor is set to 0,0
+	var currDoc = jsyaml.load(cm.getRange({ line: startLine, ch: 0 }, { line: endLine, ch: 0 }));
+	if (IsPackage(currDoc)) {
+		currDocIdx = yamlData.findIndex(item => item.group === currDoc.group && item.name === currDoc.name);
+		//SelectTab(tabName);
+	}
+	else {
+		currDocIdx = yamlData.findIndex(item => item.assetId === currDoc.assetId);
+		//SelectTab('AssetPropertiesTab');
 	}
 
-
-	if (assetId === undefined) {
-		currDocIdx = yamlData.findIndex(item => item.group === pkgGroup && item.name === pkgName);
-	} else {
-		currDocIdx = yamlData.findIndex(item => item.assetId === assetId);
-	}
 	console.log(currDocIdx);
 	UpdateData(false);
-});
+}
+
+
+
 /**
  * Array of packages and assets in this YAML file. The primary data object.
  */
 var yamlData = [];
-
-
-//var sc4pacAssets = new Array();
-//var sc4pacPackages = new Array();
-//var sc4pacData = FetchSc4pacData().then(result => {
-//	sc4pacData = result.contents;
-//	sc4pacAssets = result.contents.filter((item) => item.group === 'sc4pacAsset');
-//	sc4pacPackages = result.contents.filter((item) => item.group !== 'sc4pacAsset');
-//});
-//async function FetchSc4pacData() {
-//	const request = new Request('https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json');
-//	const response = await fetch(request);
-//	return await response.json();
-//}
-//async function FetchSc4EvermoreData() {
-//	const request = new Request('https://www.sc4evermore.com/latest-modified-downloads.php');
-//	const response = await fetch(request);
-//	return await response.json();
-//}
-//fetch('/config.json').then(function (config) {
-//    console.log('API key:', config.apiKey);
-//});
-
-
 /**
- * Load From Dialog element
+ * Index of the currently selected document within `yamlData`. If this is null, then the `selectedDoc` is new and has not yet been added to `yamlData`.
  */
-const loadFileDialog = document.getElementById('LoadFromChannelDialog');
+var currDocIdx = null;
+/**
+ * The currently selected ("active") document being edited - may be a package or an asset.
+ */
+var selectedDoc = null;
 /**
  * Main Tree View element
  */
@@ -135,16 +94,14 @@ var atv;
  */
 var vtv;
 /**
- * Index of the currently selected document within `yamlData`.
+ * Load From ... dialog element
  */
-var currDocIdx = null;
+const loadFileDialog = document.getElementById('LoadFromChannelDialog');
 /**
- * Currently selected document in the main tree - may be a package or an asset.
+ * Preferences dialog element
  */
-var selectedDoc = null;
+const preferencesDialog = new bootstrap.Modal('#PreferencesDialog');
 
-var countOfPackages = 0;
-var countOfAssets = 0;
 var listOfAssets = new Array();
 var listOfPackages = new Array();
 var listOfGroups = new Array();
@@ -368,19 +325,21 @@ var pkgGroupSelect = new TomSelect('#PackageGroup', {
 
 
 ResetAllInputs();
+SetTabState();
 
-
-
-//TODO - validate YAML in code pane for valid yaml syntax
-//TODO - validate YAML in code pane for valid sc4pac schema
+//Initialize all tooltips
+const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
 
 
 /**
- * Sync changes between the codepane and UI with the current state of the `yamlData` array (UI ←→ yamlData ←→ codepane). Also sets the currently active (selected) document.
+ * Sync changes between the codepane and UI with the current state of the `yamlData` array (UI ←→ yamlData ←→ codepane).
  * 
  * Dumps yamlData to the codepane by default.
- * @param {boolean} dumpData Specify FALSE to skip updating the code pane. Default is TRUE.
+ * @param {boolean} dumpData Whether to update the code pane. Should be disabled if this is called from the codepane (as the codepane would already be up to date). Default is FALSE.
+ * 
+ * The default *must* be FALSE because setting the code text will re-trigger the change event a second time
  */
 function UpdateData(dumpData = true) {
 	//When updating a text input, the input event occurs immediately, but the change event doesn't occur until you commit the change by lose focus or submit the form.
@@ -389,11 +348,12 @@ function UpdateData(dumpData = true) {
 	//codemirror.onchange() { metadata.update() }
 	//metadata.update() { treeview.update(); form.update(); codemirror.update() }
 
+	if (currDocIdx === null) {
+		return;
+	}
 
-
-	//Update the counts of packages and assets
-	countOfAssets = 0;
-	countOfPackages = 0;
+	var countOfAssets = 0;
+	var countOfPackages = 0;
 	listOfAssets.length = 0;
 	listOfPackages.length = 0;
 
@@ -410,23 +370,24 @@ function UpdateData(dumpData = true) {
 	}
 	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 
-	SetSelectedDoc(currDocIdx);
-	ToggleTabState();
+	SetTabState();
 	UpdateLocalDropdowns();
 	UpdateMainTree();
 	UpdateIncludedAssetTree();
 	UpdateVariantTree();
 
 	
-
-	if (IsPackage(selectedDoc)) {
-		FillPackageForm();
-	} else {
-		FillAssetForm();
-	}
-	
 	if (dumpData) {
+		cm.off('change', CodeMirrorOnChange);
 		cm.setValue(DumpYaml());
+		cm.on('change', CodeMirrorOnChange);
+	}
+	else {
+		if (IsPackage(selectedDoc)) {
+			FillPackageForm();
+		} else {
+			FillAssetForm();
+		}
 	}
 	SetSelectedDoc(currDocIdx);
 
@@ -558,7 +519,7 @@ function UpdateMainTree() {
 			SetSelectedDoc(selectedIdx - 1, 'a');
 			FillAssetForm();
 		}
-		ToggleTabState();
+		SetTabState();
 	});
 }
 
@@ -664,11 +625,8 @@ function UpdateVariantTree() {
 
 
 
-
-function CopyToClipboard() {
-	navigator.clipboard.writeText(cm.getValue())
-}
-
+//TODO - validate YAML in code pane for valid yaml syntax
+//TODO - validate YAML in code pane for valid sc4pac schema
 function validate() {
 	//ensure any manually typed yaml (as opposed to generated yaml) is syntactically valid
 }
@@ -698,18 +656,6 @@ function GetVariant(key, value) {
 		return localVariant;
 	}
 }
-
-function RemoveSelectedDoc() {
-	if (IsPackage(selectedDoc)) {
-		yamlData = yamlData.filter((doc) => doc.group + doc.name !== selectedDoc.group + selectedDoc.name);
-	} else {
-		yamlData = yamlData.filter((doc) => doc.assetId !== selectedDoc.assetId);
-	}
-
-	UpdateData();
-	ResetAssetInputs();
-}
-
 
 /**
  * Returns the specified package or asset
@@ -769,150 +715,10 @@ function SetSelectedDoc(index, type) {
 		}
 	}
 }
-
-
-
-document.addEventListener("keydown", function (e) {
-	if ((e.metaKey || e.ctrlKey) && e.code === "KeyS") {
-		SaveAs();
-		e.preventDefault();
-	}
-}, false);
-function SaveAs() {
-	var bb = new Blob([cm.getValue()], { type: 'application/yaml' });
-	var tmp = document.createElement('a');
-	var fileName;
-	if (yamlData[0] == null) {
-		fileName = "document.yaml";
-	} else if (document.getElementById('YamlFileName').textContent !== '') {
-		fileName = document.getElementById('YamlFileName').textContent;
-	} else {
-		fileName = IsPackage(yamlData[0]) ? yamlData[0].name : yamlData[0].assetId + '.yaml';
-	}
-	tmp.download = fileName;
-	tmp.href = window.URL.createObjectURL(bb);
-	tmp.click();
-	tmp.remove();
-}
-
-
-document.addEventListener("keydown", function (e) {
-	if ((e.metaKey || e.ctrlKey) && e.code === "KeyO") {
-		LoadFromFile();
-		e.preventDefault();
-	}
-}, false);
-function LoadFromFile() {
-	var tmp = document.createElement("input")
-	tmp.type = 'file'
-	tmp.style.display = 'none'
-	tmp.onchange = function (e) {
-		var file = e.target.files[0];
-		if (!file) {
-			return;
-		}
-		document.getElementById('YamlFileName').textContent = file.name
-		var reader = new FileReader();
-		reader.onload = function (e) {
-			var contents = e.target.result;
-			cm.setValue(contents);
-			tmp.remove();
-		}
-		reader.readAsText(file);
-	}
-	tmp.click();
-}
-
-
 /**
- * Load content from a Github file tree
- * @param {any} srcElem Source element this function is being called from.
- *
- * If the element is `a` then this is triggered from the open menu or the breadcrumb menu and we want to navigate to the base folder of the Github files; if the element is `BUTTON` then its being triggered from a button click in the modal dialog and we want to navigate to a subfolder of the Github files. Basically, links go to the root folder level, buttons go to a subfolder level.
- * @param {any} channel Name of the channel to fetch data from, e.g. 'default' or 'zasco' or 'simtropolis'
+ * Clear the `selectedDoc` and `currDocIdx` by setting them to null to indicate no document is selected ("active").
  */
-async function LoadFromGithub(srcElem, channel) {
-	var crumbNav = document.getElementById('ChannelBreadcrumb');
-	var level = (srcElem.tagName === 'A') ? 1 : 2;
-
-	//Set the base srcUrl and update the breadcrumb menu.
-	if (level === 1) { 
-		switch (channel.toLowerCase()) {
-			case 'default':
-				srcUrl = 'https://api.github.com/repos/memo33/sc4pac/git/trees/2b987426294c3fb8b66b1875d629d5937ad921ac';
-				break;
-			case 'simtropolis':
-				srcUrl = 'https://api.github.com/repos/sebamarynissen/simtropolis-channel/git/trees/04887d7d070e600ea0fb4a7cc22314c5fb0af436';
-				break;
-			case 'zasco':
-				srcUrl = 'https://api.github.com/repos/Zasco/sc4pac-channel/git/trees/ad3f15a09bf296df6ef87be2175542f1ee671407';
-				break;
-		}
-		if (srcElem.textContent !== 'Root') {
-			loadFileDialog.querySelector('.modal-title').textContent = srcElem.innerHTML;
-		}
-		if (crumbNav.children.length > 1) {
-			crumbNav.lastElementChild.remove();
-			crumbNav.firstElementChild.firstElementChild.remove(); //remove the <a> link
-			crumbNav.firstElementChild.textContent = 'Root';
-			crumbNav.firstElementChild.className = 'breadcrumb-item active'
-		}
-	}
-	else {
-		srcUrl = srcElem.value;
-
-		var prevCrumb = crumbNav.firstElementChild 
-		prevCrumb.className = 'breadcrumb-item';
-		prevCrumb.textContent = '';
-
-		let newLink = document.createElement('a');
-		newLink.href = '#';
-		newLink.textContent = 'Root';
-		newLink.addEventListener('click', function () { LoadFromGithub(this, channel); });
-		prevCrumb.appendChild(newLink);
-
-		let newCrumb = document.createElement('li');
-		newCrumb.className = 'breadcrumb-item active';
-		newCrumb.textContent = srcElem.textContent;
-		crumbNav.appendChild(newCrumb);
-	}
-
-
-	fetch(srcUrl)
-		.then(response => response.json())
-		.then(data => {
-			let listDiv = loadFileDialog.querySelector('.list-group');
-			listDiv.textContent = '';
-			data.tree
-				.filter((obj) => obj.path.charAt(0) !== '.')
-				.forEach(obj => {
-					let btn = document.createElement('button');
-					btn.className = 'list-group-item list-group-item-action';
-					btn.textContent = obj.path;
-					btn.value = obj.url;
-					if (level === 1) {
-						btn.addEventListener('click', function () { LoadFromGithub(this, channel); });
-					} else {
-						btn.addEventListener('click', function () { GetContent(this.value, obj.path); });
-					}
-
-					listDiv.appendChild(btn);
-				});
-		})
-		.catch(error => console.error('Error fetching the tree data:', error));
-}
-
-
-function GetContent(url, fileName) {
-	fetch(url)
-		.then(response => response.json())
-		.then(data => {
-			document.getElementById('YamlFileName').textContent = fileName;
-			cm.setValue(atob(data.content));
-		})
-		.catch(error => console.error('Error fetching the tree data:', error));
-
-	//Hide the modal display
-	var modal = bootstrap.Modal.getInstance(loadFileDialog)
-	modal.hide();
+function ClearSelectedDoc() {
+	selectedDoc = null;
+	currDocIdx = null;
 }

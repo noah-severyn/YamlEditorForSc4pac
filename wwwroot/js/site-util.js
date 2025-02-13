@@ -33,7 +33,7 @@ function TextToArray(text) {
 
 
 /**
- * Determine whether the specified object contains the properties of a sc4pac Asset.
+ * Determine whether the specified object contains the properties of a sc4pac Asset. A unique asset is determined by its `assetId` property.
  * @param {Object} obj The object to analyze
  * @returns TRUE if the object represents an Asset; FALSE otherwise
  */
@@ -41,12 +41,12 @@ function IsAsset(obj) {
 	if (obj === null || obj === undefined) {
 		return false;
 	}
-	return Object.hasOwn(obj, 'assetId') && Object.hasOwn(obj, 'lastModified') && Object.hasOwn(obj, 'url') && Object.hasOwn(obj, 'version');
+	return Object.hasOwn(obj, 'assetId');
 }
 
 
 /**
- * Determine whether the specified object contains the properties of a sc4pac Package.
+ * Determine whether the specified object contains the properties of a sc4pac Package. A unique package is determined by it's `group` and `name` property combination.
  * @param {Object} obj The object to analyze
  * @returns TRUE if the object represents a Package; FALSE otherwise
  */
@@ -54,5 +54,5 @@ function IsPackage(obj) {
 	if (obj === null || obj === undefined) {
 		return false;
 	}
-	return Object.hasOwn(obj, 'group') && Object.hasOwn(obj, 'name') && Object.hasOwn(obj, 'version') && Object.hasOwn(obj, 'subfolder');
+	return Object.hasOwn(obj, 'group') && Object.hasOwn(obj, 'name');
 }

@@ -29,7 +29,7 @@
 		<nav class="navbar navbar-light border-bottom box-shadow bg-light mb-3">
 			<div class="container justify-content-start">
 				<a class="navbar-brand mb-0" href="index.html">YAML editor for sc4pac</a>
-				<span class="navbar-text">This tool is designed to help create and edit YAML metadata files used by <a href="https://community.simtropolis.com/forums/topic/762677-sc4pac-lets-write-our-own-package-manager/">sc4pac</a>. Please contact <a href="https://community.simtropolis.com/profile/455740-nos17/">nos.17</a> with any comments or issues.</span>
+				<span class="navbar-text">This tool is designed to help create and edit YAML metadata files used by <a href="https://community.simtropolis.com/forums/topic/762677-sc4pac-lets-write-our-own-package-manager/">sc4pac</a>. Please <a href="https://github.com/noah-severyn/YamlEditorForSc4pac/issues">open an issue</a> in Github or contact <a href="https://community.simtropolis.com/profile/455740-nos17/">nos.17</a> with any comments or issues.</span>
 			</div>
 		</nav>
 	</header>
@@ -104,7 +104,7 @@
 					<fieldset id="PackageInfoContent" class="tab-pane m-3" tabindex="0">
 						<form id="PackageInfoForm">
 							<div class="input-group mb-2">
-								<span id="PackageWebsiteLabel" class="input-group-text w2">Website</span>
+								<span id="PackageWebsiteLabel" class="input-group-text w2 required-label">Website</span>
 								<div class="form-check mt-2 me-2 ms-2">
 									<input id="IsMultipleWebsites" class="form-check-input" type="checkbox" title="Whether this package has multiple websites (uploaded to multiple exchanges)">
 									<label class="form-check-label" for="IsMultipleWebsites" title="Whether this package has multiple websites (uploaded to multiple exchanges">Multiple</label>
@@ -251,12 +251,8 @@
 					<fieldset id="AssetPropertiesContent" class="tab-pane m-3" tabindex="0">
 						<form id="AssetPropertiesForm">
 							<div class="form-floating mb-2">
-								<input id="AssetUrl" type="url" class="form-control required" required />
-								<label for="AssetUrl" class="required-label">Url</label>
-							</div>
-							<div class="form-floating mb-2">
 								<input id="AssetId" type="text" class="form-control required" required />
-								<label for="AssetId" class="required-label">Id</label>
+								<label for="AssetId" class="required-label">AssetId</label>
 							</div>
 							<div class="form-floating mb-2">
 								<input id="AssetVersion" type="text" class="form-control required" required />
@@ -271,6 +267,10 @@
 									<input id="AssetLastModifiedText" type="text" class="form-control" required />
 									<label for="AssetLastModifiedText">(paste raw date time value)</label>
 								</div>
+							</div>
+							<div class="form-floating mb-2">
+								<input id="AssetUrl" type="url" class="form-control required" required />
+								<label for="AssetUrl" class="required-label">Url</label>
 							</div>
 							<div class="mb-2 input-group">
 								<label id="AssetArchiveTypeLabel" class="input-group-text w2">Archive Type</label>
@@ -299,8 +299,7 @@
 							<button id="ResetAssetFormButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
 						</div>
 						<div class="mb-2 btn-group">
-							<button id="AddAssetButton" class="btn btn-primary" type="button" disabled>Add New Asset</button>
-							<button id="RemoveAssetButton" class="btn btn-outline-danger" type="button" disabled>Remove Asset</button>
+							<button id="RemoveAssetButton" class="btn btn-outline-danger" type="button">Remove Asset</button>
 						</div>
 					</fieldset>
 				</div>
@@ -310,7 +309,6 @@
 						<button id="ResetPackageFormButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
 					</div>
 					<div class="btn-group">
-						<button id="AddPackageButton" class="btn btn-primary" type="button" disabled>Add New Package</button>
 						<button id="RemovePackageButton" class="btn btn-outline-danger" type="button" disabled>Remove Package</button>
 					</div>
 				</div>
@@ -336,30 +334,57 @@
 					<button id="CopyToClipButton" class="btn btn-primary" type="button">Copy to Clipboard</button>
 					<button id="SaveAsButton" class="btn btn-primary" type="button">Save As</button>
 					<button id="ClearAllButton" class="btn btn-danger" type="button">Clear All</button>
+					<button id="OpenPreferencesButton" class="btn btn-success" type="button">Preferences</button>
 				</div>
 
 				<textarea id="editor" placeholder="Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications."></textarea>
+			</div>
 
-				<div class="modal fade" id="LoadFromChannelDialog" tabindex="-1">
-					<div class="modal-dialog modal-dialog-scrollable">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h1 class="modal-title fs-5" id="ModalSourceTitle">Modal title</h1>
-								<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			<!--Modal Dialogs-->
+			<div class="modal fade" id="LoadFromChannelDialog" tabindex="-1">
+				<div class="modal-dialog modal-dialog-scrollable">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h1 class="modal-title fs-5">Modal title</h1>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+						</div>
+						<div class="modal-body">
+							<nav aria-label="breadcrumb">
+								<ol id="ChannelBreadcrumb" class="breadcrumb">
+									<li class="breadcrumb-item active">Root</li>
+								</ol>
+							</nav>
+							<div id="ChannelItemList" class="list-group"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal fade" id="PreferencesDialog" tabindex="-1">
+				<div class="modal-dialog modal-dialog-scrollable modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h1 class="modal-title fs-5">Preferences</h1>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+						</div>
+						<div class="modal-body">
+							<div class="form-check">
+								<input id="AllowPartialPackages" class="form-check-input" type="checkbox" value="">
+								<label class="form-check-label" for="AllowPartialPackages" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" data-bs-title="Only turn on when creating metadata for new, not yet created, STEX uploads. <span class='text-warning'>Keep off for regular metadata editing.</span>">
+									Create partial package metadata
+								</label>
 							</div>
-							<div class="modal-body">
-								<nav aria-label="breadcrumb">
-									<ol id="ChannelBreadcrumb" class="breadcrumb">
-										<li class="breadcrumb-item active">Root</li>
-									</ol>
-								</nav>
-								<div id="ChannelItemList" class="list-group"></div>
+							<div class="form-check">
+								<input id="PreferStChannelFilenames" class="form-check-input" type="checkbox" value="">
+								<label class="form-check-label" for="PreferStChannelFilenames" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" data-bs-title="Prefer a format prefixed with the STEX id like <code>29061-paris-building.yaml</code> instead of <code>paris-building.yaml</code>.">
+									Use <code>st-channel</code> naming style when saving files
+								</label>
 							</div>
 						</div>
 					</div>
 				</div>
-
 			</div>
+
 		</div>
 	</main>
 
@@ -372,6 +397,8 @@
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="wwwroot/js/site-util.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site-interactivity.js"></script>
+	<script type="text/javascript" src="wwwroot/js/site-events.js"></script>
+	<script type="text/javascript" src="wwwroot/js/site-file-io.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site.js"></script>
 </body>
 </html>

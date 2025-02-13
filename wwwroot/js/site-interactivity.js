@@ -1,169 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
-// ----------------------------------------------   Set Event Handlers   ----------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------
-document.getElementById('NewPackageButton').addEventListener('click', () => {
-	ResetPackageInputs();
-	SelectTab('PackagePropertiesTab');
-	EnablePackageTabs();
-});
-document.getElementById('NewAssetButton').addEventListener('click', () => {
-	ResetAssetInputs();
-	SelectTab('AssetPropertiesTab');
-	EnableAssetTab();
-});
-for (const tab of document.querySelectorAll('.nav-link')) {
-	tab.addEventListener('click', () => { SelectTab(tab.id, false) });
-}
 
-
-
-// Package events
-document.getElementById('ResetPackageFormButton').addEventListener('click', () => {
-	ResetPackageInputs();
-});
-document.getElementById('AddPackageButton').addEventListener('click', () => {
-	AddPackage();
-});
-document.getElementById('RemovePackageButton').addEventListener('click', () => {
-	RemoveSelectedDoc();
-});
-
-
-
-// Package Properties tab events
-for (const input of document.querySelectorAll('#PackagePropertiesForm .form-control')) {
-	input.addEventListener('input', event => {
-		UpdatePackageData(event.target.id);
-	});
-}
-document.getElementById('PacPackageList').addEventListener('change', event => {
-	PackageAddDependency(event.target);
-});
-document.getElementById('LocalPackageList').addEventListener('change', event => {
-	PackageAddDependency(event.target);
-});
-
-
-
-// Package Info tab events
-document.getElementById('IsMultipleWebsites').addEventListener('change', () => {
-	ToggleMultipleWebsites();
-});
-for (const input of document.querySelectorAll('#PackageInfoForm .form-control')) {
-	input.addEventListener('input', event => {
-		UpdatePackageData(event.target.id);
-	});
-}
-
-
-
-
-// Package Included Asset tab events
-document.getElementById('SelectLocalPackageAssets').addEventListener('change', event => {
-	SetIncludedAssetId(event.target);
-});
-document.getElementById('SelectPacPackageAssets').addEventListener('change', event => {
-	SetIncludedAssetId(event.target);
-});
-document.getElementById('PackageAssetInclude').addEventListener('change', event => {
-	UpdatePackageData(event.target.id);
-});
-document.getElementById('PackageAssetExclude').addEventListener('change', event => {
-	UpdatePackageData(event.target.id);
-});
-document.getElementById('ResetIncludedAssetButton').addEventListener('change', () => {
-	ResetIncludedAssetInputs();
-});
-document.getElementById('AddPackageAssetButton').addEventListener('change', () => {
-	AddIncludedAsset();
-});
-
-
-
-
-// Package Variant tab events
-for (const input of document.querySelectorAll('#VariantKey, #VariantValue, #VariantDescription, #VariantsPacPackageList, #VariantsLocalPackageList')) {
-	input.addEventListener('input', event => {
-		UpdateVariantData(event.target);
-	});
-}
-for (const input of document.querySelectorAll('#VariantsPacAssetList, #VariantsLocalAssetList, #VariantInclude, #VariantExclude')) {
-	input.addEventListener('change', event => {
-		UpdateVariantData(event.target);
-	});
-}
-document.getElementById('ResetVariantFormButton').addEventListener('click', () => {
-	ResetVariantInputs();
-});
-document.getElementById('AddAssetToVariantButton').addEventListener('click', () => {
-	AddAssetToVariant();
-});
-document.getElementById('RemoveAssetFromVariantButton').addEventListener('click', () => {
-	RemoveAssetFromVariant();
-});
-document.getElementById('AddVariantButton').addEventListener('click', () => {
-	AddNewVariant();
-});
-document.getElementById('RemoveVariantButton').addEventListener('click', () => {
-	RemoveVariant();
-});
-
-
-
-// Asset Properties tab events
-for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
-	input.addEventListener('input', event => {
-		if (event.target.id === 'AssetLastModifiedText') {
-			// Convert UTC text pasted into the input box for to a valid datetime to populate the datetime picker.
-			var inputValue = document.getElementById('AssetLastModifiedText').value.replaceAll('"', '');
-			try {
-				var newDate = new Date(inputValue).toISOString().slice(0, 19);
-				document.getElementById('AssetLastModified').value = newDate;
-			} catch (e) {
-				console.log(e);
-			}
-		}
-		
-		UpdateAssetItem(event.target.id);
-	});
-}
-document.getElementById('AssetArchiveVersion').addEventListener('change', event => {
-	UpdateAssetItem(event.target.id);
-});
-document.getElementById('ResetAssetFormButton').addEventListener('click', () => {
-	ResetAssetInputs();
-});
-document.getElementById('AddAssetButton').addEventListener('click', () => {
-	AddAsset();
-});
-document.getElementById('RemoveAssetButton').addEventListener('click', () => {
-	RemoveSelectedDoc();
-});
-
-
-
-// Output area events
-document.getElementById('LoadFromFile').addEventListener('click', () => {
-	LoadFromFile();
-});
-document.getElementById('LoadFromGitDefault').addEventListener('click', event => {
-	LoadFromGithub(event.target, 'default');
-});
-document.getElementById('LoadFromGitSimtrop').addEventListener('click', event => {
-	LoadFromGithub(event.target, 'simtropolis');
-});
-document.getElementById('LoadFromGitZasco').addEventListener('click', event => {
-	LoadFromGithub(event.target, 'zasco');
-});
-document.getElementById('CopyToClipButton').addEventListener('click', () => {
-	CopyToClipboard();
-});
-document.getElementById('SaveAsButton').addEventListener('click', () => {
-	SaveAs();
-});
-document.getElementById('ClearAllButton').addEventListener('click', () => {
-	ClearAll();
-});
 
 
 /**
@@ -199,14 +34,34 @@ function EnablePackageTabs() {
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
 }
 /**
-* Toggles the package tabs and asset tab between enabled/disabled states based on the type of `selectedDoc`.
+* Enables the only first two package tabs (Properties and Info), for when partial package metadata is being created.
 */
-function ToggleTabState() {
-	if (IsPackage(selectedDoc)) {
-		EnablePackageTabs();
+function EnablePartialPackageTabs() {
+	document.getElementById('PackagePropertiesTab').classList.remove('disabled');
+	document.getElementById('PackagePropertiesTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('PackageInfoTab').classList.remove('disabled');
+	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('IncludedAssetsTab').classList.add('disabled');
+	document.getElementById('IncludedAssetsTab').removeAttribute('data-bs-toggle', 'tab');
+	document.getElementById('PackageVaraintsTab').classList.add('disabled');
+	document.getElementById('PackageVaraintsTab').removeAttribute('data-bs-toggle', 'tab');
+
+	document.getElementById('AssetPropertiesTab').classList.add('disabled');
+	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
+}
+
+/**
+* Sets the state of the package tabs and asset tab to enabled or disabled based on the type of `selectedDoc`.
+*/
+function SetTabState() {
+	if (localStorage.getItem('allow-partial-packages') === 'true') {
+		EnablePartialPackageTabs();
+	} 
+	else if (IsAsset(selectedDoc)) {
+		EnableAssetTab();
 	}
 	else {
-		EnableAssetTab();
+		EnablePackageTabs();
 	}
 }
 /**
@@ -237,16 +92,17 @@ function ClearAll() {
 	cm.setValue('');
 	yamlData.length = 0;
 	document.getElementById('YamlFileName').textContent = '';
+	UpdateData();
 }
 /**
  * Resets all input form fields.
  */
 function ResetAllInputs() {
-	ResetPackageInputs();
 	ResetIncludedAssetInputs();
 	ResetVariantInputs();
 	ResetIncludedAssetInputs();
 	ResetAssetInputs();
+	ResetPackageInputs(); //Reset package inputs last to the heading and the selected tab are aligned
 }
 /**
  * Resets the Package input form fields.
@@ -271,7 +127,6 @@ function ResetPackageInputs() {
 	document.getElementById('PackageWebsite').value = '';
 	document.getElementById('PackageWebsite').rows = '1';
 	document.getElementById('IsMultipleWebsites').checked = false;
-	document.getElementById('AddPackageButton').disabled = true;
 
 	document.getElementById('CurrentDocumentType').innerHTML = 'package';
 	document.getElementById('CurrentDocumentName').innerHTML = '[new package]';
@@ -315,7 +170,6 @@ function ResetAssetInputs() {
 	document.getElementById('AssetArchiveVersion').selectedIndex = 0;
 	document.getElementById('AssetChecksum').value = '';
 	document.getElementById('AssetNonPersistentUrl').value = '';
-	document.getElementById('AddAssetButton').disabled = true;
 
 	document.getElementById('CurrentDocumentType').innerHTML = 'asset';
 	document.getElementById('CurrentDocumentName').innerHTML = '[new asset]';
@@ -326,6 +180,7 @@ function ResetAssetInputs() {
 
 /**
  * Apply basic validation rules for the specified entry field.
+ * @param {string} elementId The Id of the input element being changed
  */
 function ValidateInput(elementId) {
 	var inputElement = document.getElementById(elementId);
@@ -339,7 +194,7 @@ function ValidateInput(elementId) {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-]/g, '').toLowerCase();
 	} else if (fieldName === 'Dependencies') {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-:;\n]/g, '').toLowerCase();
-	} else if (fieldName === 'Website' || fieldName === 'AssetUrl') {
+	} else if (fieldName === 'Website' || fieldName === 'Websites' || fieldName === 'Url') {
 		inputText = inputText.toLowerCase().replace(new RegExp('[^a-z0-9-&_:;/?=.\n]'), '');
 	} else if (fieldName === 'Include' || fieldName === 'Exclude') {
 		//Want to replace ONLY for file/folder names, not regex strings
@@ -364,8 +219,22 @@ function ToggleMultipleWebsites() {
 		document.getElementById('PackageWebsite').value = document.getElementById('PackageWebsite').value.split(';')[0];
 		document.getElementById('PackageWebsite').rows = '1';
 	}
-	UpdatePackageData('PackageWebsite');
+	UpdatePackageData();
 }
+
+
+
+function RemoveSelectedDoc() {
+	if (IsPackage(selectedDoc)) {
+		yamlData = yamlData.filter((doc) => doc.group + doc.name !== selectedDoc.group + selectedDoc.name);
+	} else {
+		yamlData = yamlData.filter((doc) => doc.assetId !== selectedDoc.assetId);
+	}
+
+	UpdateData();
+	ResetAssetInputs();
+}
+
 
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -443,101 +312,66 @@ function AddDepencencyFromPacList() {
 	input.value = '';
 }
 /**
- * Update the YAML codepane with the values in the current Package form field.
+ * Updates the selectedDoc with the current state of the Package Properties and Package Info tabs.
  */
-function UpdatePackageData(fieldName) {
-	//Prevent adding a package if any required fields are blank
-	if (document.getElementById('PackageGroup').value === '' || document.getElementById('PackageName').value === '' || document.getElementById('PackageVersion').value === '' || document.getElementById('PackageSummary').value === '') {
-		document.getElementById('AddPackageButton').disabled = true;
-		document.getElementById('RemovePackageButton').disabled = true;
-	} else {
-		document.getElementById('AddPackageButton').disabled = false;
-		document.getElementById('RemovePackageButton').disabled = false;
+function UpdatePackageData() {
+	if (selectedDoc === null) {
+		selectedDoc = new Object();
 	}
 
-	ValidateInput(fieldName);
-	if (selectedDoc !== null) {
+	// Package Properties
+	if (document.getElementById('PackageGroup').value !== '') {
 		selectedDoc.group = document.getElementById('PackageGroup').value;
+	}
+	if (document.getElementById('PackageName').value !== '') {
 		selectedDoc.name = document.getElementById('PackageName').value;
+	}
+	if (document.getElementById('PackageVersion').value !== '') {
 		selectedDoc.version = document.getElementById('PackageVersion').value;
+	}
+	if (document.getElementById('PackageSubfolder').value !== '') {
 		selectedDoc.subfolder = document.getElementById('PackageSubfolder').value;
-		if (document.getElementById('PackageDependencies').value !== '') {
-			selectedDoc.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
-		}
-
-		selectedDoc.info.summary = document.getElementById('PackageSummary').value;
-		if (document.getElementById('PackageWarning').value !== '') {
-			selectedDoc.info.warning = document.getElementById('PackageWarning').value
-		}
-		if (document.getElementById('PackageConflicts').value !== '') {
-			selectedDoc.info.conflicts = document.getElementById('PackageConflicts').value
-		}
-		if (document.getElementById('PackageDescription').value !== '') {
-			selectedDoc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
-		}
-		if (document.getElementById('PackageAuthor').value !== '') {
-			selectedDoc.info.author = document.getElementById('PackageAuthor').value
-		}
-		if (document.getElementById('PackageImages').value !== '') {
-			selectedDoc.info.images = TextToArray(document.getElementById('PackageImages').value);
-		}
-		if (document.getElementById('PackageWebsite').value !== '') {
-			if (document.getElementById('IsMultipleWebsites').checked) {
-				selectedDoc.info.websites = TextToArray(document.getElementById('PackageWebsite').value);
-				delete selectedDoc.info.website;
-			} else {
-				selectedDoc.info.website = document.getElementById('PackageWebsite').value;
-				delete selectedDoc.info.websites;
-			}
-		}
-
-		document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
-		UpdateData();
 	}
-}
-/**
- * Append a new package to the end of the YAML document.
- */
-function AddPackage() {
-	var newPackage = {
-		group: document.getElementById('PackageGroup').value,
-		name: document.getElementById('PackageName').value,
-		version: document.getElementById('PackageVersion').value,
-		subfolder: document.getElementById('PackageSubfolder').value,
-		info: {}
-	};
 	if (document.getElementById('PackageDependencies').value !== '') {
-		newPackage.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
+		selectedDoc.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
 	}
-	newPackage.info.summary = document.getElementById('PackageSummary').value;
+
+	// Package Info
+	if (document.getElementById('PackageSummary').value !== '') {
+		selectedDoc.info.summary = document.getElementById('PackageSummary').value;
+	}
 	if (document.getElementById('PackageWarning').value !== '') {
-		newPackage.info.warning = document.getElementById('PackageWarning').value;
+		selectedDoc.info.warning = document.getElementById('PackageWarning').value
 	}
 	if (document.getElementById('PackageConflicts').value !== '') {
-		newPackage.info.conflicts = document.getElementById('PackageConflicts').value;
+		selectedDoc.info.conflicts = document.getElementById('PackageConflicts').value
 	}
 	if (document.getElementById('PackageDescription').value !== '') {
-		newPackage.info.description = document.getElementById('PackageDescription').value;
+		selectedDoc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
 	}
 	if (document.getElementById('PackageAuthor').value !== '') {
-		newPackage.info.author = document.getElementById('PackageAuthor').value;
+		selectedDoc.info.author = document.getElementById('PackageAuthor').value
 	}
 	if (document.getElementById('PackageImages').value !== '') {
-		newPackage.info.images = TextToArray(document.getElementById('PackageImages').value);
+		selectedDoc.info.images = TextToArray(document.getElementById('PackageImages').value);
 	}
 	if (document.getElementById('PackageWebsite').value !== '') {
 		if (document.getElementById('IsMultipleWebsites').checked) {
-			newPackage.info.websites = TextToArray(document.getElementById('PackageWebsite').value);
+			selectedDoc.info.websites = TextToArray(document.getElementById('PackageWebsite').value);
+			delete selectedDoc.info.website;
 		} else {
-			newPackage.info.website = document.getElementById('PackageWebsite').value;
+			selectedDoc.info.website = document.getElementById('PackageWebsite').value;
+			delete selectedDoc.info.websites;
 		}
 	}
-	yamlData.push(newPackage);
 
-	SetSelectedDoc(yamlData.filter((doc) => IsPackage(doc)).length - 1, 'p')
+	//To push the package to the list it at minimum must have a group and name so the cm.OnChange can pick it up
+	if (currDocIdx === null && Object.hasOwn(selectedDoc, "group") && Object.hasOwn(selectedDoc, "name")) {
+		yamlData.push(selectedDoc);
+		SetSelectedDoc(yamlData.filter((doc) => IsPackage(doc)).length - 1, 'p');
+	}
 	UpdateData();
-	// This second doc selection is to counter the override of yamlData in ParseYaml().
-	SetSelectedDoc(yamlData.filter((doc) => IsPackage(doc)).length - 1, 'p')
+	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
 }
 
 
@@ -725,7 +559,6 @@ function AddNewVariant() {
  */
 function FillAssetForm() {
 	if (selectedDoc === undefined || selectedDoc === null) { return; }
-	//document.getElementById('AddAssetButton').disabled = false;
 	document.getElementById('AssetUrl').value = selectedDoc.url;
 	document.getElementById('AssetId').value = selectedDoc.assetId;
 	document.getElementById('AssetVersion').value = selectedDoc.version;
@@ -744,31 +577,25 @@ function FillAssetForm() {
 	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.assetId;
 }
 /**
- * Live update the YAML codepane with the values in the current Asset form field as the user types.
+ * Updates the selectedDoc with the current state of the Asset Properties tab inputs.
  */
-function UpdateAssetItem(itemName) {
-	ValidateInput(itemName);
-
-	//Prevent adding an asset if any required fields are blank
-	if (document.getElementById('AssetUrl').value !== '' && document.getElementById('AssetId').value !== '' && document.getElementById('AssetVersion').value !== '' && document.getElementById('AssetLastModified').value !== '') {
-		document.getElementById('AddAssetButton').disabled = false;
-	} else {
-		document.getElementById('AddAssetButton').disabled = true;
-		document.getElementById('RemoveAssetButton').disabled = true;
+function UpdateAssetData() {
+	if (selectedDoc === null) {
+		selectedDoc = new Object();
 	}
 
-	if (selectedDoc === null || selectedDoc === undefined) {
-		return;
+	if (document.getElementById('AssetUrl').value !== '') {
+		selectedDoc.url = document.getElementById('AssetUrl').value;
 	}
-	document.getElementById('RemoveAssetButton').disabled = false;
-
-
-
-	selectedDoc.url = document.getElementById('AssetUrl').value;
-	selectedDoc.assetId = document.getElementById('AssetId').value;
-	selectedDoc.version = document.getElementById('AssetVersion').value;
-	selectedDoc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
-	
+	if (document.getElementById('AssetId').value !== '') {
+		selectedDoc.assetId = document.getElementById('AssetId').value;
+	}
+	if (document.getElementById('AssetVersion').value !== '') {
+		selectedDoc.version = document.getElementById('AssetVersion').value;
+	}
+	if (document.getElementById('AssetLastModified').value !== '') {
+		selectedDoc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
+	}
 	if (document.getElementById('AssetArchiveVersion').value !== '0') {
 		if (!Object.hasOwn(selectedDoc, 'archiveType')) {
 			selectedDoc.archiveType = new Object();
@@ -778,7 +605,6 @@ function UpdateAssetItem(itemName) {
 	} else {
 		delete selectedDoc.archiveType;
 	}
-
 	if (document.getElementById('AssetChecksum').value !== '') {
 		if (!Object.hasOwn(selectedDoc, 'checksum')) {
 			selectedDoc.checksum = new Object();
@@ -787,37 +613,17 @@ function UpdateAssetItem(itemName) {
 	} else {
 		delete selectedDoc.checksum;
 	}
-
 	if (document.getElementById('AssetNonPersistentUrl').value !== '') {
 		selectedDoc.nonPersistentUrl = document.getElementById('AssetNonPersistentUrl').value;
 	} else {
 		delete selectedDoc.nonPersistentUrl;
 	}
-	UpdateData();
-}
-/**
- * Add a new asset to the end of this YAML document.
- */
-function AddAsset() {
-	var newAsset = {
-		url: document.getElementById('AssetUrl').value,
-		assetId: document.getElementById('AssetId').value,
-		version: document.getElementById('AssetVersion').value,
-		lastModified: document.getElementById('AssetLastModified').value + 'Z'
-	}
-	if (document.getElementById('AssetArchiveVersion').value !== '0') {
-		newAsset.archiveType = new Object();
-		newAsset.archiveType.format = "Clickteam";
-		newAsset.archiveType.version = document.getElementById('AssetArchiveVersion').value;
-	}
-	if (document.getElementById('AssetChecksum').value !== '') {
-		newAsset.checksum = new Object();
-		newAsset.checksum.sha256 = document.getElementById('AssetChecksum').value;
-	}
-	if (document.getElementById('AssetNonPersistentUrl').value !== '') {
-		newAsset.nonPersistentUrl = document.getElementById('AssetNonPersistentUrl').value;
-	}
-	yamlData.push(newAsset);
 
+	//To push the package to the list it at minimum must have an assetId
+	if (currDocIdx === null && Object.hasOwn(selectedDoc, "assetId")) {
+		yamlData.push(selectedDoc);
+		SetSelectedDoc(yamlData.filter((doc) => IsAsset(doc)).length - 1, 'a');
+	}
 	UpdateData();
+	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.assetId;
 }

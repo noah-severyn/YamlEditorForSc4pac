@@ -58,3 +58,7 @@ body {
   color: rgb(108, 117, 125);
   padding: 3px 0.75rem;
 }
+
+.tooltip-inner {
+    max-width: 100% !important;
+}
