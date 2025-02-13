@@ -24,13 +24,10 @@ document.getElementById('RemovePackageButton').addEventListener('click', () => {
 });
 
 document.getElementById('AssetArchiveVersion').addEventListener('change', event => {
-	UpdateAssetItem(event.target.id);
+	UpdateAssetData(event.target.id);
 });
 document.getElementById('ResetAssetFormButton').addEventListener('click', () => {
 	ResetAssetInputs();
-});
-document.getElementById('AddAssetButton').addEventListener('click', () => {
-	AddAsset();
 });
 document.getElementById('RemoveAssetButton').addEventListener('click', () => {
 	RemoveSelectedDoc();
@@ -42,15 +39,19 @@ document.getElementById('RemoveAssetButton').addEventListener('click', () => {
 // ---------------------------------------------   Output column events   ---------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 document.getElementById('LoadFromFile').addEventListener('click', () => {
+	ClearAll();
 	LoadFromFile();
 });
 document.getElementById('LoadFromGitDefault').addEventListener('click', event => {
+	ClearAll();
 	LoadFromGithub(event.target, 'default');
 });
 document.getElementById('LoadFromGitSimtrop').addEventListener('click', event => {
+	ClearAll();
 	LoadFromGithub(event.target, 'simtropolis');
 });
 document.getElementById('LoadFromGitZasco').addEventListener('click', event => {
+	ClearAll();
 	LoadFromGithub(event.target, 'zasco');
 });
 document.getElementById('CopyToClipButton').addEventListener('click', () => {
@@ -187,7 +188,8 @@ for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
 			}
 		}
 
-		UpdateAssetItem(event.target.id);
+		ValidateInput(event.target.id);
+		UpdateAssetData();
 	});
 }
 

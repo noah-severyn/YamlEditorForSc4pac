@@ -194,7 +194,7 @@ function ValidateInput(elementId) {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-]/g, '').toLowerCase();
 	} else if (fieldName === 'Dependencies') {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-:;\n]/g, '').toLowerCase();
-	} else if (fieldName === 'Website' || fieldName === 'AssetUrl') {
+	} else if (fieldName === 'Website' || fieldName === 'Websites' || fieldName === 'Url') {
 		inputText = inputText.toLowerCase().replace(new RegExp('[^a-z0-9-&_:;/?=.\n]'), '');
 	} else if (fieldName === 'Include' || fieldName === 'Exclude') {
 		//Want to replace ONLY for file/folder names, not regex strings
@@ -577,21 +577,25 @@ function FillAssetForm() {
 	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.assetId;
 }
 /**
- * Live update the YAML codepane with the values in the current Asset form field as the user types.
+ * Updates the selectedDoc with the current state of the Asset Properties tab inputs.
  */
-function UpdateAssetItem(itemName) {
-	ValidateInput(itemName);
-	if (selectedDoc === null || selectedDoc === undefined) {
-		return;
+function UpdateAssetData() {
+	if (selectedDoc === null) {
+		selectedDoc = new Object();
 	}
 
-
-
-	selectedDoc.url = document.getElementById('AssetUrl').value;
-	selectedDoc.assetId = document.getElementById('AssetId').value;
-	selectedDoc.version = document.getElementById('AssetVersion').value;
-	selectedDoc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
-	
+	if (document.getElementById('AssetUrl').value !== '') {
+		selectedDoc.url = document.getElementById('AssetUrl').value;
+	}
+	if (document.getElementById('AssetId').value !== '') {
+		selectedDoc.assetId = document.getElementById('AssetId').value;
+	}
+	if (document.getElementById('AssetVersion').value !== '') {
+		selectedDoc.version = document.getElementById('AssetVersion').value;
+	}
+	if (document.getElementById('AssetLastModified').value !== '') {
+		selectedDoc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
+	}
 	if (document.getElementById('AssetArchiveVersion').value !== '0') {
 		if (!Object.hasOwn(selectedDoc, 'archiveType')) {
 			selectedDoc.archiveType = new Object();
@@ -601,7 +605,6 @@ function UpdateAssetItem(itemName) {
 	} else {
 		delete selectedDoc.archiveType;
 	}
-
 	if (document.getElementById('AssetChecksum').value !== '') {
 		if (!Object.hasOwn(selectedDoc, 'checksum')) {
 			selectedDoc.checksum = new Object();
@@ -610,37 +613,17 @@ function UpdateAssetItem(itemName) {
 	} else {
 		delete selectedDoc.checksum;
 	}
-
 	if (document.getElementById('AssetNonPersistentUrl').value !== '') {
 		selectedDoc.nonPersistentUrl = document.getElementById('AssetNonPersistentUrl').value;
 	} else {
 		delete selectedDoc.nonPersistentUrl;
 	}
-	UpdateData();
-}
-/**
- * Add a new asset to the end of this YAML document.
- */
-function AddAsset() {
-	var newAsset = {
-		url: document.getElementById('AssetUrl').value,
-		assetId: document.getElementById('AssetId').value,
-		version: document.getElementById('AssetVersion').value,
-		lastModified: document.getElementById('AssetLastModified').value + 'Z'
-	}
-	if (document.getElementById('AssetArchiveVersion').value !== '0') {
-		newAsset.archiveType = new Object();
-		newAsset.archiveType.format = "Clickteam";
-		newAsset.archiveType.version = document.getElementById('AssetArchiveVersion').value;
-	}
-	if (document.getElementById('AssetChecksum').value !== '') {
-		newAsset.checksum = new Object();
-		newAsset.checksum.sha256 = document.getElementById('AssetChecksum').value;
-	}
-	if (document.getElementById('AssetNonPersistentUrl').value !== '') {
-		newAsset.nonPersistentUrl = document.getElementById('AssetNonPersistentUrl').value;
-	}
-	yamlData.push(newAsset);
 
+	//To push the package to the list it at minimum must have an assetId
+	if (currDocIdx === null && Object.hasOwn(selectedDoc, "assetId")) {
+		yamlData.push(selectedDoc);
+		SetSelectedDoc(yamlData.filter((doc) => IsAsset(doc)).length - 1, 'a');
+	}
 	UpdateData();
+	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.assetId;
 }
