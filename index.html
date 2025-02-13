@@ -131,7 +131,11 @@
 								<input id="PackageAuthor" class="form-control" type="text" />
 							</div>
 							<div class="input-group mb-2">
-								<span class="input-group-text w2">Description</span>
+								<span class="input-group-text w-100">Description</span>
+								<!--<div class="form-check form-switch mt-2 me-2 ms-2">
+									<input id="ToggleImagePreview" class="form-check-input" type="checkbox" role="switch" checked>
+									<label class="form-check-label" for="ToggleImagePreview">Preview Images</label>
+								</div>-->
 								<textarea id="PackageDescription" class="form-control" rows="9"></textarea>
 							</div>
 							<div class="input-group mb-2">
@@ -340,7 +344,10 @@
 					<button id="OpenPreferencesButton" class="btn btn-success" type="button">Preferences</button>
 				</div>
 
-				<textarea id="CodeEditor" placeholder="Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications."></textarea>
+				<div class="box">
+					<textarea id="CodeEditor" placeholder="Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications."></textarea>
+				</div>
+				
 			</div>
 
 			<!--Modal Dialogs-->
