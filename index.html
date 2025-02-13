@@ -23,6 +23,9 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/js-treeview@1.1.5/dist/treeview.min.css" integrity="sha256-7HeITe+2TSRri/WLPYj3ogabAV0rUDJT3mUe3135Pog=" crossorigin="anonymous">
 	<link rel="stylesheet" href="wwwroot/css/tree-view.css" type="text/css" />
 	<script src="https://cdn.jsdelivr.net/npm/js-treeview@1.1.5/dist/treeview.min.js" integrity="sha256-93K+UKgnmM6W/Gp13Z2QUMEStoI+wSf1dykHaFphUc0=" crossorigin="anonymous"></script>
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
 </head>
 <body class="d-flex flex-column h-100 mb-0">
 	<header>
@@ -337,7 +340,7 @@
 					<button id="OpenPreferencesButton" class="btn btn-success" type="button">Preferences</button>
 				</div>
 
-				<textarea id="editor" placeholder="Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications."></textarea>
+				<textarea id="CodeEditor" placeholder="Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications."></textarea>
 			</div>
 
 			<!--Modal Dialogs-->
@@ -393,7 +396,6 @@
 		<span class="container text-muted">&copy; 2025 - YAML editor for sc4pac</span>
 	</footer>
 
-	<!--<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>-->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="wwwroot/js/site-util.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site-interactivity.js"></script>

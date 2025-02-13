@@ -1,7 +1,7 @@
 /**
- * CodeMirror editor component
+ * CodeMirror YAML editor element
  */
-const cm = CodeMirror.fromTextArea(document.getElementById('editor'), {
+const cm = CodeMirror.fromTextArea(document.getElementById('CodeEditor'), {
 	lineNumbers: true,
 	tabSize: 2,
 	lineWrapping: true,
@@ -101,6 +101,20 @@ const loadFileDialog = document.getElementById('LoadFromChannelDialog');
  * Preferences dialog element
  */
 const preferencesDialog = new bootstrap.Modal('#PreferencesDialog');
+/**
+ * Package summary markdown editor
+ */
+const pkgSummaryEditor = new EasyMDE({
+	element: document.getElementById("PackageDescription"),
+	forceSync: true,
+	previewImagesInEditor: true,
+	status: false //hide the status bar
+});
+pkgSummaryEditor.codemirror.on("change", () => {
+	UpdatePackageData();
+	//TODO rename this to medatadata, also the asset function too
+});
+
 
 var listOfAssets = new Array();
 var listOfPackages = new Array();
