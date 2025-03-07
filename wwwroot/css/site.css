@@ -19,9 +19,6 @@ body {
   margin-bottom: 60px;
 }
 
-#CodeEditor {
-  
-}
 .EasyMDEContainer {
     width: 100%;
 }
@@ -70,4 +67,16 @@ body {
 
 .tooltip-inner {
     max-width: 100% !important;
+}
+
+#Column0, #Column1, #Column2 {
+    /*border: 1px solid black;*/
+}
+/* This is the code editor */
+.CodeMirror.cm-s-default {
+    height: 75%;
+}
+/* This is the markdown editor */
+.CodeMirror.cm-s-easymde {
+    width: 100%;
 }
