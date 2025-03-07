@@ -253,7 +253,7 @@ function FillPackageForm() {
 	document.getElementById('PackageSummary').value = selectedDoc.info.summary;
 	document.getElementById('PackageConflicts').value = selectedDoc.info.conflicts ?? '';
 	document.getElementById('PackageWarning').value = selectedDoc.info.warning ?? '';
-	document.getElementById('PackageDescription').value = selectedDoc.info.description ?? '';
+	pkgSummaryEditor.value(selectedDoc.info.description ?? '');
 	document.getElementById('PackageAuthor').value = selectedDoc.info.author ?? '';
 	document.getElementById('PackageImages').value = ArrayToText(selectedDoc.info.images);
 	if (Object.hasOwn(selectedDoc.info, 'websites')) {
@@ -337,20 +337,23 @@ function UpdatePackageData() {
 	}
 
 	// Package Info
+	if (selectedDoc.info === undefined) {
+		selectedDoc.info = new Object();
+	}
 	if (document.getElementById('PackageSummary').value !== '') {
 		selectedDoc.info.summary = document.getElementById('PackageSummary').value;
 	}
 	if (document.getElementById('PackageWarning').value !== '') {
-		selectedDoc.info.warning = document.getElementById('PackageWarning').value
+		selectedDoc.info.warning = document.getElementById('PackageWarning').value;
 	}
 	if (document.getElementById('PackageConflicts').value !== '') {
-		selectedDoc.info.conflicts = document.getElementById('PackageConflicts').value
+		selectedDoc.info.conflicts = document.getElementById('PackageConflicts').value;
 	}
 	if (document.getElementById('PackageDescription').value !== '') {
 		selectedDoc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
 	}
 	if (document.getElementById('PackageAuthor').value !== '') {
-		selectedDoc.info.author = document.getElementById('PackageAuthor').value
+		selectedDoc.info.author = document.getElementById('PackageAuthor').value;
 	}
 	if (document.getElementById('PackageImages').value !== '') {
 		selectedDoc.info.images = TextToArray(document.getElementById('PackageImages').value);

@@ -19,13 +19,19 @@ body {
   margin-bottom: 60px;
 }
 
+.EasyMDEContainer {
+    width: 100%;
+}
+.box {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+}
 .CodeMirror {
-    border: 1px solid turquoise;
+    border: 1px solid lightgrey;
+    /*flex: 1 1 auto;*/
 }
 .CodeMirror-scroll {
-    max-height: 70vh;
-    overflow: auto;
-    background-color: azure;
 }
 
 .required {
@@ -61,4 +67,16 @@ body {
 
 .tooltip-inner {
     max-width: 100% !important;
+}
+
+#Column0, #Column1, #Column2 {
+    /*border: 1px solid black;*/
+}
+/* This is the code editor */
+.CodeMirror.cm-s-default {
+    height: 75%;
+}
+/* This is the markdown editor */
+.CodeMirror.cm-s-easymde {
+    width: 100%;
 }
