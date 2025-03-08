@@ -10,7 +10,9 @@ const cm = CodeMirror.fromTextArea(document.getElementById('CodeEditor'), {
 cm.on('change', CodeMirrorOnChange);
 
 function CodeMirrorOnChange(instance, changeObj) {
-	yamlData = jsyaml.loadAll(cm.getValue());
+	//yamlData = jsyaml.loadAll(cm.getValue());
+	yamlData = YAML.parseAllDocuments(cm.getValue()).map(i => i.toJS(options = {}));
+	console.log(yamlData);
 
 	//Figure which document we're editing within the code so it can be set as the selected document
 	var tabName = 'PackagePropertiesTab';
@@ -444,11 +446,8 @@ function UpdateData(dumpData = true) {
 			if (yamlData[idx] === null) {
 				continue;
 			}
-			docu = jsyaml.dump(yamlData[idx], {
-				'lineWidth': -1,
-				'quotingType': '"',
-				'noArrayIndent': true,
-				'forceQuotes': true
+			docu = YAML.stringify(yamlData[idx], {
+				indentSeq: false
 			});
 			//The parser blows away the multiline context so we need to rebuild it :(
 			if (docu.indexOf('description: ') > 0) {
