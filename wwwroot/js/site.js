@@ -10,9 +10,8 @@ const cm = CodeMirror.fromTextArea(document.getElementById('CodeEditor'), {
 cm.on('change', CodeMirrorOnChange);
 
 function CodeMirrorOnChange(instance, changeObj) {
-	//yamlData = jsyaml.loadAll(cm.getValue());
-	yamlData = YAML.parseAllDocuments(cm.getValue()).map(i => i.toJS(options = {}));
-	console.log(yamlData);
+	yamlData = YAML.parseAllDocuments(cm.getValue());
+	//yamlData2 = YAML.parseAllDocuments(cm.getValue()).map(i => i.toJS(options = {}));
 
 	//Figure which document we're editing within the code so it can be set as the selected document
 	var tabName = 'PackagePropertiesTab';
@@ -55,7 +54,7 @@ function CodeMirrorOnChange(instance, changeObj) {
 	}
 
 	//TODO - fix the automatic tab activating when editing a part of the code pane. It currently always defaults to the 'PackageProperties' tab because when dumping the data the cursor is set to 0,0
-	var currDoc = jsyaml.load(cm.getRange({ line: startLine, ch: 0 }, { line: endLine, ch: 0 }));
+	var currDoc = YAML.parseDocument(cm.getRange({ line: startLine, ch: 0 }, { line: endLine, ch: 0 }));
 	if (IsPackage(currDoc)) {
 		currDocIdx = yamlData.findIndex(item => item.group === currDoc.group && item.name === currDoc.name);
 		//SelectTab(tabName);
@@ -390,7 +389,8 @@ function UpdateData(dumpData = true) {
 	UpdateLocalDropdowns();
 	UpdateMainTree();
 	UpdateIncludedAssetTree();
-	UpdateVariantTree();
+	//UpdateVariantTree();
+	//TODO - readd the UpdateVariantTree function
 
 	
 	if (dumpData) {
@@ -421,7 +421,7 @@ function UpdateData(dumpData = true) {
 		variantDependencies.replaceChildren();
 		variantDependencies.appendChild(new Option('', ''));
 		for (var idx = 0; idx < listOfPackages.length; idx++) {
-			var pkgName = listOfPackages[idx].group + ":" + listOfPackages[idx].name;
+			var pkgName = listOfPackages[idx].get('group') + ":" + listOfPackages[idx].get('name');
 			packageDependencies.add(new Option(pkgName, pkgName));
 			variantDependencies.add(new Option(pkgName, pkgName));
 		}
@@ -433,8 +433,8 @@ function UpdateData(dumpData = true) {
 		localAssetList.appendChild(new Option('', ''));
 		variantAssets.replaceChildren();
 		variantAssets.appendChild(new Option('', ''));
-		listOfAssets.forEach(i => localAssetList.add(new Option(i.assetId, i.assetId)));
-		listOfAssets.forEach(i => variantAssets.add(new Option(i.assetId, i.assetId)));
+		listOfAssets.forEach(i => localAssetList.add(new Option(i.get('assetId'), i.get('assetId'))));
+		listOfAssets.forEach(i => variantAssets.add(new Option(i.get('assetId'), i.get('assetId'))));
 	}
 
 	function DumpYaml() {
@@ -449,13 +449,6 @@ function UpdateData(dumpData = true) {
 			docu = YAML.stringify(yamlData[idx], {
 				indentSeq: false
 			});
-			//The parser blows away the multiline context so we need to rebuild it :(
-			if (docu.indexOf('description: ') > 0) {
-				var rgx = new RegExp('description: \"(.*?)\"');
-				var oldText = docu.match(rgx)[0];
-				var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"', '');
-				docu = docu.replace(oldText, newText);
-			}
 
 			newYaml = newYaml + docu;
 			if (idx !== yamlData.length - 1) {
@@ -470,11 +463,11 @@ function UpdateData(dumpData = true) {
 //https://github.com/justinchmura/js-treeview
 function UpdateMainTree() {
 	function getAssetTreeName(id, asset) {
-		return id + ' - ' + asset.assetId;
+		return id + ' - ' + asset.get('assetId');
 	}
 	
 	function getPackageTreeName(id, package) {
-		return id + ' - ' + package.group + ":" + package.name;
+		return id + ' - ' + package.get('group') + ":" + package.get('name');
 	}
 	
 	var idx = 1;
@@ -538,10 +531,10 @@ function UpdateMainTree() {
 
 function UpdateIncludedAssetTree() {
 	var pkgAssets;
-	if (selectedDoc == null || selectedDoc.assets == null) {
+	if (selectedDoc == null || selectedDoc.get('assets') == null) {
 		pkgAssets = [];
 	} else {
-		pkgAssets = selectedDoc.assets.map((i) => ({ name: i.assetId, children: [] }));
+		pkgAssets = selectedDoc.assets.map((i) => ({ name: i.get('assetId'), children: [] }));
 	}
 
 	var pkgAssetData = [{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }]
@@ -721,10 +714,10 @@ function SetSelectedDoc(index, type) {
 			return;
 		} else if (type.toLowerCase() === 'p') {
 			selectedDoc = docs[index];
-			currDocIdx = yamlData.findIndex(i => i.group === selectedDoc.group && i.name === selectedDoc.name);
+			currDocIdx = yamlData.findIndex(i => i.get('group') === selectedDoc.get('group') && i.get('name') === selectedDoc.get('name'));
 		} else if (type.toLowerCase() === 'a') {
 			selectedDoc = docs[index];
-			currDocIdx = yamlData.findIndex(i => i.assetId === selectedDoc.assetId);
+			currDocIdx = yamlData.findIndex(i => i.get('assetId') === selectedDoc.get('assetId'));
 		}
 	}
 }

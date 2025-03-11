@@ -34,25 +34,25 @@ function TextToArray(text) {
 
 /**
  * Determine whether the specified object contains the properties of a sc4pac Asset. A unique asset is determined by its `assetId` property.
- * @param {Object} obj The object to analyze
+ * @param {YAML.Document} doc The Document to analyze
  * @returns TRUE if the object represents an Asset; FALSE otherwise
  */
-function IsAsset(obj) {
-	if (obj === null || obj === undefined) {
+function IsAsset(doc) {
+	if (doc === null || doc === undefined) {
 		return false;
 	}
-	return Object.hasOwn(obj, 'assetId');
+	return doc.has('assetId');
 }
 
 
 /**
  * Determine whether the specified object contains the properties of a sc4pac Package. A unique package is determined by it's `group` and `name` property combination.
- * @param {Object} obj The object to analyze
+ * @param {YAML.Document} doc The Document to analyze
  * @returns TRUE if the object represents a Package; FALSE otherwise
  */
-function IsPackage(obj) {
-	if (obj === null || obj === undefined) {
+function IsPackage(doc) {
+	if (doc === null || doc === undefined) {
 		return false;
 	}
-	return Object.hasOwn(obj, 'group') && Object.hasOwn(obj, 'name');
+	return doc.has('group') && doc.has('name');
 }
