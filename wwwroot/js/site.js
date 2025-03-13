@@ -82,6 +82,8 @@ var currDocIdx = null;
  * The currently selected ("active") document being edited - may be a package or an asset.
  */
 var selectedDoc = null;
+
+var selectedPkgAssetIdx = null;
 /**
  * Main Tree View element
  */
@@ -440,7 +442,6 @@ function UpdateData(dumpData = true) {
 	function DumpYaml() {
 		var newYaml = '';
 		var docu = '';
-		//TODO - figure out how to retain comments
 
 		for (var idx = 0; idx < yamlData.length; idx++) {
 			if (yamlData[idx] === null) {
@@ -534,7 +535,7 @@ function UpdateIncludedAssetTree() {
 	if (selectedDoc == null || selectedDoc.get('assets') == null) {
 		pkgAssets = [];
 	} else {
-		pkgAssets = selectedDoc.assets.map((i) => ({ name: i.get('assetId'), children: [] }));
+		pkgAssets = selectedDoc.get('assets').toJSON().map((i) => ({ name: i.assetId, children: [] }));
 	}
 
 	var pkgAssetData = [{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }]
