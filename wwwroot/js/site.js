@@ -192,33 +192,31 @@ function UpdateData(dumpData = true) {
 		cm.setValue(DumpYaml());
 		cm.on('change', CodeMirrorOnChange);
 	}
-	else {
-		if (IsPackage(selectedDoc)) {
-			FillPackageForm();
-		} else {
-			FillAssetForm();
-		}
-	}
+	
 	SetSelectedDoc(currDocIdx);
 
 	function DumpYaml() {
-		var newYaml = '';
-		var docu = '';
+		if (yamlData.length === 0) {
+			return '';
+		} else {
+			var newYaml = '';
+			var docu = '';
+			for (var idx = 0; idx < yamlData.length; idx++) {
+				if (yamlData[idx] === null) {
+					continue;
+				}
+				docu = yamlData[idx].toString(options = {
+					lineWidth: 0,
+					defaultKeyType: 'PLAIN',
+					defaultStringType: 'QUOTE_DOUBLE',
+					singleQuote: false,
+					indentSeq: false
+				});
 
-		for (var idx = 0; idx < yamlData.length; idx++) {
-			if (yamlData[idx] === null) {
-				continue;
+				newYaml = newYaml + docu + '\n';
 			}
-			docu = YAML.stringify(yamlData[idx], {
-				indentSeq: false
-			});
-
-			newYaml = newYaml + docu;
-			if (idx !== yamlData.length - 1) {
-				newYaml = newYaml + '\n---\n';
-			}
+			return newYaml;
 		}
-		return newYaml;
 	}
 }
 
