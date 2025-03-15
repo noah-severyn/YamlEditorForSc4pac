@@ -144,12 +144,23 @@ async function LoadFromGithub(srcElem, channel) {
 			.then(response => response.json())
 			.then(data => {
 				document.getElementById('YamlFileName').textContent = fileName;
-				cm.setValue(atob(data.content));
+				cm.setValue(DecodeBase64Unicode(data.content));
 			})
 			.catch(error => console.error('Error fetching the tree data:', error));
 
 		//Hide the modal display
 		var modal = bootstrap.Modal.getInstance(loadFileDialog)
 		modal.hide();
+	}
+
+	function DecodeBase64Unicode(base64) {
+		const binaryString = atob(base64);
+		const unicodeString = decodeURIComponent(
+			binaryString
+				.split('')
+				.map(char => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`)
+				.join('')
+		);
+		return unicodeString;
 	}
 }
