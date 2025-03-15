@@ -119,227 +119,6 @@ pkgSummaryEditor.codemirror.on("change", () => {
 });
 
 
-var listOfAssets = new Array();
-var listOfPackages = new Array();
-var listOfGroups = new Array();
-
-
-
-var pkgTomSelect = new TomSelect('#PacPackageList', {
-	valueField: 'id',
-	labelField: 'id',
-	searchField: ['id'],
-	maxItems: 1,
-	optgroups: [
-		{value: 'default', label: 'Default channel'},
-		{value: 'zasco', label: 'Zasco\'s channel'},
-	],
-	optgroupField: 'optGroup',
-
-	// fetch remote data
-	load: async function (query, callback) {
-		var self = this;
-		if (self.loading > 1) {
-			callback();
-			return;
-		}
-
-		var defaultChannelURL = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		var zascoChannelURL = 'https://zasco.github.io/sc4pac-channel/channel/sc4pac-channel-contents.json'
-		allPackages = []
-
-		function handleResponse(jsonResponse, channel) {
-			// Add a new field combining the group and name.
-			return jsonResponse.packages.map(i => ({ id: i.group + ":" + i.name, optGroup: channel, ...i }))
-		}
-		
-		await fetch(defaultChannelURL)
-			.then(response => response.json())
-			.then(json => {
-				allPackages = allPackages.concat(handleResponse(json, 'default'))
-				defaultFailed = false
-			})
-			.catch(() => {
-				defaultFailed = true
-			});
-		
-		await fetch(zascoChannelURL)
-			.then(response => response.json())
-			.then(json => {
-				allPackages = allPackages.concat(handleResponse(json, 'zasco'))
-				zascoFailed = false
-			})
-			.catch(() => {
-				zascoFailed = true
-			});
-		
-		if (!defaultFailed || !zascoFailed) {
-			callback(allPackages);
-			self.settings.load = null;
-		}
-		else callback();
-	},
-	// custom rendering function for options
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.group + ":" + item.name/*  +"["+ item.optGroup +" channel]" */) + '</div>';
-		},
-		optgroup_header: function(data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	},
-});
-
-var variantPackageSelect = new TomSelect('#VariantsPacPackageList', {
-	valueField: 'id',
-	labelField: 'id',
-	searchField: ['id'],
-	maxItems: 1,
-
-	// fetch remote data
-	load: function (query, callback) {
-		var self = this;
-		if (self.loading > 1) {
-			callback();
-			return;
-		}
-
-		var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		fetch(url)
-			.then(response => response.json())
-			.then(json => {
-				// Add a new field combining the group and name.
-				callback(json.packages.map(i => ({ id: i.group + ":" + i.name, ...i })));
-				//console.log(json.contents
-				//	.filter((item) => item.group !== 'sc4pacAsset')
-				//	.map(i => ({ id: i.group + ":" + i.name, ...i }))
-				//);
-				self.settings.load = null;
-			}).catch(() => {
-				callback();
-			});
-	},
-	// custom rendering function for options
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.group + ":" + item.name) + '</div>';
-		}
-	},
-});
-
-var variantAssetSelect = new TomSelect('#VariantsPacAssetList', {
-	valueField: 'name',
-	labelField: 'name',
-	searchField: ['name'],
-	maxItems: 1,
-
-	// fetch remote data
-	load: function (query, callback) {
-		var self = this;
-		if (self.loading > 1) {
-			callback();
-			return;
-		}
-
-		var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		fetch(url)
-			.then(response => response.json())
-			.then(json => {
-				callback(json.assets);
-				//console.log(json.contents.filter((item) => item.group === 'sc4pacAsset'));
-				//console.log(sc4pacAssets.map(i => ({ id: i.name, ...i })));
-				self.settings.load = null;
-			}).catch(() => {
-				callback();
-			});
-	},
-	//options: sc4pacAssets.map(i => ({ id: i.name, ...i})),
-	// custom rendering function for options
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.name) + '</div>';
-		}
-	},
-});
-
-var pkgSubfolderSelect = new TomSelect('#PackageSubfolder', {
-	valueField: 'name',
-	labelField: 'name',
-	searchField: ['name'],
-	maxItems: 1,
-	preload: true,
-	maxOptions: null,
-
-	// fetch remote data
-	load: function (query, callback) {
-		var self = this;
-		if (self.loading > 1) {
-			callback();
-			return;
-		}
-
-		var url = 'https://raw.githubusercontent.com/memo33/sc4pac/45fc116576044e73ff50b257fc1fcef381f96714/.github/sc4pac-yaml-schema.py' // Use data @ commit 45fc11 to prevent any failure if file is ever changed.
-		fetch(url)
-			.then(response => response.text())
-			.then(responseText => {
-				subfolders = responseText
-					.split('### [subfolders-docsify]')[1] // Keep content between delimiters.
-					.split('\n') // Split by line return.
-					.filter(n => n) // Remove empty entries (first and last).
-					.map(i => ({name: i}))
-				;
-				callback(subfolders);
-				//console.log(subfolders)
-				self.settings.load = null;
-			}).catch(() => {
-				callback();
-			});
-	},
-	// custom rendering function for options
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.name)+ '</div>';
-		}
-	},
-});
-
-var pkgGroupSelect = new TomSelect('#PackageGroup', {
-    valueField: 'group',
-    labelField: 'group',
-    searchField: ['group'],
-	maxItems: 1,
-	create: true,
-	preload: true,
-	persist: false,
-	maxOptions: null,
-
-    // fetch remote data
-    load: function (query, callback) {
-        var self = this;
-        if (self.loading > 1) {
-            callback();
-            return;
-        }
-
-        var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		fetch(url)
-            .then(response => response.json())
-            .then(json => {
-                callback(json.packages);
-                self.settings.load = null;
-            }).catch(() => {
-                callback();
-            });
-    },
-    // custom rendering function for options
-    render: {
-        option: function (item, escape) {
-            return '<div class="py-2 d-flex">' + escape(item.group)+ '</div>';
-        }
-    },
-});
-
-
 
 ResetAllInputs();
 SetTabState();
@@ -388,12 +167,10 @@ function UpdateData(dumpData = true) {
 	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 
 	SetTabState();
-	UpdateLocalDropdowns();
+	UpdateDropdownsWithLocalDocuments();
 	UpdateMainTree();
 	UpdateIncludedAssetTree();
-	//UpdateVariantTree();
-	//TODO - readd the UpdateVariantTree function
-
+	UpdateVariantTree();
 	
 	if (dumpData) {
 		cm.off('change', CodeMirrorOnChange);
@@ -409,34 +186,12 @@ function UpdateData(dumpData = true) {
 	}
 	SetSelectedDoc(currDocIdx);
 
+
 	/**
-	 * Count the number of Packages and Assets in the code pane and update the UI with this new result.
+	 * Add or remove packages or assets defined in this file to the TomSelect dropdowns
 	 */
-	function UpdateLocalDropdowns() {
-		//TODO - this UpdateLocalDropdowns function should disappear when PR #45 is implemented
+	function UpdateDropdownsWithLocalDocuments() {
 
-		//Fill local dependency selection options
-		var packageDependencies = document.getElementById('LocalPackageList');
-		var variantDependencies = document.getElementById('VariantsLocalPackageList');
-		packageDependencies.replaceChildren();
-		packageDependencies.appendChild(new Option('', ''));
-		variantDependencies.replaceChildren();
-		variantDependencies.appendChild(new Option('', ''));
-		for (var idx = 0; idx < listOfPackages.length; idx++) {
-			var pkgName = listOfPackages[idx].get('group') + ":" + listOfPackages[idx].get('name');
-			packageDependencies.add(new Option(pkgName, pkgName));
-			variantDependencies.add(new Option(pkgName, pkgName));
-		}
-
-		//Package:asset selection for local assets
-		var localAssetList = document.getElementById('SelectLocalPackageAssets');
-		var variantAssets = document.getElementById('VariantsLocalAssetList');
-		localAssetList.replaceChildren();
-		localAssetList.appendChild(new Option('', ''));
-		variantAssets.replaceChildren();
-		variantAssets.appendChild(new Option('', ''));
-		listOfAssets.forEach(i => localAssetList.add(new Option(i.get('assetId'), i.get('assetId'))));
-		listOfAssets.forEach(i => variantAssets.add(new Option(i.get('assetId'), i.get('assetId'))));
 	}
 
 	function DumpYaml() {

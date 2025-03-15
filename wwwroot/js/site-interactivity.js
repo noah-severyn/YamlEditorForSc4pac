@@ -116,8 +116,6 @@ function ResetPackageInputs() {
 	document.getElementById('PackageSubfolder').value = '';
 	if (subfolderTomSelect = document.getElementById('PackageSubfolder').tomselect) subfolderTomSelect.clear(true);
 	document.getElementById('PackageDependencies').value = '';
-	document.getElementById('LocalPackageList').value = '';
-	document.getElementById('PacPackageList').value = '';
 	document.getElementById('PackageSummary').value = '';
 	document.getElementById('PackageConflicts').value = '';
 	document.getElementById('PackageWarning').value = '';
@@ -135,9 +133,7 @@ function ResetPackageInputs() {
  * Resets the Included Asset input form fields.
  */
 function ResetIncludedAssetInputs() {
-	document.getElementById('SelectLocalPackageAssets').value = '';
-	document.getElementById('SelectPacPackageAssets').value = '';
-	document.getElementById('PackageAssetId').value = '';
+	if (pkgAssetSelect = document.getElementById('PackageAssetId').tomselect) pkgAssetSelect.clear(true);
 	document.getElementById('PackageAssetInclude').value = '';
 	document.getElementById('PackageAssetExclude').value = '';
 }
@@ -153,10 +149,8 @@ function ResetVariantInputs() {
 	document.getElementById('VariantAssetId').value = '';
 	document.getElementById('VariantInclude').value = '';
 	document.getElementById('VariantExclude').value = '';
-	if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
-	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
-	document.getElementById('VariantsLocalPackageList').value = '';
-	document.getElementById('VariantsLocalAssetList').value = '';
+	if (variantAssetSelect = document.getElementById('VariantAssetId').tomselect) variantAssetSelect.clear(true);
+	if (variantPackageSelect = document.getElementById('VariantDependencies').tomselect) variantPackageSelect.clear(true);
 }
 /**
  * Resets the Asset input form fields.
@@ -255,7 +249,11 @@ function FillPackageForm() {
 	document.getElementById('PackageWarning').value = selectedDoc.getIn(['info', 'warning']) ?? '';
 	pkgSummaryEditor.value(selectedDoc.getIn(['info', 'description']) ?? '');
 	document.getElementById('PackageAuthor').value = selectedDoc.getIn(['info', 'author']) ?? '';
-	document.getElementById('PackageImages').value = ArrayToText(selectedDoc.getIn(['info', 'images']).toJSON());
+	selectedDoc.getIn(['info', 'images']).toJSON().forEach((item) => {
+		pkgImageSelect.addOption({ value: item, text: item });
+		pkgImageSelect.addItem(item);
+	});
+
 	if (selectedDoc.hasIn(['info', 'websites'])) {
 		document.getElementById('PackageWebsite').value = ArrayToText(selectedDoc.getIn(['info', 'websites']).toJSON()) ?? '';
 		document.getElementById('PackageWebsite').rows = '3';
@@ -282,35 +280,6 @@ function FillIncludedAssetForm(assetName) {
 	document.getElementById('PackageAssetId').value = pkgAsset.assetId;
 	document.getElementById('PackageAssetInclude').value = ArrayToText(pkgAsset.include);
 	document.getElementById('PackageAssetExclude').value = ArrayToText(pkgAsset.exclude);
-}
-/**
- * Adds the selected dependency to the list.
- */
-function PackageAddDependency(input) {
-	var currentDependencies = document.getElementById('PackageDependencies').value;
-	if (currentDependencies === '') {
-		document.getElementById('PackageDependencies').value = input.value + ';\n'
-	} else {
-		document.getElementById('PackageDependencies').value = currentDependencies + input.value + ';\n';
-	}
-	document.getElementById('PacPackageList').tomselect.clear(true);
-	document.getElementById('LocalPackageList').value = '';
-}
-/**
- * Adds the selected sc4pac dependency to the list.
- */
-function AddDepencencyFromPacList() {
-	var selectedPkg = document.getElementById('PacPackageList').value;
-	var currentDependencies = document.getElementById('PackageDependencies').value;
-	if (currentDependencies === '') {
-		document.getElementById('PackageDependencies').value = selectedPkg + ';\n'
-	} else {
-		document.getElementById('PackageDependencies').value = currentDependencies + selectedPkg + ';\n';
-	}
-	document.getElementById('PacPackageList').value = '';
-
-	document.getElementById('PacPackageList').tomselect.clear(true);
-	input.value = '';
 }
 /**
  * Updates the selectedDoc with the current state of the Package Properties and Package Info tabs.
@@ -356,7 +325,7 @@ function UpdatePackageData() {
 		selectedDoc.setIn(['info', 'author'], document.getElementById('PackageAuthor').value);
 	}
 	if (document.getElementById('PackageImages').value !== '') {
-		selectedDoc.setIn(['info', 'images'], document.getElementById('PackageImages').value);
+		selectedDoc.setIn(['info', 'images'], pkgImageSelect.getValue().split(','));
 	}
 	if (document.getElementById('PackageWebsite').value !== '') {
 		if (document.getElementById('IsMultipleWebsites').checked) {
@@ -415,23 +384,6 @@ function AddIncludedAsset() {
 		ResetIncludedAssetInputs();
 		document.getElementById('AddPackageAssetButton').disabled = true;
 		UpdateData();
-	}
-}
-/**
- * Sets the included asset id to the currently currently selected value.
- */
-function SetIncludedAssetId(obj) {
-	if (obj.id === 'SelectLocalPackageAssets') {
-		document.getElementById('SelectPacPackageAssets').value = '';
-	} else {
-		document.getElementById('SelectLocalPackageAssets').value = '';
-	}
-
-	document.getElementById('PackageAssetId').value = obj.value;
-	if (currPackageIdx !== null) {
-		document.getElementById('AddPackageAssetButton').disabled = false;
-	} else {
-		document.getElementById('AddPackageAssetButton').disabled = true;
 	}
 }
 

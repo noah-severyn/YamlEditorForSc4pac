@@ -93,33 +93,9 @@ for (const input of document.querySelectorAll('#PackagePropertiesForm .form-cont
 		UpdatePackageData();
 	});
 };
-document.getElementById('PacPackageList').addEventListener('change', event => {
-	PackageAddDependency(event.target);
-});
-document.getElementById('LocalPackageList').addEventListener('change', event => {
-	PackageAddDependency(event.target);
-});
 document.getElementById('IsMultipleWebsites').addEventListener('change', () => {
 	ToggleMultipleWebsites();
 });
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------   Included Asset tab events   ------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------
-//document.getElementById('SelectLocalPackageAssets').addEventListener('change', event => {
-//	SetIncludedAssetId(event.target);
-//});
-//document.getElementById('SelectPacPackageAssets').addEventListener('change', event => {
-//	SetIncludedAssetId(event.target);
-//});
-//document.getElementById('PackageAssetInclude').addEventListener('change', event => {
-//	UpdatePackageData(event.target.id);
-//});
-//document.getElementById('PackageAssetExclude').addEventListener('change', event => {
-//	UpdatePackageData(event.target.id);
-//});
 document.getElementById('ResetIncludedAssetButton').addEventListener('change', () => {
 	ResetIncludedAssetInputs();
 });
