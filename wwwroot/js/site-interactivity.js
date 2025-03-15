@@ -98,9 +98,9 @@ function ClearAll() {
  * Resets all input form fields.
  */
 function ResetAllInputs() {
-	ResetIncludedAssetInputs();
+	ResetIncludedAssetForm();
 	ResetVariantInputs();
-	ResetIncludedAssetInputs();
+	ResetIncludedAssetForm();
 	ResetAssetInputs();
 	ResetPackageInputs(); //Reset package inputs last to the heading and the selected tab are aligned
 }
@@ -128,14 +128,6 @@ function ResetPackageInputs() {
 
 	document.getElementById('CurrentDocumentType').innerHTML = 'package';
 	document.getElementById('CurrentDocumentName').innerHTML = '[new package]';
-}
-/**
- * Resets the Included Asset input form fields.
- */
-function ResetIncludedAssetInputs() {
-	if (pkgAssetSelect = document.getElementById('PackageAssetId').tomselect) pkgAssetSelect.clear(true);
-	document.getElementById('PackageAssetInclude').value = '';
-	document.getElementById('PackageAssetExclude').value = '';
 }
 /**
  * Resets the Varaint input form fields.
@@ -242,7 +234,7 @@ function FillPackageForm() {
 	document.getElementById('PackageName').value = selectedDoc.get('name');
 	document.getElementById('PackageVersion').value = selectedDoc.get('version');
 	document.getElementById('PackageSubfolder').value = selectedDoc.get('subfolder');
-	document.getElementById('PackageDependencies').value = ArrayToText(selectedDoc.get('dependencies'));
+	//document.getElementById('PackageDependencies').value = ArrayToText(selectedDoc.get('dependencies'));
 
 	document.getElementById('PackageSummary').value = selectedDoc.getIn(['info', 'summary']);
 	document.getElementById('PackageConflicts').value = selectedDoc.getIn(['info', 'conflicts']) ?? '';
@@ -272,16 +264,6 @@ function FillPackageForm() {
 	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.get('group') + ':' + selectedDoc.get('name');
 }
 /**
- * Fill the Package Asset input form fields with the values from the currently selected package and asset number.
- */
-function FillIncludedAssetForm(assetName) {
-	var pkgAsset = selectedDoc.get('assets').toJSON().find((i) => i.assetId === assetName);
-	selectedPkgAssetIdx = selectedDoc.get('assets').toJSON().findIndex((i) => i.assetId === assetName);
-	document.getElementById('PackageAssetId').value = pkgAsset.assetId;
-	document.getElementById('PackageAssetInclude').value = ArrayToText(pkgAsset.include);
-	document.getElementById('PackageAssetExclude').value = ArrayToText(pkgAsset.exclude);
-}
-/**
  * Updates the selectedDoc with the current state of the Package Properties and Package Info tabs.
  */
 function UpdatePackageData() {
@@ -303,7 +285,7 @@ function UpdatePackageData() {
 		selectedDoc.setIn(['subfolder'], document.getElementById('PackageSubfolder').value);
 	}
 	if (document.getElementById('PackageDependencies').value !== '') {
-		selectedDoc.setIn(['dependencies'], TextToArray(document.getElementById('PackageDependencies').value));
+		selectedDoc.setIn(['dependencies'], TomSelectValueToArray(pkgDependencySelect.getValue()));
 	}
 
 	// Package Info
@@ -320,6 +302,8 @@ function UpdatePackageData() {
 		var scl = new YAML.Scalar(document.getElementById('PackageDescription').value.replaceAll('"', "'"));
 		scl.type = 'BLOCK_LITERAL'; // Ensures the "|-" style is used
 		selectedDoc.setIn(['info', 'description'], scl);
+	} else {
+		selectedDoc.deleteIn(['info', 'description']);
 	}
 	if (document.getElementById('PackageAuthor').value !== '') {
 		selectedDoc.setIn(['info', 'author'], document.getElementById('PackageAuthor').value);
@@ -338,10 +322,7 @@ function UpdatePackageData() {
 	}
 
 	// Included Assets
-	if (document.getElementById('PackageAssetId').value !== '') {
-		selectedDoc.get('assets').items[selectedPkgAssetIdx].set('assetId', document.getElementById('PackageAssetId').value)
-		
-	}
+	UpdateIncludedAssetData();
 
 	//To push the package to the list it at minimum must have a group and name so the cm.OnChange can pick it up
 	if (currDocIdx === null && selectedDoc.has('group') && selectedDoc.has('name')) {
@@ -361,30 +342,61 @@ function UpdatePackageData() {
 // -----------------------------------------------   Included Assets   ------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 /**
- * Add a new asset to the currently selected package.
+ * Resets the Included Asset input form fields.
  */
-function AddIncludedAsset() {
-	ValidateInput('PackageAssetId');
-	if (selectedDoc !== null) {
-		var newAsset = {
-			assetId: document.getElementById('PackageAssetId').value
-		}
+function ResetIncludedAssetForm() {
+	selectedPkgAssetIdx = null;
+	if (pkgAssetSelect = document.getElementById('PackageAssetId').tomselect) pkgAssetSelect.clear(true);
+	if (pkgAssetIncludeSelect = document.getElementById('PackageAssetInclude').tomselect) {
+		pkgAssetIncludeSelect.clear(true);
+		pkgAssetIncludeSelect.clearOptions();
+	}
+	if (pkgAssetExcludeSelect = document.getElementById('PackageAssetExclude').tomselect) {
+		pkgAssetExcludeSelect.clear(true);
+		pkgAssetExcludeSelect.clearOptions();
+	}
+}
+/**
+ * Fill the Package Asset input form fields with the values from the currently selected package and asset index.
+ */
+function FillIncludedAssetForm(assetName) {
+	var pkgAsset = selectedDoc.get('assets').toJSON().find((i) => i.assetId === assetName);
+	selectedPkgAssetIdx = selectedDoc.get('assets').toJSON().findIndex((i) => i.assetId === assetName);
+	pkgAssetSelect.addItem('local|' + assetName, true);
+	pkgAsset.include.forEach(item => {
+		pkgAssetIncludeSelect.addOption({ value: item, text: item });
+		pkgAssetIncludeSelect.addItem(item, true);
+	});
+	pkgAsset.exclude.forEach(item => {
+		pkgAssetExcludeSelect.addOption({ value: item, text: item });
+		pkgAssetExcludeSelect.addItem(item, true);
+	});
+}
+/**
+ * Updates the code pane and adds a new included asset if necessary.
+ */
+function UpdateIncludedAssetData() {
+	let newAssetId = pkgAssetSelect.getValue().split('|')[1];
+	let newAssetInc = pkgAssetIncludeSelect.getValue().split(',');
+	let newAssetExc = pkgAssetExcludeSelect.getValue().split(',');
 
+	if (selectedPkgAssetIdx === null) {
+		let newAsset = {
+			assetId: newAssetId
+		}
 		if (document.getElementById('PackageAssetInclude').value !== '') {
-			newAsset.include = TextToArray(document.getElementById('PackageAssetInclude').value);
+			newAsset.include = newAssetInc
 		}
 		if (document.getElementById('PackageAssetExclude').value !== '') {
-			newAsset.exclude = TextToArray(document.getElementById('PackageAssetExclude').value);
+			newAsset.exclude = newAssetExc
 		}
-		if (selectedDoc.assets === undefined) {
-			selectedDoc.assets = new Array();
-		}
-		selectedDoc.assets.push(newAsset);
-
-		ResetIncludedAssetInputs();
-		document.getElementById('AddPackageAssetButton').disabled = true;
-		UpdateData();
+	} else {
+		selectedDoc.get('assets').items[selectedPkgAssetIdx].set('assetId', newAssetId);
+		selectedDoc.get('assets').items[selectedPkgAssetIdx].set('include', newAssetInc);
+		selectedDoc.get('assets').items[selectedPkgAssetIdx].set('exclude', newAssetExc);
 	}
+
+	UpdateData();
 }
 
 

@@ -16,13 +16,15 @@ let AllGroups = new Array();
 /**
  * List of subfolders inside the Plugins folder into which a package is installed
  */
-let PackageSubfolders = new Array();
-
+let AllSubfolders = new Array();
+/**
+ * List of all channels to use to initially load content. Note the order these are listed in is important to establish precedence when searching for a given package or asset id in an unknown channel. If given an id that could appear in multiple channels, we want to prioritize local first, then the default channel, then st-channel and sc4e-channel, then any other channels the user might have added.
+ */
 const ChannelInfo = [
+	{ name: 'local', url: null, label: 'This file' },
 	{ name: 'default', url: 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json', label: 'Default channel' },
+	{ name: 'simtrop', url: 'https://sc4pac.simtropolis.com/sc4pac-channel-contents.json', label: 'Simtropolis channel' },
     { name: 'zasco', url: 'https://zasco.github.io/sc4pac-channel/channel/sc4pac-channel-contents.json', label: 'Zasco\'s channel' },
-    { name: 'simtrop', url: 'https://sc4pac.simtropolis.com/sc4pac-channel-contents.json', label: 'Simtropolis channel' },
-    { name: 'local', url: null, label: 'This file' }
 ];
 for (const channel of ChannelInfo) {
     if (channel.url !== null) {
@@ -35,7 +37,7 @@ for (const channel of ChannelInfo) {
             })
             .then(data => {
                 if (channel.name === 'default') {
-                    PackageSubfolders.push(data.stats.categories.map(item => item.category));
+                    AllSubfolders = data.stats.categories.map(item => item.category);
                 }
                 AllAssets = AllAssets.concat(data.assets.map(item => channel.name + '|' + item.name));
                 AllPackages = AllPackages.concat(data.packages.map(item => channel.name + '|' + item.group + ':' + item.name));
@@ -66,7 +68,7 @@ new TomSelect('#PackageGroup', {
 
 new TomSelect('#PackageSubfolder', {
 	maxItems: 1,
-	options: PackageSubfolders.map(folder => ({ value: folder, text: folder })),
+	options: AllSubfolders.map(folder => ({ value: folder, text: folder })),
 	render: {
 		option: function (item, escape) {
 			return '<div class="py-2 d-flex">' + escape(item.text) + '</div>';
@@ -105,6 +107,7 @@ new TomSelect("#PackageAssetId", {
 	create: false,
 	valueField: 'value',
 	labelField: 'id',
+	maxItems: 1,
 	searchField: ['id'],
 	optgroups: ChannelInfo,
 	optgroupValueField: 'name',
@@ -120,6 +123,18 @@ new TomSelect("#PackageAssetId", {
 			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
 		}
 	}
+});
+
+new TomSelect("#PackageAssetInclude", {
+	persist: false,
+	createOnBlur: true,
+	create: true
+});
+
+new TomSelect("#PackageAssetExclude", {
+	persist: false,
+	createOnBlur: true,
+	create: true
 });
 
 new TomSelect("#VariantDependencies", {
@@ -166,16 +181,16 @@ new TomSelect("#VariantAssetId", {
 });
 
 window.ChannelInfo = ChannelInfo;
-//window.PackageSubfolders = PackageSubfolders;
-//window.AllAssets = AllAssets;
-//window.AllPackages = AllPackages;
-//window.AllGroups = [...new Set(AllGroups)];
+window.AllAssets = AllAssets;
+window.AllPackages = AllPackages;
 window.pkgSubfolderSelect = document.getElementById("PackageSubfolder").tomselect;
+window.pkgDependencySelect = document.getElementById("PackageDependencies").tomselect;
 window.pkgGroupSelect = document.getElementById('PackageGroup').tomselect;
 window.pkgImageSelect = document.getElementById("PackageImages").tomselect;
 
 window.pkgAssetSelect = document.getElementById("PackageAssetId").tomselect;
-window.variantAssetSelect = document.getElementById("VariantAssetId").tomselect;
+window.pkgAssetIncludeSelect = document.getElementById('PackageAssetInclude').tomselect;
+window.pkgAssetExcludeSelect = document.getElementById('PackageAssetExclude').tomselect;
 
-window.pkgDependencySelect = document.getElementById("PackageDependencies").tomselect;
+window.variantAssetSelect = document.getElementById("VariantAssetId").tomselect;
 window.variantPackageSelect = document.getElementById("VariantDependencies").tomselect;

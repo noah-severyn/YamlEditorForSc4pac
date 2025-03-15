@@ -143,6 +143,9 @@
 					<fieldset id="IncludedAssetsContent" class="tab-pane m-3" tabindex="0">
 						<div style="display:flex" class="row">
 							<div class="col-sm-12 col-md-3">
+								<div class="mb-2 btn-group">
+									<button id="NewPackageAssetButton" type="button" class="btn btn-primary btn-sm">New Included Asset</button>
+								</div>
 								<div id="AssetTreeView"></div>
 							</div>
 
@@ -155,15 +158,14 @@
 									</div>
 									<div class="mb-2 input-group">
 										<span class="input-group-text w1">Include</span>
-										<textarea id="PackageAssetInclude" class="form-control" rows="3"></textarea>
+										<input id="PackageAssetInclude" class="form-control" />
 									</div>
 									<div class="mb-2 input-group">
 										<span class="input-group-text w1">Exclude</span>
-										<textarea id="PackageAssetExclude" class="form-control" rows="3"></textarea>
+										<input id="PackageAssetExclude" class="form-control" />
 									</div>
 									<div class="mb-2 btn-group">
 										<button id="ResetIncludedAssetButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
-										<button id="AddPackageAssetButton" class="btn btn-primary" type="button" disabled="disabled">Add Asset to Package</button>
 									</div>
 								</form>
 							</div>

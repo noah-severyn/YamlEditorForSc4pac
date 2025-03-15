@@ -87,7 +87,7 @@ document.addEventListener("keydown", function (e) {
 // --------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------   Package tabs events   ---------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
-for (const input of document.querySelectorAll('#PackagePropertiesForm .form-control, #PackageInfoForm .form-control, #IncludedAssetsForm .form-select, #IncludedAssetsForm .form-control')) {
+for (const input of document.querySelectorAll('#PackagePropertiesForm .form-control, #PackageInfoForm .form-control, #IncludedAssetsForm .form-control')) {
 	input.addEventListener('input', event => {
 		ValidateInput(event.target.id);
 		UpdatePackageData();
@@ -96,11 +96,11 @@ for (const input of document.querySelectorAll('#PackagePropertiesForm .form-cont
 document.getElementById('IsMultipleWebsites').addEventListener('change', () => {
 	ToggleMultipleWebsites();
 });
-document.getElementById('ResetIncludedAssetButton').addEventListener('change', () => {
-	ResetIncludedAssetInputs();
+document.getElementById('ResetIncludedAssetButton').addEventListener('click', () => {
+	ResetIncludedAssetForm();
 });
-document.getElementById('AddPackageAssetButton').addEventListener('change', () => {
-	AddIncludedAsset();
+document.getElementById('NewPackageAssetButton').addEventListener('click', () => {
+	ResetIncludedAssetForm();
 });
 
 
