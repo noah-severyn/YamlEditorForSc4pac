@@ -48,7 +48,6 @@ for (const channel of ChannelInfo) {
 };
 
 AllGroups = [...new Set(AllGroups)]; // returns unique values
-console.log(PackageSubfolders);
 
 new TomSelect('#PackageGroup', {
 	maxItems: 1,
@@ -77,14 +76,14 @@ new TomSelect('#PackageSubfolder', {
 
 new TomSelect("#PackageDependencies", {
 	create: false,
-	valueField: 'id',
+	valueField: 'value',
 	labelField: 'id',
 	searchField: ['id'],
 	optgroups: ChannelInfo,
 	optgroupValueField: 'name',
 	optgroupField: 'channel',
 
-	options: AllPackages.map(pkg => ({ id: pkg.split("|")[1], channel: pkg.split("|")[0] })),
+	options: AllPackages.map(pkg => ({ value: pkg, id: pkg.split("|")[1], channel: pkg.split("|")[0] })),
 
 	render: {
 		option: function (item, escape) {
@@ -104,14 +103,14 @@ new TomSelect("#PackageImages", {
 
 new TomSelect("#PackageAssetId", {
 	create: false,
-	valueField: 'id',
+	valueField: 'value',
 	labelField: 'id',
 	searchField: ['id'],
 	optgroups: ChannelInfo,
 	optgroupValueField: 'name',
 	optgroupField: 'channel',
 
-	options: AllAssets.map(pkg => ({ id: pkg.split("|")[1], channel: pkg.split("|")[0] })),
+	options: AllAssets.map(asset => ({ value: asset, id: asset.split("|")[1], channel: asset.split("|")[0] })),
 
 	render: {
 		option: function (item, escape) {
@@ -125,14 +124,14 @@ new TomSelect("#PackageAssetId", {
 
 new TomSelect("#VariantDependencies", {
 	create: false,
-	valueField: 'id',
+	valueField: 'value',
 	labelField: 'id',
 	searchField: ['id'],
 	optgroups: ChannelInfo,
 	optgroupValueField: 'name',
 	optgroupField: 'channel',
 
-	options: AllPackages.map(pkg => ({ id: pkg.split("|")[1], channel: pkg.split("|")[0] })),
+	options: AllPackages.map(pkg => ({ value: pkg, id: pkg.split("|")[1], channel: pkg.split("|")[0] })),
 
 	render: {
 		option: function (item, escape) {
@@ -147,14 +146,14 @@ new TomSelect("#VariantDependencies", {
 
 new TomSelect("#VariantAssetId", {
 	create: false,
-	valueField: 'id',
+	valueField: 'value',
 	labelField: 'id',
 	searchField: ['id'],
 	optgroups: ChannelInfo,
 	optgroupValueField: 'name',
 	optgroupField: 'channel',
 
-	options: AllAssets.map(pkg => ({ id: pkg.split("|")[1], channel: pkg.split("|")[0] })),
+	options: AllAssets.map(asset => ({ value: asset, id: asset.split("|")[1], channel: asset.split("|")[0] })),
 
 	render: {
 		option: function (item, escape) {
@@ -166,15 +165,17 @@ new TomSelect("#VariantAssetId", {
 	}
 });
 
-//window.ChannelInfo = ChannelInfo;
+window.ChannelInfo = ChannelInfo;
 //window.PackageSubfolders = PackageSubfolders;
 //window.AllAssets = AllAssets;
 //window.AllPackages = AllPackages;
 //window.AllGroups = [...new Set(AllGroups)];
 window.pkgSubfolderSelect = document.getElementById("PackageSubfolder").tomselect;
 window.pkgGroupSelect = document.getElementById('PackageGroup').tomselect;
-window.pkgDependencySelect = document.getElementById("PackageDependencies").tomselect;
 window.pkgImageSelect = document.getElementById("PackageImages").tomselect;
+
 window.pkgAssetSelect = document.getElementById("PackageAssetId").tomselect;
 window.variantAssetSelect = document.getElementById("VariantAssetId").tomselect;
+
+window.pkgDependencySelect = document.getElementById("PackageDependencies").tomselect;
 window.variantPackageSelect = document.getElementById("VariantDependencies").tomselect;

@@ -119,6 +119,8 @@ pkgSummaryEditor.codemirror.on("change", () => {
 });
 
 
+let localAssets = [];
+let localPackages = [];
 
 ResetAllInputs();
 SetTabState();
@@ -150,24 +152,37 @@ function UpdateData(dumpData = true) {
 
 	var countOfAssets = 0;
 	var countOfPackages = 0;
-	listOfAssets.length = 0;
-	listOfPackages.length = 0;
+	localAssets.length = 0;
+	localPackages.length = 0;
 
 	if (yamlData !== null) {
-		yamlData.forEach((item) => {
-			if (IsAsset(item)) {
+		yamlData.forEach((doc) => {
+			if (IsAsset(doc)) {
 				countOfAssets++;
-				listOfAssets.push(item);
-			} else if (IsPackage(item)) {
+				localAssets.push(doc.toJSON().assetId);
+			} else if (IsPackage(doc)) {
 				countOfPackages++;
-				listOfPackages.push(item);
+				localPackages.push(doc.toJSON().group + ':' + doc.toJSON().name);
 			}
 		});
 	}
 	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 
 	SetTabState();
-	UpdateDropdownsWithLocalDocuments();
+
+	//Update the Tomselect dropdowns with the local packages and assets
+	const rgx = new RegExp('local|');
+	[pkgDependencySelect, variantPackageSelect, pkgAssetSelect, variantAssetSelect].forEach(ts => {
+		ts.clearOptions((option) => {
+			return rgx.test(option.value);
+		});
+	});
+	pkgDependencySelect.addOptions(localPackages.map(p => ({ value: 'local|' + p, id: p, channel: 'local' })));
+	variantPackageSelect.addOptions(localPackages.map(p => ({ value: 'local|' + p, id: p, channel: 'local' })));
+	pkgAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
+	variantAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
+
+	// Update the trees with local assets and packages
 	UpdateMainTree();
 	UpdateIncludedAssetTree();
 	UpdateVariantTree();
@@ -185,14 +200,6 @@ function UpdateData(dumpData = true) {
 		}
 	}
 	SetSelectedDoc(currDocIdx);
-
-
-	/**
-	 * Add or remove packages or assets defined in this file to the TomSelect dropdowns
-	 */
-	function UpdateDropdownsWithLocalDocuments() {
-
-	}
 
 	function DumpYaml() {
 		var newYaml = '';
@@ -218,25 +225,25 @@ function UpdateData(dumpData = true) {
 
 //https://github.com/justinchmura/js-treeview
 function UpdateMainTree() {
-	function getAssetTreeName(id, asset) {
-		return id + ' - ' + asset.get('assetId');
+	function CreateAssetTreeName(id, asset) {
+		return id + ' - ' + asset;
 	}
 	
-	function getPackageTreeName(id, package) {
-		return id + ' - ' + package.get('group') + ":" + package.get('name');
+	function CreatePackageTreeName(id, package) {
+		return id + ' - ' + package;
 	}
 	
 	var idx = 1;
 	var astList = [];
-	listOfAssets.forEach((asset) => {
-		astList.push({ name: getAssetTreeName(idx, asset), children: [] });
+	localAssets.forEach((asset) => {
+		astList.push({ name: CreateAssetTreeName(idx, asset), children: [] });
 		idx++;
 	});
 
 	idx = 1;
 	var pkgList = [];
-	listOfPackages.forEach((pkg) => {
-		pkgList.push({ name: getPackageTreeName(idx, pkg), children: [] });
+	localPackages.forEach((pkg) => {
+		pkgList.push({ name: CreatePackageTreeName(idx, pkg), children: [] });
 		idx++;
 	});
 
@@ -249,8 +256,8 @@ function UpdateMainTree() {
 	if (selectedDoc) {
 		leaves.forEach(function(leaf) {
 			let selectedDocTreeName;
-			if (IsPackage(selectedDoc)) selectedDocTreeName = getPackageTreeName('', selectedDoc);
-			else if (IsAsset(selectedDoc)) selectedDocTreeName = getAssetTreeName('', selectedDoc);
+			if (IsPackage(selectedDoc)) selectedDocTreeName = CreatePackageTreeName('', selectedDoc);
+			else if (IsAsset(selectedDoc)) selectedDocTreeName = CreateAssetTreeName('', selectedDoc);
 			else return;
 			if (leaf.querySelectorAll('.tree-leaf-text')[0].innerHTML.includes(selectedDocTreeName)) leaf.classList.add('selected');
 		})
