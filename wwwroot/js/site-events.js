@@ -85,58 +85,19 @@ document.addEventListener("keydown", function (e) {
 
 
 // --------------------------------------------------------------------------------------------------------------------
-// -----------------------------------------   Package Properties tab events   ----------------------------------------
+// ----------------------------------------------   Package tabs events   ---------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
-for (const input of document.querySelectorAll('#PackagePropertiesForm .form-control')) {
+for (const input of document.querySelectorAll('#PackagePropertiesForm .form-control, #PackageInfoForm .form-control, #IncludedAssetsForm .form-control')) {
 	input.addEventListener('input', event => {
 		ValidateInput(event.target.id);
 		UpdatePackageData();
 	});
-}
-document.getElementById('PacPackageList').addEventListener('change', event => {
-	PackageAddDependency(event.target);
+};
+document.getElementById('ResetIncludedAssetButton').addEventListener('click', () => {
+	ResetIncludedAssetForm();
 });
-document.getElementById('LocalPackageList').addEventListener('change', event => {
-	PackageAddDependency(event.target);
-});
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-// --------------------------------------------   Package Info tab events   -------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------
-document.getElementById('IsMultipleWebsites').addEventListener('change', () => {
-	ToggleMultipleWebsites();
-});
-for (const input of document.querySelectorAll('#PackageInfoForm .form-control')) {
-	input.addEventListener('input', event => {
-		ValidateInput(event.target.id);
-		UpdatePackageData();
-	});
-}
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------   Included Asset tab events   ------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------
-document.getElementById('SelectLocalPackageAssets').addEventListener('change', event => {
-	SetIncludedAssetId(event.target);
-});
-document.getElementById('SelectPacPackageAssets').addEventListener('change', event => {
-	SetIncludedAssetId(event.target);
-});
-document.getElementById('PackageAssetInclude').addEventListener('change', event => {
-	UpdatePackageData(event.target.id);
-});
-document.getElementById('PackageAssetExclude').addEventListener('change', event => {
-	UpdatePackageData(event.target.id);
-});
-document.getElementById('ResetIncludedAssetButton').addEventListener('change', () => {
-	ResetIncludedAssetInputs();
-});
-document.getElementById('AddPackageAssetButton').addEventListener('change', () => {
-	AddIncludedAsset();
+document.getElementById('NewPackageAssetButton').addEventListener('click', () => {
+	ResetIncludedAssetForm();
 });
 
 

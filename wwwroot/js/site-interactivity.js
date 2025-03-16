@@ -98,9 +98,9 @@ function ClearAll() {
  * Resets all input form fields.
  */
 function ResetAllInputs() {
-	ResetIncludedAssetInputs();
+	ResetIncludedAssetForm();
 	ResetVariantInputs();
-	ResetIncludedAssetInputs();
+	ResetIncludedAssetForm();
 	ResetAssetInputs();
 	ResetPackageInputs(); //Reset package inputs last to the heading and the selected tab are aligned
 }
@@ -110,36 +110,25 @@ function ResetAllInputs() {
 function ResetPackageInputs() {
 	selectedDoc = null;
 	document.getElementById('PackageGroup').value = '';
-	if (groupTomSelect = document.getElementById('PackageGroup').tomselect) groupTomSelect.clear(true);
+	pkgGroupSelect.clear(true);
 	document.getElementById('PackageName').value = '';
 	document.getElementById('PackageVersion').value = '';
 	document.getElementById('PackageSubfolder').value = '';
-	if (subfolderTomSelect = document.getElementById('PackageSubfolder').tomselect) subfolderTomSelect.clear(true);
-	document.getElementById('PackageDependencies').value = '';
-	document.getElementById('LocalPackageList').value = '';
-	document.getElementById('PacPackageList').value = '';
+	pkgSubfolderSelect.clear(true);
+	pkgDependencySelect.clear(true);
 	document.getElementById('PackageSummary').value = '';
 	document.getElementById('PackageConflicts').value = '';
 	document.getElementById('PackageWarning').value = '';
-	document.getElementById('PackageDescription').value = '';
+	pkgSummaryEditor.codemirror.off("change", UpdatePackageData);
+	pkgSummaryEditor.codemirror.setValue('');
+	pkgSummaryEditor.codemirror.on("change", UpdatePackageData);
 	document.getElementById('PackageAuthor').value = '';
 	document.getElementById('PackageImages').value = '';
-	document.getElementById('PackageWebsite').value = '';
-	document.getElementById('PackageWebsite').rows = '1';
-	document.getElementById('IsMultipleWebsites').checked = false;
+	pkgWebsitesSelect.clear(true);
+	pkgWebsitesSelect.clearOptions();
 
 	document.getElementById('CurrentDocumentType').innerHTML = 'package';
 	document.getElementById('CurrentDocumentName').innerHTML = '[new package]';
-}
-/**
- * Resets the Included Asset input form fields.
- */
-function ResetIncludedAssetInputs() {
-	document.getElementById('SelectLocalPackageAssets').value = '';
-	document.getElementById('SelectPacPackageAssets').value = '';
-	document.getElementById('PackageAssetId').value = '';
-	document.getElementById('PackageAssetInclude').value = '';
-	document.getElementById('PackageAssetExclude').value = '';
 }
 /**
  * Resets the Varaint input form fields.
@@ -153,10 +142,8 @@ function ResetVariantInputs() {
 	document.getElementById('VariantAssetId').value = '';
 	document.getElementById('VariantInclude').value = '';
 	document.getElementById('VariantExclude').value = '';
-	if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
-	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
-	document.getElementById('VariantsLocalPackageList').value = '';
-	document.getElementById('VariantsLocalAssetList').value = '';
+	variantAssetSelect.clear(true);
+	variantPackageSelect.clear(true);
 }
 /**
  * Resets the Asset input form fields.
@@ -201,26 +188,9 @@ function ValidateInput(elementId) {
 		//inputText = inputText.replaceAll('\\', '/');
 	}
 	inputElement.value = inputText;
-
-	//The replacement of invalid characters resets cursor position to the end which is undesirable; reset it to where the user was editing. This is only valid for non-dropdown inputs
-	if (["PackageGroup", "PackageSubfolder", "AssetArchiveVersion"].indexOf(elementId) === -1) {
-		inputElement.setSelectionRange(locn, locn);
-	}
 }
 
 
-function ToggleMultipleWebsites() {
-	var currVal = document.getElementById('IsMultipleWebsites').checked;
-	if (currVal) {
-		document.getElementById('PackageWebsiteLabel').textContent = 'Websites';
-		document.getElementById('PackageWebsite').rows = '3';
-	} else {
-		document.getElementById('PackageWebsiteLabel').textContent = 'Website';
-		document.getElementById('PackageWebsite').value = document.getElementById('PackageWebsite').value.split(';')[0];
-		document.getElementById('PackageWebsite').rows = '1';
-	}
-	UpdatePackageData();
-}
 
 
 
@@ -244,137 +214,165 @@ function RemoveSelectedDoc() {
  * Fill the Package input form fields with the values from the currently selected package number.
  */
 function FillPackageForm() {
-	document.getElementById('PackageGroup').value = selectedDoc.group;
-	document.getElementById('PackageName').value = selectedDoc.name;
-	document.getElementById('PackageVersion').value = selectedDoc.version;
-	document.getElementById('PackageSubfolder').value = selectedDoc.subfolder;
-	document.getElementById('PackageDependencies').value = ArrayToText(selectedDoc.dependencies);
-
-	document.getElementById('PackageSummary').value = selectedDoc.info.summary;
-	document.getElementById('PackageConflicts').value = selectedDoc.info.conflicts ?? '';
-	document.getElementById('PackageWarning').value = selectedDoc.info.warning ?? '';
-	pkgSummaryEditor.value(selectedDoc.info.description ?? '');
-	document.getElementById('PackageAuthor').value = selectedDoc.info.author ?? '';
-	document.getElementById('PackageImages').value = ArrayToText(selectedDoc.info.images);
-	if (Object.hasOwn(selectedDoc.info, 'websites')) {
-		document.getElementById('PackageWebsite').value = ArrayToText(selectedDoc.info.websites) ?? '';
-		document.getElementById('PackageWebsite').rows = '3';
-		document.getElementById('IsMultipleWebsites').checked = true;
-	} else {
-		document.getElementById('PackageWebsite').value = selectedDoc.info.website ?? '';
-		document.getElementById('PackageWebsite').rows = '1';
-		document.getElementById('IsMultipleWebsites').checked = false;
+	(pkgGroupSelect.createItem(selectedDoc.get('group')) || pkgGroupSelect.addItem(selectedDoc.get('group'), true));
+	document.getElementById('PackageName').value = selectedDoc.get('name');
+	document.getElementById('PackageVersion').value = selectedDoc.get('version');
+	pkgSubfolderSelect.addItem(selectedDoc.get('subfolder'), true);
+	if (selectedDoc.has('dependencies')) {
+		let deps = (Array.isArray(selectedDoc.get('dependencies')) ? selectedDoc.get('dependencies') : selectedDoc.get('dependencies').items);
+		if (typeof(deps) === 'string') {
+			pkgDependencySelect.addItem(deps, true);
+		} else {
+			deps.forEach((item) => {
+				pkgDependencySelect.addItem(item.value, true);
+			});
+		}
 	}
 
-	//For some reason these must be last otherwise the regular text inputs will not populate correctly
-	(pkgGroupSelect.createItem(selectedDoc.group) || pkgGroupSelect.addItem(selectedDoc.group));
-	pkgSubfolderSelect.addItem(selectedDoc.subfolder);
+	document.getElementById('PackageSummary').value = selectedDoc.getIn(['info', 'summary']);
+	document.getElementById('PackageConflicts').value = selectedDoc.getIn(['info', 'conflicts']) ?? '';
+	document.getElementById('PackageWarning').value = selectedDoc.getIn(['info', 'warning']) ?? '';
+	pkgSummaryEditor.codemirror.off("change", UpdatePackageData);
+	pkgSummaryEditor.value(selectedDoc.getIn(['info', 'description']) ?? '');
+	pkgSummaryEditor.codemirror.on("change", UpdatePackageData);
+	document.getElementById('PackageAuthor').value = selectedDoc.getIn(['info', 'author']) ?? '';
+	if (selectedDoc.hasIn(['info', 'images'])) {
+		let images = selectedDoc.getIn(['info', 'images']).items;
+		images.forEach(img => {
+			pkgImageSelect.addOption({ value: img.value, text: img.value });
+			pkgImageSelect.addItem(img.value, true);
+		});
+	}
+	if (selectedDoc.hasIn(['info', 'websites'])) {
+		let sites = selectedDoc.getIn(['info', 'websites']).items;
+		sites.forEach(site => {
+			pkgWebsitesSelect.addOption({ value: site.value, text: site.value });
+			pkgWebsitesSelect.addItem(site.value, true);
+		});
+	} else {
+		let site = selectedDoc.getIn(['info', 'website']) ?? '';
+		pkgWebsitesSelect.addOption({ value: site, text: site });
+		pkgWebsitesSelect.addItem(site, true);
+	}
 
 	document.getElementById('CurrentDocumentType').innerHTML = "package";
-	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
-}
-/**
- * Fill the Package Asset input form fields with the values from the currently selected package and asset number.
- */
-function FillIncludedAssetForm(assetName) {
-	var pkgAsset = selectedDoc.assets.find((i) => i.assetId === assetName);
-	document.getElementById('PackageAssetId').value = pkgAsset.assetId;
-	document.getElementById('PackageAssetInclude').value = ArrayToText(pkgAsset.include);
-	document.getElementById('PackageAssetExclude').value = ArrayToText(pkgAsset.exclude);
-}
-/**
- * Adds the selected dependency to the list.
- */
-function PackageAddDependency(input) {
-	var currentDependencies = document.getElementById('PackageDependencies').value;
-	if (currentDependencies === '') {
-		document.getElementById('PackageDependencies').value = input.value + ';\n'
-	} else {
-		document.getElementById('PackageDependencies').value = currentDependencies + input.value + ';\n';
-	}
-	document.getElementById('PacPackageList').tomselect.clear(true);
-	document.getElementById('LocalPackageList').value = '';
-}
-/**
- * Adds the selected sc4pac dependency to the list.
- */
-function AddDepencencyFromPacList() {
-	var selectedPkg = document.getElementById('PacPackageList').value;
-	var currentDependencies = document.getElementById('PackageDependencies').value;
-	if (currentDependencies === '') {
-		document.getElementById('PackageDependencies').value = selectedPkg + ';\n'
-	} else {
-		document.getElementById('PackageDependencies').value = currentDependencies + selectedPkg + ';\n';
-	}
-	document.getElementById('PacPackageList').value = '';
-
-	document.getElementById('PacPackageList').tomselect.clear(true);
-	input.value = '';
+	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.get('group') + ':' + selectedDoc.get('name');
 }
 /**
  * Updates the selectedDoc with the current state of the Package Properties and Package Info tabs.
  */
 function UpdatePackageData() {
+	//TODO rename this function to medatadata, also the asset function too
 	if (selectedDoc === null) {
-		selectedDoc = new Object();
+		selectedDoc = new YAML.Document(new Object());
 	}
 
-	// Package Properties
+
+	//#region Package Properties
 	if (document.getElementById('PackageGroup').value !== '') {
-		selectedDoc.group = document.getElementById('PackageGroup').value;
+		selectedDoc.setIn(['group'], document.getElementById('PackageGroup').value);
 	}
 	if (document.getElementById('PackageName').value !== '') {
-		selectedDoc.name = document.getElementById('PackageName').value;
+		selectedDoc.setIn(['name'], document.getElementById('PackageName').value);
 	}
 	if (document.getElementById('PackageVersion').value !== '') {
-		selectedDoc.version = document.getElementById('PackageVersion').value;
+		selectedDoc.setIn(['version'], document.getElementById('PackageVersion').value);
 	}
 	if (document.getElementById('PackageSubfolder').value !== '') {
-		selectedDoc.subfolder = document.getElementById('PackageSubfolder').value;
+		selectedDoc.setIn(['subfolder'], document.getElementById('PackageSubfolder').value);
 	}
 	if (document.getElementById('PackageDependencies').value !== '') {
-		selectedDoc.dependencies = TextToArray(document.getElementById('PackageDependencies').value);
+		selectedDoc.get('dependencies').items = [];
+		pkgDependencySelect.getValue().split(',').forEach(dep => {
+			selectedDoc.get('dependencies').add(dep);
+		});
+	} else if (document.getElementById('PackageDependencies').value === '' && selectedDoc.has('dependencies')) {
+		selectedDoc.delete('dependencies');
 	}
+	//#endregion
 
-	// Package Info
-	if (selectedDoc.info === undefined) {
-		selectedDoc.info = new Object();
-	}
+
+	//#region Package Info
 	if (document.getElementById('PackageSummary').value !== '') {
-		selectedDoc.info.summary = document.getElementById('PackageSummary').value;
+		selectedDoc.setIn(['info', 'summary'], document.getElementById('PackageSummary').value);
 	}
 	if (document.getElementById('PackageWarning').value !== '') {
-		selectedDoc.info.warning = document.getElementById('PackageWarning').value;
+		selectedDoc.setIn(['info', 'warning'], document.getElementById('PackageWarning').value);
 	}
 	if (document.getElementById('PackageConflicts').value !== '') {
-		selectedDoc.info.conflicts = document.getElementById('PackageConflicts').value;
+		selectedDoc.setIn(['info', 'conflicts'], document.getElementById('PackageConflicts').value);
 	}
 	if (document.getElementById('PackageDescription').value !== '') {
-		selectedDoc.info.description = document.getElementById('PackageDescription').value.replaceAll('"', "'");
+		let scl = new YAML.Scalar(document.getElementById('PackageDescription').value.replaceAll('"', "'"));
+		scl.type = 'BLOCK_LITERAL'; // Ensures the "|-" style is used
+		selectedDoc.setIn(['info', 'description'], scl);
+	} else if (document.getElementById('PackageDescription').value === '' && selectedDoc.hasIn(['info', 'description'])) {
+		selectedDoc.deleteIn(['info', 'description']);
 	}
 	if (document.getElementById('PackageAuthor').value !== '') {
-		selectedDoc.info.author = document.getElementById('PackageAuthor').value;
+		selectedDoc.setIn(['info', 'author'], document.getElementById('PackageAuthor').value);
 	}
 	if (document.getElementById('PackageImages').value !== '') {
-		selectedDoc.info.images = TextToArray(document.getElementById('PackageImages').value);
+		selectedDoc.setIn(['info', 'images'], pkgImageSelect.getValue().split(','));
 	}
 	if (document.getElementById('PackageWebsite').value !== '') {
-		if (document.getElementById('IsMultipleWebsites').checked) {
-			selectedDoc.info.websites = TextToArray(document.getElementById('PackageWebsite').value);
-			delete selectedDoc.info.website;
+		let sites = pkgWebsitesSelect.getValue().split(',');
+		if (sites.length > 1) {
+			if (selectedDoc.hasIn(['info', 'websites'])) {
+				selectedDoc.getIn(['info', 'websites']).items = [];
+			} else {
+				selectedDoc.addIn(['info', 'websites'], []);
+			}
+			sites.forEach(site => {
+				selectedDoc.getIn(['info', 'websites']).add(site);
+			});
+			selectedDoc.deleteIn(['info', 'website']);
 		} else {
-			selectedDoc.info.website = document.getElementById('PackageWebsite').value;
-			delete selectedDoc.info.websites;
+			selectedDoc.setIn(['info', 'website'], sites[0]);
+			selectedDoc.deleteIn(['info', 'websites']);
 		}
+	} else if (selectedDoc.hasIn(['info', 'website'])) {
+		selectedDoc.deleteIn(['info', 'website']);
+	} else if (selectedDoc.hasIn(['info', 'websites'])) {
+		selectedDoc.deleteIn(['info', 'websites']);
 	}
+	//#endregion
+
+
+	//#region Included Assets
+	//let newAssetId = pkgAssetSelect.getValue().split('|')[1];
+	let newAssetId = pkgAssetSelect.getValue();
+	let newAssetInc = pkgAssetIncSelect.getValue().split(',');
+	let newAssetExc = pkgAssetExcSelect.getValue().split(',');
+
+	if (selectedPkgAssetIdx === null) {
+		let newAsset = {
+			assetId: newAssetId
+		}
+		if (document.getElementById('PackageAssetInclude').value !== '') {
+			newAsset.include = newAssetInc
+		}
+		if (document.getElementById('PackageAssetExclude').value !== '') {
+			newAsset.exclude = newAssetExc
+		}
+	} else {
+		selectedDoc.get('assets').items[selectedPkgAssetIdx].set('assetId', newAssetId);
+		selectedDoc.get('assets').items[selectedPkgAssetIdx].set('include', newAssetInc);
+		selectedDoc.get('assets').items[selectedPkgAssetIdx].set('exclude', newAssetExc);
+	}
+	//#endregion
+
 
 	//To push the package to the list it at minimum must have a group and name so the cm.OnChange can pick it up
-	if (currDocIdx === null && Object.hasOwn(selectedDoc, "group") && Object.hasOwn(selectedDoc, "name")) {
+	if (currDocIdx === null && selectedDoc.has('group') && selectedDoc.has('name')) {
 		yamlData.push(selectedDoc);
 		SetSelectedDoc(yamlData.filter((doc) => IsPackage(doc)).length - 1, 'p');
 	}
 	UpdateData();
-	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.group + ':' + selectedDoc.name;
+	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.get('group') + ':' + selectedDoc.get('name');
+
+
+	
 }
 
 
@@ -383,47 +381,32 @@ function UpdatePackageData() {
 // -----------------------------------------------   Included Assets   ------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 /**
- * Add a new asset to the currently selected package.
+ * Resets the Included Asset input form fields.
  */
-function AddIncludedAsset() {
-	ValidateInput('PackageAssetId');
-	if (selectedDoc !== null) {
-		var newAsset = {
-			assetId: document.getElementById('PackageAssetId').value
-		}
-
-		if (document.getElementById('PackageAssetInclude').value !== '') {
-			newAsset.include = TextToArray(document.getElementById('PackageAssetInclude').value);
-		}
-		if (document.getElementById('PackageAssetExclude').value !== '') {
-			newAsset.exclude = TextToArray(document.getElementById('PackageAssetExclude').value);
-		}
-		if (selectedDoc.assets === undefined) {
-			selectedDoc.assets = new Array();
-		}
-		selectedDoc.assets.push(newAsset);
-
-		ResetIncludedAssetInputs();
-		document.getElementById('AddPackageAssetButton').disabled = true;
-		UpdateData();
-	}
+function ResetIncludedAssetForm() {
+	selectedPkgAssetIdx = null;
+	pkgAssetSelect.clear(true);
+	pkgAssetIncSelect.clear(true);
+	pkgAssetIncSelect.clearOptions();
+	pkgAssetExcSelect.clear(true);
+	pkgAssetExcSelect.clearOptions();
 }
 /**
- * Sets the included asset id to the currently currently selected value.
+ * Fill the Package Asset input form fields with the values from the currently selected package and asset index.
  */
-function SetIncludedAssetId(obj) {
-	if (obj.id === 'SelectLocalPackageAssets') {
-		document.getElementById('SelectPacPackageAssets').value = '';
-	} else {
-		document.getElementById('SelectLocalPackageAssets').value = '';
-	}
-
-	document.getElementById('PackageAssetId').value = obj.value;
-	if (currPackageIdx !== null) {
-		document.getElementById('AddPackageAssetButton').disabled = false;
-	} else {
-		document.getElementById('AddPackageAssetButton').disabled = true;
-	}
+function FillIncludedAssetForm(assetName) {
+	var pkgAsset = selectedDoc.get('assets').toJSON().find((i) => i.assetId === assetName);
+	selectedPkgAssetIdx = selectedDoc.get('assets').toJSON().findIndex((i) => i.assetId === assetName);
+	//pkgAssetSelect.addItem('local|' + assetName, true);
+	pkgAssetSelect.addItem(assetName, true);
+	pkgAsset.include.forEach(item => {
+		pkgAssetIncSelect.addOption({ value: item, text: item });
+		pkgAssetIncSelect.addItem(item, true);
+	});
+	pkgAsset.exclude.forEach(item => {
+		pkgAssetExcSelect.addOption({ value: item, text: item });
+		pkgAssetExcSelect.addItem(item, true);
+	});
 }
 
 
@@ -562,71 +545,70 @@ function AddNewVariant() {
  */
 function FillAssetForm() {
 	if (selectedDoc === undefined || selectedDoc === null) { return; }
-	document.getElementById('AssetUrl').value = selectedDoc.url;
-	document.getElementById('AssetId').value = selectedDoc.assetId;
-	document.getElementById('AssetVersion').value = selectedDoc.version;
-	document.getElementById('AssetLastModified').value = new Date(selectedDoc.lastModified).toISOString().slice(0, 19);
-	if (Object.hasOwn(selectedDoc, 'archiveType')) {
-		document.getElementById('AssetArchiveVersion').value = selectedDoc.archiveType.version;
+	document.getElementById('AssetUrl').value = selectedDoc.get('url');
+	document.getElementById('AssetId').value = selectedDoc.get('assetId');
+	document.getElementById('AssetVersion').value = selectedDoc.get('version');
+	document.getElementById('AssetLastModified').value = new Date(selectedDoc.get('lastModified')).toISOString().slice(0, 19);
+	if (selectedDoc.has('archiveType')) {
+		document.getElementById('AssetArchiveVersion').value = selectedDoc.getIn(['archiveType', 'version']);
 	}
-	if (Object.hasOwn(selectedDoc, 'checksum')) {
-		document.getElementById('AssetChecksum').value = selectedDoc.checksum.sha256;
+	if (selectedDoc.has('checksum')) {
+		document.getElementById('AssetChecksum').value = selectedDoc.getIn(['checksum', 'sha256']);
 	}
-	if (Object.hasOwn(selectedDoc, 'nonPersistentUrl')) {
-		document.getElementById('AssetNonPersistentUrl').value = selectedDoc.nonPersistentUrl;
+	if (selectedDoc.has('nonPersistentUrl')) {
+		document.getElementById('AssetNonPersistentUrl').value = selectedDoc.get('nonPersistentUrl');
 	}
 
 	document.getElementById('CurrentDocumentType').innerHTML = "asset";
-	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.assetId;
+	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.get('assetId');
 }
 /**
  * Updates the selectedDoc with the current state of the Asset Properties tab inputs.
  */
 function UpdateAssetData() {
 	if (selectedDoc === null) {
-		selectedDoc = new Object();
+		selectedDoc = new YAML.Document(new Object());
 	}
 
 	if (document.getElementById('AssetUrl').value !== '') {
-		selectedDoc.url = document.getElementById('AssetUrl').value;
+		selectedDoc.setIn(['url'], document.getElementById('AssetUrl').value);
 	}
 	if (document.getElementById('AssetId').value !== '') {
-		selectedDoc.assetId = document.getElementById('AssetId').value;
+		selectedDoc.setIn(['assetId'], document.getElementById('AssetId').value);
 	}
 	if (document.getElementById('AssetVersion').value !== '') {
-		selectedDoc.version = document.getElementById('AssetVersion').value;
+		selectedDoc.setIn(['version'], document.getElementById('AssetVersion').value);
 	}
 	if (document.getElementById('AssetLastModified').value !== '') {
-		selectedDoc.lastModified = document.getElementById('AssetLastModified').value + 'Z';
+		selectedDoc.setIn(['lastModified'], document.getElementById('AssetLastModified').value + 'Z');
 	}
 	if (document.getElementById('AssetArchiveVersion').value !== '0') {
-		if (!Object.hasOwn(selectedDoc, 'archiveType')) {
-			selectedDoc.archiveType = new Object();
-			selectedDoc.archiveType.format = "Clickteam"
+		if (selectedDoc.has('archiveType')) {
+			selectedDoc.setIn(['archiveType', 'format'], "Clickteam");
 		}
-		selectedDoc.archiveType.version = document.getElementById('AssetArchiveVersion').value;
+		selectedDoc.setIn(['archiveType', 'version'], document.getElementById('AssetArchiveVersion').value);
 	} else {
-		delete selectedDoc.archiveType;
+		selectedDoc.deleteIn(['archiveType']);
 	}
 	if (document.getElementById('AssetChecksum').value !== '') {
-		if (!Object.hasOwn(selectedDoc, 'checksum')) {
+		if (!selectedDoc.has('checksum')) {
 			selectedDoc.checksum = new Object();
 		}
-		selectedDoc.checksum.sha256 = document.getElementById('AssetChecksum').value;
+		selectedDoc.setIn(['checksum', 'sha256'], document.getElementById('AssetChecksum').value);
 	} else {
-		delete selectedDoc.checksum;
+		selectedDoc.deleteIn(['checksum']);
 	}
 	if (document.getElementById('AssetNonPersistentUrl').value !== '') {
-		selectedDoc.nonPersistentUrl = document.getElementById('AssetNonPersistentUrl').value;
+		selectedDoc.setIn(['nonPersistentUrl'], document.getElementById('AssetNonPersistentUrl').value);
 	} else {
-		delete selectedDoc.nonPersistentUrl;
+		selectedDoc.deleteIn(['nonPersistentUrl']);
 	}
 
 	//To push the package to the list it at minimum must have an assetId
-	if (currDocIdx === null && Object.hasOwn(selectedDoc, "assetId")) {
+	if (currDocIdx === null && selectedDoc.has('assetId')) {
 		yamlData.push(selectedDoc);
 		SetSelectedDoc(yamlData.filter((doc) => IsAsset(doc)).length - 1, 'a');
 	}
 	UpdateData();
-	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.assetId;
+	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.get('assetId');
 }

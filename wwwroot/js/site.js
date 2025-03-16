@@ -10,7 +10,7 @@ const cm = CodeMirror.fromTextArea(document.getElementById('CodeEditor'), {
 cm.on('change', CodeMirrorOnChange);
 
 function CodeMirrorOnChange(instance, changeObj) {
-	yamlData = jsyaml.loadAll(cm.getValue());
+	yamlData = YAML.parseAllDocuments(cm.getValue());
 
 	//Figure which document we're editing within the code so it can be set as the selected document
 	var tabName = 'PackagePropertiesTab';
@@ -53,7 +53,7 @@ function CodeMirrorOnChange(instance, changeObj) {
 	}
 
 	//TODO - fix the automatic tab activating when editing a part of the code pane. It currently always defaults to the 'PackageProperties' tab because when dumping the data the cursor is set to 0,0
-	var currDoc = jsyaml.load(cm.getRange({ line: startLine, ch: 0 }, { line: endLine, ch: 0 }));
+	var currDoc = YAML.parseDocument(cm.getRange({ line: startLine, ch: 0 }, { line: endLine, ch: 0 }));
 	if (IsPackage(currDoc)) {
 		currDocIdx = yamlData.findIndex(item => item.group === currDoc.group && item.name === currDoc.name);
 		//SelectTab(tabName);
@@ -81,6 +81,8 @@ var currDocIdx = null;
  * The currently selected ("active") document being edited - may be a package or an asset.
  */
 var selectedDoc = null;
+
+var selectedPkgAssetIdx = null;
 /**
  * Main Tree View element
  */
@@ -110,233 +112,137 @@ const pkgSummaryEditor = new EasyMDE({
 	previewImagesInEditor: true,
 	status: false //hide the status bar
 });
-pkgSummaryEditor.codemirror.on("change", () => {
-	UpdatePackageData();
-	//TODO rename this to medatadata, also the asset function too
-});
+pkgSummaryEditor.codemirror.on("change", UpdatePackageData);
 
 
-var listOfAssets = new Array();
-var listOfPackages = new Array();
-var listOfGroups = new Array();
-
-
-
-var pkgTomSelect = new TomSelect('#PacPackageList', {
-	valueField: 'id',
-	labelField: 'id',
-	searchField: ['id'],
-	maxItems: 1,
-	optgroups: [
-		{value: 'default', label: 'Default channel'},
-		{value: 'zasco', label: 'Zasco\'s channel'},
-	],
-	optgroupField: 'optGroup',
-
-	// fetch remote data
-	load: async function (query, callback) {
-		var self = this;
-		if (self.loading > 1) {
-			callback();
-			return;
-		}
-
-		var defaultChannelURL = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		var zascoChannelURL = 'https://zasco.github.io/sc4pac-channel/channel/sc4pac-channel-contents.json'
-		allPackages = []
-
-		function handleResponse(jsonResponse, channel) {
-			// Add a new field combining the group and name.
-			return jsonResponse.packages.map(i => ({ id: i.group + ":" + i.name, optGroup: channel, ...i }))
-		}
-		
-		await fetch(defaultChannelURL)
-			.then(response => response.json())
-			.then(json => {
-				allPackages = allPackages.concat(handleResponse(json, 'default'))
-				defaultFailed = false
-			})
-			.catch(() => {
-				defaultFailed = true
-			});
-		
-		await fetch(zascoChannelURL)
-			.then(response => response.json())
-			.then(json => {
-				allPackages = allPackages.concat(handleResponse(json, 'zasco'))
-				zascoFailed = false
-			})
-			.catch(() => {
-				zascoFailed = true
-			});
-		
-		if (!defaultFailed || !zascoFailed) {
-			callback(allPackages);
-			self.settings.load = null;
-		}
-		else callback();
-	},
-	// custom rendering function for options
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.group + ":" + item.name/*  +"["+ item.optGroup +" channel]" */) + '</div>';
-		},
-		optgroup_header: function(data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	},
-});
-
-var variantPackageSelect = new TomSelect('#VariantsPacPackageList', {
-	valueField: 'id',
-	labelField: 'id',
-	searchField: ['id'],
-	maxItems: 1,
-
-	// fetch remote data
-	load: function (query, callback) {
-		var self = this;
-		if (self.loading > 1) {
-			callback();
-			return;
-		}
-
-		var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		fetch(url)
-			.then(response => response.json())
-			.then(json => {
-				// Add a new field combining the group and name.
-				callback(json.packages.map(i => ({ id: i.group + ":" + i.name, ...i })));
-				//console.log(json.contents
-				//	.filter((item) => item.group !== 'sc4pacAsset')
-				//	.map(i => ({ id: i.group + ":" + i.name, ...i }))
-				//);
-				self.settings.load = null;
-			}).catch(() => {
-				callback();
-			});
-	},
-	// custom rendering function for options
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.group + ":" + item.name) + '</div>';
-		}
-	},
-});
-
-var variantAssetSelect = new TomSelect('#VariantsPacAssetList', {
-	valueField: 'name',
-	labelField: 'name',
-	searchField: ['name'],
-	maxItems: 1,
-
-	// fetch remote data
-	load: function (query, callback) {
-		var self = this;
-		if (self.loading > 1) {
-			callback();
-			return;
-		}
-
-		var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		fetch(url)
-			.then(response => response.json())
-			.then(json => {
-				callback(json.assets);
-				//console.log(json.contents.filter((item) => item.group === 'sc4pacAsset'));
-				//console.log(sc4pacAssets.map(i => ({ id: i.name, ...i })));
-				self.settings.load = null;
-			}).catch(() => {
-				callback();
-			});
-	},
-	//options: sc4pacAssets.map(i => ({ id: i.name, ...i})),
-	// custom rendering function for options
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.name) + '</div>';
-		}
-	},
-});
-
-var pkgSubfolderSelect = new TomSelect('#PackageSubfolder', {
-	valueField: 'name',
-	labelField: 'name',
-	searchField: ['name'],
-	maxItems: 1,
-	preload: true,
-	maxOptions: null,
-
-	// fetch remote data
-	load: function (query, callback) {
-		var self = this;
-		if (self.loading > 1) {
-			callback();
-			return;
-		}
-
-		var url = 'https://raw.githubusercontent.com/memo33/sc4pac/45fc116576044e73ff50b257fc1fcef381f96714/.github/sc4pac-yaml-schema.py' // Use data @ commit 45fc11 to prevent any failure if file is ever changed.
-		fetch(url)
-			.then(response => response.text())
-			.then(responseText => {
-				subfolders = responseText
-					.split('### [subfolders-docsify]')[1] // Keep content between delimiters.
-					.split('\n') // Split by line return.
-					.filter(n => n) // Remove empty entries (first and last).
-					.map(i => ({name: i}))
-				;
-				callback(subfolders);
-				//console.log(subfolders)
-				self.settings.load = null;
-			}).catch(() => {
-				callback();
-			});
-	},
-	// custom rendering function for options
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.name)+ '</div>';
-		}
-	},
-});
-
-var pkgGroupSelect = new TomSelect('#PackageGroup', {
-    valueField: 'group',
-    labelField: 'group',
-    searchField: ['group'],
+const pkgGroupSelect = new TomSelect('#PackageGroup', {
 	maxItems: 1,
 	create: true,
 	preload: true,
 	persist: false,
 	maxOptions: null,
 
-    // fetch remote data
-    load: function (query, callback) {
-        var self = this;
-        if (self.loading > 1) {
-            callback();
-            return;
-        }
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.text) + '</div>';
+		}
+	},
+});
 
-        var url = 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json'
-		fetch(url)
-            .then(response => response.json())
-            .then(json => {
-                callback(json.packages);
-                self.settings.load = null;
-            }).catch(() => {
-                callback();
-            });
-    },
-    // custom rendering function for options
-    render: {
-        option: function (item, escape) {
-            return '<div class="py-2 d-flex">' + escape(item.group)+ '</div>';
-        }
-    },
+const pkgSubfolderSelect = new TomSelect('#PackageSubfolder', {
+	maxItems: 1,
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.text) + '</div>';
+		}
+	},
+});
+
+const pkgDependencySelect = new TomSelect("#PackageDependencies", {
+	create: false,
+	valueField: 'value',
+	labelField: 'id',
+	searchField: ['id'],
+	//optgroups: ChannelInfo,
+	//optgroupValueField: 'name',
+	//optgroupField: 'channel',
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
+		},
+		optgroup_header: function (data, escape) {
+			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
+		}
+	}
+});
+
+const pkgWebsitesSelect = new TomSelect("#PackageWebsite", {
+	persist: false,
+	createOnBlur: true,
+	create: true
+});
+
+const pkgImageSelect = new TomSelect("#PackageImages", {
+	persist: false,
+	createOnBlur: true,
+	create: true
+});
+
+const pkgAssetSelect = new TomSelect("#PackageAssetId", {
+	create: false,
+	valueField: 'value',
+	labelField: 'id',
+	maxItems: 1,
+	searchField: ['id'],
+	//optgroups: ChannelInfo,
+	//optgroupValueField: 'name',
+	//optgroupField: 'channel',
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
+		},
+		optgroup_header: function (data, escape) {
+			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
+		}
+	}
+});
+
+const pkgAssetIncSelect = new TomSelect("#PackageAssetInclude", {
+	persist: false,
+	createOnBlur: true,
+	create: true
+});
+
+const pkgAssetExcSelect = new TomSelect("#PackageAssetExclude", {
+	persist: false,
+	createOnBlur: true,
+	create: true
+});
+
+const variantPackageSelect = new TomSelect("#VariantDependencies", {
+	create: false,
+	valueField: 'value',
+	labelField: 'id',
+	searchField: ['id'],
+	//optgroups: ChannelInfo,
+	//optgroupValueField: 'name',
+	//optgroupField: 'channel',
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
+		},
+		optgroup_header: function (data, escape) {
+			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
+		}
+	}
+});
+
+const variantAssetSelect = new TomSelect("#VariantAssetId", {
+	create: false,
+	valueField: 'value',
+	labelField: 'id',
+	searchField: ['id'],
+	//optgroups: ChannelInfo,
+	//optgroupValueField: 'name',
+	//optgroupField: 'channel',
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
+		},
+		optgroup_header: function (data, escape) {
+			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
+		}
+	}
 });
 
 
+let localAssets = [];
+let localPackages = [];
 
 ResetAllInputs();
 SetTabState();
@@ -368,127 +274,94 @@ function UpdateData(dumpData = true) {
 
 	var countOfAssets = 0;
 	var countOfPackages = 0;
-	listOfAssets.length = 0;
-	listOfPackages.length = 0;
+	localAssets.length = 0;
+	localPackages.length = 0;
 
 	if (yamlData !== null) {
-		yamlData.forEach((item) => {
-			if (IsAsset(item)) {
+		yamlData.forEach((doc) => {
+			if (IsAsset(doc)) {
 				countOfAssets++;
-				listOfAssets.push(item);
-			} else if (IsPackage(item)) {
+				localAssets.push(doc.toJSON().assetId);
+			} else if (IsPackage(doc)) {
 				countOfPackages++;
-				listOfPackages.push(item);
+				localPackages.push(doc.toJSON().group + ':' + doc.toJSON().name);
 			}
 		});
 	}
 	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 
 	SetTabState();
-	UpdateLocalDropdowns();
+
+	//Update the Tomselect dropdowns with the local packages and assets
+	[pkgDependencySelect, variantPackageSelect, pkgAssetSelect, variantAssetSelect].forEach(tscontrol => {
+		let allOpts = tscontrol.options
+		for (const key in allOpts) {
+			if (allOpts[key].channel === 'local') {
+				tscontrol.removeOption(key);
+			}
+		}
+	});
+	//pkgDependencySelect.addOptions(localPackages.map(p => ({ value: 'local|' + p, id: p, channel: 'local' })));
+	//variantPackageSelect.addOptions(localPackages.map(p => ({ value: 'local|' + p, id: p, channel: 'local' })));
+	//pkgAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
+	//variantAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
+	pkgDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
+	variantPackageSelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
+	pkgAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
+	variantAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
+
+	// Update the trees with local assets and packages
 	UpdateMainTree();
 	UpdateIncludedAssetTree();
 	UpdateVariantTree();
-
 	
 	if (dumpData) {
 		cm.off('change', CodeMirrorOnChange);
 		cm.setValue(DumpYaml());
 		cm.on('change', CodeMirrorOnChange);
 	}
-	else {
-		if (IsPackage(selectedDoc)) {
-			FillPackageForm();
-		} else {
-			FillAssetForm();
-		}
-	}
+	
 	SetSelectedDoc(currDocIdx);
 
-	/**
-	 * Count the number of Packages and Assets in the code pane and update the UI with this new result.
-	 */
-	function UpdateLocalDropdowns() {
-		//TODO - this UpdateLocalDropdowns function should disappear when PR #45 is implemented
-
-		//Fill local dependency selection options
-		var packageDependencies = document.getElementById('LocalPackageList');
-		var variantDependencies = document.getElementById('VariantsLocalPackageList');
-		packageDependencies.replaceChildren();
-		packageDependencies.appendChild(new Option('', ''));
-		variantDependencies.replaceChildren();
-		variantDependencies.appendChild(new Option('', ''));
-		for (var idx = 0; idx < listOfPackages.length; idx++) {
-			var pkgName = listOfPackages[idx].group + ":" + listOfPackages[idx].name;
-			packageDependencies.add(new Option(pkgName, pkgName));
-			variantDependencies.add(new Option(pkgName, pkgName));
-		}
-
-		//Package:asset selection for local assets
-		var localAssetList = document.getElementById('SelectLocalPackageAssets');
-		var variantAssets = document.getElementById('VariantsLocalAssetList');
-		localAssetList.replaceChildren();
-		localAssetList.appendChild(new Option('', ''));
-		variantAssets.replaceChildren();
-		variantAssets.appendChild(new Option('', ''));
-		listOfAssets.forEach(i => localAssetList.add(new Option(i.assetId, i.assetId)));
-		listOfAssets.forEach(i => variantAssets.add(new Option(i.assetId, i.assetId)));
-	}
-
 	function DumpYaml() {
-		var newYaml = '';
-		var docu = '';
-		//TODO - figure out how to retain comments
+		if (yamlData.length === 0) {
+			return '';
+		} else {
+			var newYaml = '';
+			var docu = '';
+			for (var idx = 0; idx < yamlData.length; idx++) {
+				if (yamlData[idx] === null) {
+					continue;
+				}
+				docu = yamlData[idx].toString(options = {
+					lineWidth: 0,
+					defaultKeyType: 'PLAIN',
+					defaultStringType: 'QUOTE_DOUBLE',
+					singleQuote: false,
+					indentSeq: false
+				});
 
-		for (var idx = 0; idx < yamlData.length; idx++) {
-			if (yamlData[idx] === null) {
-				continue;
+				newYaml = newYaml + docu + '\n';
 			}
-			docu = jsyaml.dump(yamlData[idx], {
-				'lineWidth': -1,
-				'quotingType': '"',
-				'noArrayIndent': true,
-				'forceQuotes': true
-			});
-			//The parser blows away the multiline context so we need to rebuild it :(
-			if (docu.indexOf('description: ') > 0) {
-				var rgx = new RegExp('description: \"(.*?)\"');
-				var oldText = docu.match(rgx)[0];
-				var newText = oldText.replace('description: "', "description: |\n    ").replaceAll('\\n', '\n    ').replaceAll('\n    \n', '\n\n').replace('"', '');
-				docu = docu.replace(oldText, newText);
-			}
-
-			newYaml = newYaml + docu;
-			if (idx !== yamlData.length - 1) {
-				newYaml = newYaml + '\n---\n';
-			}
+			return newYaml;
 		}
-		return newYaml;
 	}
 }
 
 
 //https://github.com/justinchmura/js-treeview
 function UpdateMainTree() {
-	function getAssetTreeName(id, asset) {
-		return id + ' - ' + asset.assetId;
-	}
-	
-	function getPackageTreeName(id, package) {
-		return id + ' - ' + package.group + ":" + package.name;
-	}
-	
 	var idx = 1;
 	var astList = [];
-	listOfAssets.forEach((asset) => {
-		astList.push({ name: getAssetTreeName(idx, asset), children: [] });
+	localAssets.forEach((asset) => {
+		astList.push({ name: CreateAssetTreeName(idx, asset), children: [] });
 		idx++;
 	});
 
 	idx = 1;
 	var pkgList = [];
-	listOfPackages.forEach((pkg) => {
-		pkgList.push({ name: getPackageTreeName(idx, pkg), children: [] });
+	localPackages.forEach((pkg) => {
+		pkgList.push({ name: CreatePackageTreeName(idx, pkg), children: [] });
 		idx++;
 	});
 
@@ -499,17 +372,30 @@ function UpdateMainTree() {
 	mtv = new TreeView(mainTreeData, document.getElementById('MainTreeView'));
 	leaves = mtv.node.querySelectorAll('.tree-leaf');
 	if (selectedDoc) {
-		leaves.forEach(function(leaf) {
+		leaves.forEach(function (leaf) {
 			let selectedDocTreeName;
-			if (IsPackage(selectedDoc)) selectedDocTreeName = getPackageTreeName('', selectedDoc);
-			else if (IsAsset(selectedDoc)) selectedDocTreeName = getAssetTreeName('', selectedDoc);
-			else return;
+			if (IsPackage(selectedDoc)) {
+				selectedDocTreeName = CreatePackageTreeName('', selectedDoc);
+			}
+			else if (IsAsset(selectedDoc)) {
+				selectedDocTreeName = CreateAssetTreeName('', selectedDoc);
+			}
+			else {
+				return;
+			}
 			if (leaf.querySelectorAll('.tree-leaf-text')[0].innerHTML.includes(selectedDocTreeName)) leaf.classList.add('selected');
 		})
 	}
-	
+	function CreateAssetTreeName(id, asset) {
+		return id + ' - ' + asset;
+	}
+
+	function CreatePackageTreeName(id, package) {
+		return id + ' - ' + package;
+	}
+
 	mtv.on("select", function (t) {
-		leaves.forEach(function(leaf) {
+		leaves.forEach(function (leaf) {
 			if (!(leaf instanceof HTMLElement)) return;
 			leaf.classList.remove('selected');
 		})
@@ -526,6 +412,7 @@ function UpdateMainTree() {
 
 			SetSelectedDoc(selectedIdx - 1, 'p');
 			FillPackageForm();
+			UpdateIncludedAssetTree();
 		} else {
 			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			SelectTab('AssetPropertiesTab');
@@ -539,10 +426,10 @@ function UpdateMainTree() {
 
 function UpdateIncludedAssetTree() {
 	var pkgAssets;
-	if (selectedDoc == null || selectedDoc.assets == null) {
+	if (selectedDoc == null || selectedDoc.get('assets') == null) {
 		pkgAssets = [];
 	} else {
-		pkgAssets = selectedDoc.assets.map((i) => ({ name: i.assetId, children: [] }));
+		pkgAssets = selectedDoc.get('assets').toJSON().map((i) => ({ name: i.assetId, children: [] }));
 	}
 
 	var pkgAssetData = [{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }]
@@ -722,10 +609,10 @@ function SetSelectedDoc(index, type) {
 			return;
 		} else if (type.toLowerCase() === 'p') {
 			selectedDoc = docs[index];
-			currDocIdx = yamlData.findIndex(i => i.group === selectedDoc.group && i.name === selectedDoc.name);
+			currDocIdx = yamlData.findIndex(i => i.get('group') === selectedDoc.get('group') && i.get('name') === selectedDoc.get('name'));
 		} else if (type.toLowerCase() === 'a') {
 			selectedDoc = docs[index];
-			currDocIdx = yamlData.findIndex(i => i.assetId === selectedDoc.assetId);
+			currDocIdx = yamlData.findIndex(i => i.get('assetId') === selectedDoc.get('assetId'));
 		}
 	}
 }

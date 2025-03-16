@@ -4,26 +4,33 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>YAML editor for sc4pac</title>
+	<link rel="icon" type="image/png" sizes="16x16" href="wwwroot/img/favicon-16x16.png"> <!--https://lettericon.com/-->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 	<link rel="stylesheet" href="wwwroot/css/site.css" asp-append-version="true" />
 	<link rel="stylesheet" href="wwwroot/SC4PackMan.styles.css" asp-append-version="true" />
 
+	<script type="module">
+		import * as YAML from 'https://cdn.skypack.dev/yaml';
+		window.YAML = YAML;
+	</script>
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js" integrity="sha512-CSBhVREyzHAjAFfBlIBakjoRUKp5h7VSweP0InR/pAJyptH7peuhCsqAI/snV+TwZmXZqoUklpXp6R6wMnYf5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
+	<!--CodeMirror-->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css" integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<link rel="stylesheet" href="wwwroot/css/codemirror.css" type="text/css" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js" integrity="sha512-8RnEqURPUc5aqFEN04aQEiPlSAdE0jlFS/9iGgUyNtwFnSKCXhmB6ZTNl7LnDtDWKabJIASzXrzD0K+LYexU9g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/yaml/yaml.min.js" integrity="sha512-+aXDZ93WyextRiAZpsRuJyiAZ38ztttUyO/H3FZx4gOAOv4/k9C6Um1CvHVtaowHZ2h7kH0d+orWvdBLPVwb4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/display/placeholder.min.js"></script>
 
+	<!--Tom Select-->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/css/tom-select.min.css" integrity="sha512-fnaIKCc5zGOLlOvY3QDkgHHDiDdb4GyMqn99gIRfN6G6NrgPCvZ8tNLMCPYgfHM3i3WeAU6u4Taf8Cuo0Y0IyQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.3.1/js/tom-select.complete.js" integrity="sha512-96+GeOCMUo6K6W5zoFwGYN9dfyvJNorkKL4cv+hFVmLYx/JZS5vIxOk77GqiK0qYxnzBB+4LbWRVgu5XcIihAQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+	<!--JS TreeView-->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/js-treeview@1.1.5/dist/treeview.min.css" integrity="sha256-7HeITe+2TSRri/WLPYj3ogabAV0rUDJT3mUe3135Pog=" crossorigin="anonymous">
 	<link rel="stylesheet" href="wwwroot/css/tree-view.css" type="text/css" />
 	<script src="https://cdn.jsdelivr.net/npm/js-treeview@1.1.5/dist/treeview.min.js" integrity="sha256-93K+UKgnmM6W/Gp13Z2QUMEStoI+wSf1dykHaFphUc0=" crossorigin="anonymous"></script>
 
+	<!--Easy Markdown Editor-->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
 	<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
 </head>
@@ -88,17 +95,9 @@
 								<input id="PackageSubfolder" class="form-control required" required />
 							</div>
 
-							<label for="PacPackageList" class="form-label">Add a dependency:</label>
-							<div class="input-group mb-2">
-								<label class="input-group-text" for="PacPackageList">From channels</label>
-								<input id="PacPackageList" class="form-control" />
-								<label class="input-group-text" for="PacPackageList">From this file</label>
-								<select id="LocalPackageList" class="form-control"></select>
-							</div>
-
 							<div class="input-group mb-2">
 								<span class="input-group-text w2">Dependencies</span>
-								<textarea id="PackageDependencies" class="form-control" rows="7"></textarea>
+								<input id="PackageDependencies" class="form-control required" autocomplete="off">
 							</div>
 						</form>
 					</fieldset>
@@ -107,12 +106,8 @@
 					<fieldset id="PackageInfoContent" class="tab-pane m-3" tabindex="0">
 						<form id="PackageInfoForm">
 							<div class="input-group mb-2">
-								<span id="PackageWebsiteLabel" class="input-group-text w2">Website</span>
-								<div class="form-check mt-2 me-2 ms-2">
-									<input id="IsMultipleWebsites" class="form-check-input" type="checkbox" title="Whether this package has multiple websites (uploaded to multiple exchanges)">
-									<label class="form-check-label" for="IsMultipleWebsites" title="Whether this package has multiple websites (uploaded to multiple exchanges">Multiple</label>
-								</div>
-								<textarea id="PackageWebsite" class="form-control"></textarea>
+								<label id="PackageWebsiteLabel" class="input-group-text w2">Website(s)</label>
+								<input id="PackageWebsite" class="form-control" />
 							</div>
 							<div class="input-group mb-2">
 								<span class="input-group-text required-label w2">Summary</span>
@@ -140,7 +135,7 @@
 							</div>
 							<div class="input-group mb-2">
 								<span class="input-group-text w2">Images</span>
-								<textarea id="PackageImages" class="form-control" rows="5"></textarea>
+								<input id="PackageImages" class="form-control required" autocomplete="off">
 							</div>
 						</form>
 					</fieldset>
@@ -149,35 +144,29 @@
 					<fieldset id="IncludedAssetsContent" class="tab-pane m-3" tabindex="0">
 						<div style="display:flex" class="row">
 							<div class="col-sm-12 col-md-3">
+								<div class="mb-2 btn-group">
+									<button id="NewPackageAssetButton" type="button" class="btn btn-primary btn-sm">New Included Asset</button>
+								</div>
 								<div id="AssetTreeView"></div>
 							</div>
 
 							<div class="col-sm-12 col-md-9">
-								<p>These assets will be installed for every user, regardless of the chosen variant or option. Choose an asset from one of the dropdowns below.</p>
+								<p>These assets will always be installed, regardless of the chosen variant or option.</p>
 								<form id="IncludedAssetsForm">
 									<div class="mb-2 input-group">
-										<span class="input-group-text w1">This file</span>
-										<select id="SelectLocalPackageAssets" class="form-select"></select>
-									</div>
-									<div class="mb-2 input-group">
-										<span class="input-group-text w1">Sc4pac</span>
-										<select id="SelectPacPackageAssets" class="form-select"></select>
-									</div>
-									<div class="mb-2 input-group">
 										<span class="input-group-text w1">Asset Id</span>
-										<input id="PackageAssetId" class="form-control" type="text" disabled="disabled" />
+										<input id="PackageAssetId" class="form-control" />
 									</div>
 									<div class="mb-2 input-group">
 										<span class="input-group-text w1">Include</span>
-										<textarea id="PackageAssetInclude" class="form-control" rows="3"></textarea>
+										<input id="PackageAssetInclude" class="form-control" />
 									</div>
 									<div class="mb-2 input-group">
 										<span class="input-group-text w1">Exclude</span>
-										<textarea id="PackageAssetExclude" class="form-control" rows="3"></textarea>
+										<input id="PackageAssetExclude" class="form-control" />
 									</div>
 									<div class="mb-2 btn-group">
 										<button id="ResetIncludedAssetButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
-										<button id="AddPackageAssetButton" class="btn btn-primary" type="button" disabled="disabled">Add Asset to Package</button>
 									</div>
 								</form>
 							</div>
@@ -210,28 +199,14 @@
 										<input id="VariantDescription" class="form-control" type="text" />
 									</div>
 
-									<label for="VariantsPacPackageList" class="form-label">Add a dependency:</label>
-									<div class="input-group mb-2">
-										<label class="input-group-text w2" for="VariantsPacPackageList">From sc4pac</label>
-										<input id="VariantsPacPackageList" class="form-control" />
-										<label class="input-group-text w2" for="VariantsLocalPackageList">From this file</label>
-										<select id="VariantsLocalPackageList" class="form-control"></select>
-									</div>
 									<div class="mb-2 input-group">
-										<span class="input-group-text w2">Dependencies</span>
-										<textarea id="VariantDependencies" class="form-control" rows="3" oninput=""></textarea>
+										<label class="input-group-text w2">Dependencies</label>
+										<input id="VariantDependencies" class="form-control" />
 									</div>
 
-									<label for="VariantsPacAssetList" class="form-label">Add an asset:</label>
-									<div class="input-group mb-2">
-										<label class="input-group-text w2" for="VariantsPacAssetList">From sc4pac</label>
-										<input id="VariantsPacAssetList" class="form-control" />
-										<label class="input-group-text w2" for="VariantsLocalAssetList">From this file</label>
-										<select id="VariantsLocalAssetList" class="form-control"></select>
-									</div>
 									<div class="mb-2 input-group">
-										<label class="input-group-text w1">Asset Id</label>
-										<input id="VariantAssetId" class="form-control" disabled />
+										<label class="input-group-text w2">Asset Id</label>
+										<input id="VariantAssetId" class="form-control" />
 									</div>
 									<div class="input-group mb-2">
 										<label class="input-group-text w1">Include</label>
@@ -347,7 +322,7 @@
 				<div class="box">
 					<textarea id="CodeEditor" placeholder="Use the inputs on the left to generate YAML or paste an existing script here and parse it to begin modifications."></textarea>
 				</div>
-				
+
 			</div>
 
 			<!--Modal Dialogs-->
@@ -404,10 +379,11 @@
 	</footer>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="wwwroot/js/site-load.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site-util.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site-interactivity.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site-events.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site-file-io.js"></script>
-	<script type="text/javascript" src="wwwroot/js/site.js"></script>
+	<script type="text/javascript" src="wwwroot/js/site.js" ></script>
 </body>
 </html>
