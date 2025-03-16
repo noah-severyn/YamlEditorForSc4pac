@@ -11,7 +11,6 @@ cm.on('change', CodeMirrorOnChange);
 
 function CodeMirrorOnChange(instance, changeObj) {
 	yamlData = YAML.parseAllDocuments(cm.getValue());
-	//yamlData2 = YAML.parseAllDocuments(cm.getValue()).map(i => i.toJS(options = {}));
 
 	//Figure which document we're editing within the code so it can be set as the selected document
 	var tabName = 'PackagePropertiesTab';
@@ -119,6 +118,126 @@ pkgSummaryEditor.codemirror.on("change", () => {
 });
 
 
+const pkgGroupSelect = new TomSelect('#PackageGroup', {
+	maxItems: 1,
+	create: true,
+	preload: true,
+	persist: false,
+	maxOptions: null,
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.text) + '</div>';
+		}
+	},
+});
+
+const pkgSubfolderSelect = new TomSelect('#PackageSubfolder', {
+	maxItems: 1,
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.text) + '</div>';
+		}
+	},
+});
+
+const pkgDependencySelect = new TomSelect("#PackageDependencies", {
+	create: false,
+	valueField: 'value',
+	labelField: 'id',
+	searchField: ['id'],
+	//optgroups: ChannelInfo,
+	//optgroupValueField: 'name',
+	//optgroupField: 'channel',
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
+		},
+		optgroup_header: function (data, escape) {
+			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
+		}
+	}
+});
+
+const pkgImageSelect = new TomSelect("#PackageImages", {
+	persist: false,
+	createOnBlur: true,
+	create: true
+});
+
+const pkgAssetSelect = new TomSelect("#PackageAssetId", {
+	create: false,
+	valueField: 'value',
+	labelField: 'id',
+	maxItems: 1,
+	searchField: ['id'],
+	//optgroups: ChannelInfo,
+	//optgroupValueField: 'name',
+	//optgroupField: 'channel',
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
+		},
+		optgroup_header: function (data, escape) {
+			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
+		}
+	}
+});
+
+const pkgAssetIncSelect = new TomSelect("#PackageAssetInclude", {
+	persist: false,
+	createOnBlur: true,
+	create: true
+});
+
+const pkgAssetExcSelect = new TomSelect("#PackageAssetExclude", {
+	persist: false,
+	createOnBlur: true,
+	create: true
+});
+
+const variantPackageSelect = new TomSelect("#VariantDependencies", {
+	create: false,
+	valueField: 'value',
+	labelField: 'id',
+	searchField: ['id'],
+	//optgroups: ChannelInfo,
+	//optgroupValueField: 'name',
+	//optgroupField: 'channel',
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
+		},
+		optgroup_header: function (data, escape) {
+			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
+		}
+	}
+});
+
+const variantAssetSelect = new TomSelect("#VariantAssetId", {
+	create: false,
+	valueField: 'value',
+	labelField: 'id',
+	searchField: ['id'],
+	//optgroups: ChannelInfo,
+	//optgroupValueField: 'name',
+	//optgroupField: 'channel',
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
+		},
+		optgroup_header: function (data, escape) {
+			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
+		}
+	}
+});
+
+
 let localAssets = [];
 let localPackages = [];
 
@@ -171,16 +290,19 @@ function UpdateData(dumpData = true) {
 	SetTabState();
 
 	//Update the Tomselect dropdowns with the local packages and assets
-	const rgx = new RegExp('local|');
-	[pkgDependencySelect, variantPackageSelect, pkgAssetSelect, variantAssetSelect].forEach(ts => {
-		ts.clearOptions((option) => {
-			return rgx.test(option.value);
+	[pkgDependencySelect, variantPackageSelect, pkgAssetSelect, variantAssetSelect].forEach(tscontrol => {
+		tscontrol.clearOptions((option) => {
+			return option.channel === 'local';
 		});
 	});
-	pkgDependencySelect.addOptions(localPackages.map(p => ({ value: 'local|' + p, id: p, channel: 'local' })));
-	variantPackageSelect.addOptions(localPackages.map(p => ({ value: 'local|' + p, id: p, channel: 'local' })));
-	pkgAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
-	variantAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
+	//pkgDependencySelect.addOptions(localPackages.map(p => ({ value: 'local|' + p, id: p, channel: 'local' })));
+	//variantPackageSelect.addOptions(localPackages.map(p => ({ value: 'local|' + p, id: p, channel: 'local' })));
+	//pkgAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
+	//variantAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
+	pkgDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
+	variantPackageSelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
+	pkgAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
+	variantAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
 
 	// Update the trees with local assets and packages
 	UpdateMainTree();

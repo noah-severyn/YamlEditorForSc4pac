@@ -1,5 +1,4 @@
-import * as YAML from 'https://cdn.skypack.dev/yaml';
-window.YAML = YAML;
+
 
 /**
  * List of assets from all channels
@@ -26,171 +25,42 @@ const ChannelInfo = [
 	{ name: 'simtrop', url: 'https://sc4pac.simtropolis.com/sc4pac-channel-contents.json', label: 'Simtropolis channel' },
     { name: 'zasco', url: 'https://zasco.github.io/sc4pac-channel/channel/sc4pac-channel-contents.json', label: 'Zasco\'s channel' },
 ];
-for (const channel of ChannelInfo) {
-    if (channel.url !== null) {
-        await fetch(channel.url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (channel.name === 'default') {
-                    AllSubfolders = data.stats.categories.map(item => item.category);
-                }
-                AllAssets = AllAssets.concat(data.assets.map(item => channel.name + '|' + item.name));
-                AllPackages = AllPackages.concat(data.packages.map(item => channel.name + '|' + item.group + ':' + item.name));
-                AllGroups = AllGroups.concat(data.packages.map(item => channel.name + '|' + item.group));
-            })
-            .catch(error => {
-                console.error('There was a problem fetching data from ' + channel.url + ':', error);
-            });
-	}
-};
-
-AllGroups = [...new Set(AllGroups)]; // returns unique values
-
-new TomSelect('#PackageGroup', {
-	maxItems: 1,
-	create: true,
-	preload: true,
-	persist: false,
-	maxOptions: null,
-
-	options: AllGroups.map(g => ({ value: g.split("|")[1], text: g.split("|")[1] })),
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.text) + '</div>';
-		}
-	},
-});
-
-new TomSelect('#PackageSubfolder', {
-	maxItems: 1,
-	options: AllSubfolders.map(folder => ({ value: folder, text: folder })),
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.text) + '</div>';
-		}
-	},
-});
-
-new TomSelect("#PackageDependencies", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	searchField: ['id'],
-	optgroups: ChannelInfo,
-	optgroupValueField: 'name',
-	optgroupField: 'channel',
-
-	options: AllPackages.map(pkg => ({ value: pkg, id: pkg.split("|")[1], channel: pkg.split("|")[0] })),
-
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		},
-		optgroup_header: function (data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	}
-});
-
-new TomSelect("#PackageImages", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
-
-new TomSelect("#PackageAssetId", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	maxItems: 1,
-	searchField: ['id'],
-	optgroups: ChannelInfo,
-	optgroupValueField: 'name',
-	optgroupField: 'channel',
-
-	options: AllAssets.map(asset => ({ value: asset, id: asset.split("|")[1], channel: asset.split("|")[0] })),
-
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		},
-		optgroup_header: function (data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	}
-});
-
-new TomSelect("#PackageAssetInclude", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
-
-new TomSelect("#PackageAssetExclude", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
-
-new TomSelect("#VariantDependencies", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	searchField: ['id'],
-	optgroups: ChannelInfo,
-	optgroupValueField: 'name',
-	optgroupField: 'channel',
-
-	options: AllPackages.map(pkg => ({ value: pkg, id: pkg.split("|")[1], channel: pkg.split("|")[0] })),
-
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		},
-		optgroup_header: function (data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	}
-});
+LoadData();
 
 
-new TomSelect("#VariantAssetId", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	searchField: ['id'],
-	optgroups: ChannelInfo,
-	optgroupValueField: 'name',
-	optgroupField: 'channel',
+async function LoadData() {
+    for (const channel of ChannelInfo) {
+        if (channel.url !== null) {
+            await fetch(channel.url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (channel.name === 'default') {
+                        AllSubfolders = data.stats.categories.map(item => item.category);
+                    }
+                    AllAssets = AllAssets.concat(data.assets.map(item => ({ id: item.name, channel: channel.name })));
+                    AllPackages = AllPackages.concat(data.packages.map(item => ({ id: item.group + ':' + item.name, channel: channel.name })));
+                    AllGroups = AllGroups.concat(data.packages.map(item => item.group));
+                })
+                .catch(error => {
+                    console.error('There was a problem fetching data from ' + channel.url + ':', error);
+                });
+        }
+    };
+    AllGroups = [...new Set(AllGroups)]; // returns unique values
 
-	options: AllAssets.map(asset => ({ value: asset, id: asset.split("|")[1], channel: asset.split("|")[0] })),
+    pkgGroupSelect.addOptions(AllGroups.map(grp => ({ value: grp, text: grp })));
+    pkgSubfolderSelect.addOptions(AllSubfolders.map(fldr => ({ value: fldr, text: fldr })));
+    pkgDependencySelect.addOptions(AllPackages.map(pkg => ({ value: pkg.id, id: pkg.id, channel: pkg.channel })));
+    pkgAssetSelect.addOptions(AllAssets.map(asset => ({ value: asset.id, id: asset.id, channel: asset.channel })));
+    variantPackageSelect.addOptions(AllPackages.map(pkg => ({ value: pkg.id, id: pkg.id, channel: pkg.channel })));
+    variantAssetSelect.addOptions(AllAssets.map(asset => ({ value: asset.id, id: asset.id, channel: asset.channel })));
 
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		},
-		optgroup_header: function (data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	}
-});
-
-window.ChannelInfo = ChannelInfo;
-window.AllAssets = AllAssets;
-window.AllPackages = AllPackages;
-window.pkgSubfolderSelect = document.getElementById("PackageSubfolder").tomselect;
-window.pkgDependencySelect = document.getElementById("PackageDependencies").tomselect;
-window.pkgGroupSelect = document.getElementById('PackageGroup').tomselect;
-window.pkgImageSelect = document.getElementById("PackageImages").tomselect;
-
-window.pkgAssetSelect = document.getElementById("PackageAssetId").tomselect;
-window.pkgAssetIncludeSelect = document.getElementById('PackageAssetInclude').tomselect;
-window.pkgAssetExcludeSelect = document.getElementById('PackageAssetExclude').tomselect;
-
-window.variantAssetSelect = document.getElementById("VariantAssetId").tomselect;
-window.variantPackageSelect = document.getElementById("VariantDependencies").tomselect;
+    //AllGroups.map(g => ({ value: g.split("|")[1], text: g.split("|")[1] })),
+    //AllPackages.map(pkg => ({ value: pkg, id: pkg.split("|")[1], channel: pkg.split("|")[0] })),
+    //AllAssets.map(asset => ({ value: asset, id: asset.split("|")[1], channel: asset.split("|")[0] })),
+}
