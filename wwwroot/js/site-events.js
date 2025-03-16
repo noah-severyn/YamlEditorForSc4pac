@@ -93,9 +93,6 @@ for (const input of document.querySelectorAll('#PackagePropertiesForm .form-cont
 		UpdatePackageData();
 	});
 };
-document.getElementById('IsMultipleWebsites').addEventListener('change', () => {
-	ToggleMultipleWebsites();
-});
 document.getElementById('ResetIncludedAssetButton').addEventListener('click', () => {
 	ResetIncludedAssetForm();
 });

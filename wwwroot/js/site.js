@@ -112,10 +112,7 @@ const pkgSummaryEditor = new EasyMDE({
 	previewImagesInEditor: true,
 	status: false //hide the status bar
 });
-pkgSummaryEditor.codemirror.on("change", () => {
-	UpdatePackageData();
-	//TODO rename this to medatadata, also the asset function too
-});
+pkgSummaryEditor.codemirror.on("change", UpdatePackageData);
 
 
 const pkgGroupSelect = new TomSelect('#PackageGroup', {
@@ -159,6 +156,12 @@ const pkgDependencySelect = new TomSelect("#PackageDependencies", {
 			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
 		}
 	}
+});
+
+const pkgWebsitesSelect = new TomSelect("#PackageWebsite", {
+	persist: false,
+	createOnBlur: true,
+	create: true
 });
 
 const pkgImageSelect = new TomSelect("#PackageImages", {
@@ -291,9 +294,12 @@ function UpdateData(dumpData = true) {
 
 	//Update the Tomselect dropdowns with the local packages and assets
 	[pkgDependencySelect, variantPackageSelect, pkgAssetSelect, variantAssetSelect].forEach(tscontrol => {
-		tscontrol.clearOptions((option) => {
-			return option.channel === 'local';
-		});
+		let allOpts = tscontrol.options
+		for (const key in allOpts) {
+			if (allOpts[key].channel === 'local') {
+				tscontrol.removeOption(key);
+			}
+		}
 	});
 	//pkgDependencySelect.addOptions(localPackages.map(p => ({ value: 'local|' + p, id: p, channel: 'local' })));
 	//variantPackageSelect.addOptions(localPackages.map(p => ({ value: 'local|' + p, id: p, channel: 'local' })));
@@ -345,14 +351,6 @@ function UpdateData(dumpData = true) {
 
 //https://github.com/justinchmura/js-treeview
 function UpdateMainTree() {
-	function CreateAssetTreeName(id, asset) {
-		return id + ' - ' + asset;
-	}
-	
-	function CreatePackageTreeName(id, package) {
-		return id + ' - ' + package;
-	}
-	
 	var idx = 1;
 	var astList = [];
 	localAssets.forEach((asset) => {
@@ -374,17 +372,30 @@ function UpdateMainTree() {
 	mtv = new TreeView(mainTreeData, document.getElementById('MainTreeView'));
 	leaves = mtv.node.querySelectorAll('.tree-leaf');
 	if (selectedDoc) {
-		leaves.forEach(function(leaf) {
+		leaves.forEach(function (leaf) {
 			let selectedDocTreeName;
-			if (IsPackage(selectedDoc)) selectedDocTreeName = CreatePackageTreeName('', selectedDoc);
-			else if (IsAsset(selectedDoc)) selectedDocTreeName = CreateAssetTreeName('', selectedDoc);
-			else return;
+			if (IsPackage(selectedDoc)) {
+				selectedDocTreeName = CreatePackageTreeName('', selectedDoc);
+			}
+			else if (IsAsset(selectedDoc)) {
+				selectedDocTreeName = CreateAssetTreeName('', selectedDoc);
+			}
+			else {
+				return;
+			}
 			if (leaf.querySelectorAll('.tree-leaf-text')[0].innerHTML.includes(selectedDocTreeName)) leaf.classList.add('selected');
 		})
 	}
-	
+	function CreateAssetTreeName(id, asset) {
+		return id + ' - ' + asset;
+	}
+
+	function CreatePackageTreeName(id, package) {
+		return id + ' - ' + package;
+	}
+
 	mtv.on("select", function (t) {
-		leaves.forEach(function(leaf) {
+		leaves.forEach(function (leaf) {
 			if (!(leaf instanceof HTMLElement)) return;
 			leaf.classList.remove('selected');
 		})
@@ -401,6 +412,7 @@ function UpdateMainTree() {
 
 			SetSelectedDoc(selectedIdx - 1, 'p');
 			FillPackageForm();
+			UpdateIncludedAssetTree();
 		} else {
 			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			SelectTab('AssetPropertiesTab');
