@@ -458,27 +458,6 @@ function UpdateVariantTree() {
 
 		console.log(selectedItem + ' clicked');
 	});
-
-	/**
-	 * Fill the Varaint input form fields with the specified variant.
-	 */
-	function FillVariantFormHeader(vData) {
-		var key = Object.keys(vData.variant)[0];
-		var idx = key.lastIndexOf(':');
-		document.getElementById('IsGlobalVariant').checked = (key.substring(0, idx) !== selectedDoc.group + ':' + selectedDoc.name);
-		document.getElementById('VariantKey').value = key.substring(idx + 1);
-		document.getElementById('VariantValue').value = Object.values(vData.variant)[0];
-		document.getElementById('VariantDescription').value = '';
-		document.getElementById('VariantDependencies').value = ArrayToText(vData.dependencies);
-		document.getElementById('VariantDescription').value = selectedDoc.variantDescriptions[key][Object.values(vData.variant)[0]];
-	}
-
-
-	function FillVariantFormAsset(vAsset) {
-		document.getElementById('VariantAssetId').value = vAsset.assetId;
-		document.getElementById('VariantInclude').value = ArrayToText(vAsset.include);
-		document.getElementById('VariantExclude').value = ArrayToText(vAsset.exclude);
-	}
 }
 
 

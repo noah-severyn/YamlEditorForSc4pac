@@ -104,63 +104,6 @@ function ResetAllInputs() {
 	ResetAssetInputs();
 	ResetPackageInputs(); //Reset package inputs last to the heading and the selected tab are aligned
 }
-/**
- * Resets the Package input form fields.
- */
-function ResetPackageInputs() {
-	selectedDoc = null;
-	document.getElementById('PackageGroup').value = '';
-	pkgGroupSelect.clear(true);
-	document.getElementById('PackageName').value = '';
-	document.getElementById('PackageVersion').value = '';
-	document.getElementById('PackageSubfolder').value = '';
-	pkgSubfolderSelect.clear(true);
-	pkgDependencySelect.clear(true);
-	document.getElementById('PackageSummary').value = '';
-	document.getElementById('PackageConflicts').value = '';
-	document.getElementById('PackageWarning').value = '';
-	pkgSummaryEditor.codemirror.off("change", UpdatePackageData);
-	pkgSummaryEditor.codemirror.setValue('');
-	pkgSummaryEditor.codemirror.on("change", UpdatePackageData);
-	document.getElementById('PackageAuthor').value = '';
-	document.getElementById('PackageImages').value = '';
-	pkgWebsitesSelect.clear(true);
-	pkgWebsitesSelect.clearOptions();
-
-	document.getElementById('CurrentDocumentType').innerHTML = 'package';
-	document.getElementById('CurrentDocumentName').innerHTML = '[new package]';
-}
-/**
- * Resets the Varaint input form fields.
- */
-function ResetVariantInputs() {
-	document.getElementById('IsGlobalVariant').checked = false;
-	document.getElementById('VariantKey').value = '';
-	document.getElementById('VariantValue').value = '';
-	document.getElementById('VariantDescription').value = '';
-	document.getElementById('VariantDependencies').value = '';
-	document.getElementById('VariantAssetId').value = '';
-	document.getElementById('VariantInclude').value = '';
-	document.getElementById('VariantExclude').value = '';
-	variantAssetSelect.clear(true);
-	variantPackageSelect.clear(true);
-}
-/**
- * Resets the Asset input form fields.
- */
-function ResetAssetInputs() {
-	document.getElementById('AssetUrl').value = '';
-	document.getElementById('AssetId').value = '';
-	document.getElementById('AssetVersion').value = '';
-	document.getElementById('AssetLastModified').value = 0;
-	document.getElementById('AssetLastModifiedText').value = '';
-	document.getElementById('AssetArchiveVersion').selectedIndex = 0;
-	document.getElementById('AssetChecksum').value = '';
-	document.getElementById('AssetNonPersistentUrl').value = '';
-
-	document.getElementById('CurrentDocumentType').innerHTML = 'asset';
-	document.getElementById('CurrentDocumentName').innerHTML = '[new asset]';
-}
 
 
 
@@ -210,6 +153,32 @@ function RemoveSelectedDoc() {
 // --------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------   Packages   ---------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
+/**
+ * Resets the Package input form fields.
+ */
+function ResetPackageInputs() {
+	selectedDoc = null;
+	document.getElementById('PackageGroup').value = '';
+	pkgGroupSelect.clear(true);
+	document.getElementById('PackageName').value = '';
+	document.getElementById('PackageVersion').value = '';
+	document.getElementById('PackageSubfolder').value = '';
+	pkgSubfolderSelect.clear(true);
+	pkgDependencySelect.clear(true);
+	document.getElementById('PackageSummary').value = '';
+	document.getElementById('PackageConflicts').value = '';
+	document.getElementById('PackageWarning').value = '';
+	pkgSummaryEditor.codemirror.off("change", UpdatePackageData);
+	pkgSummaryEditor.codemirror.setValue('');
+	pkgSummaryEditor.codemirror.on("change", UpdatePackageData);
+	document.getElementById('PackageAuthor').value = '';
+	document.getElementById('PackageImages').value = '';
+	pkgWebsitesSelect.clear(true);
+	pkgWebsitesSelect.clearOptions();
+
+	document.getElementById('CurrentDocumentType').innerHTML = 'package';
+	document.getElementById('CurrentDocumentName').innerHTML = '[new package]';
+}
 /**
  * Fill the Package input form fields with the values from the currently selected package number.
  */
@@ -374,12 +343,6 @@ function UpdatePackageData() {
 
 	
 }
-
-
-
-// --------------------------------------------------------------------------------------------------------------------
-// -----------------------------------------------   Included Assets   ------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------
 /**
  * Resets the Included Asset input form fields.
  */
@@ -410,136 +373,27 @@ function FillIncludedAssetForm(assetName) {
 }
 
 
-// --------------------------------------------------------------------------------------------------------------------
-// ---------------------------------------------------   Variants   ---------------------------------------------------
-// --------------------------------------------------------------------------------------------------------------------
-function VariantAddDependency(input) {
-	var currentDependencies = document.getElementById('VariantDependencies').value;
-	if (currentDependencies === '') {
-		document.getElementById('VariantDependencies').value = input.value + ';\n'
-	} else {
-		document.getElementById('VariantDependencies').value = currentDependencies + input.value + ';\n';
-	}
-	variantPackageSelect.clear(true);
-}
-function UpdateVariantData(elem) {
-	//Prevent adding a variant if any required fields are blank
-	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '') {
-		document.getElementById('AddVariantButton').disabled = true
-		document.getElementById('RemoveVariantButton').disabled = true;
-	} else {
-		document.getElementById('AddVariantButton').disabled = false;
-		document.getElementById('RemoveVariantButton').disabled = false;
-	}
-
-	if (elem.id === 'VariantsPacAssetList' || elem.id === 'VariantsLocalAssetList') {
-		document.getElementById('VariantAssetId').value = elem.value;
-		if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
-		elem.value = '';
-	} else if (elem.id === 'VariantsPacPackageList' || elem.id === 'VariantsLocalPackageList') {
-		document.getElementById('VariantDependencies').value = document.getElementById('VariantDependencies').value + elem.value + ';\n';
-		if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
-		elem.value = '';
-	} else {
-		ValidateInput(elem.id);
-		//TODO - update variant data
-		//Not going to bother implementing all of the onchange stuff here because I want to redesign how this works (see pr #43)
-		//Also it's a convoluted process where once the variant key name is changed the current setup will not be able to find the named variant any more
-
-	}
-	UpdateData();
-}
-function AddAssetToVariant() {
-	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
-
-	var newAsset = {
-		assetId: document.getElementById('VariantAssetId').value,
-		include: TextToArray(document.getElementById('VariantInclude').value),
-		exclude: TextToArray(document.getElementById('VariantExclude').value),
-	};
-	variant.assets.push(newAsset);
-
-
-	document.getElementById('VariantAssetId').value = '';
-	document.getElementById('VariantInclude').value = '';
-	document.getElementById('VariantExclude').value = '';
-	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
-	document.getElementById('VariantsLocalAssetList').value = '';
-	UpdateData();
-}
-function RemoveAssetFromVariant() {
-	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
-	variant.assets = variant.assets.filter((i) => i.assetId !== document.getElementById('VariantAssetId').value);
-}
-function RemoveVariant() {
-	selectedDoc.variants = selectedDoc.variants.filter((i) =>
-		(Object.keys(i.variant)[0] !== document.getElementById('VariantKey').value) &&
-		(Object.values(i.variant)[0] !== document.getElementById('VariantValue').value)
-	);
-	UpdateData();
-	ResetVariantInputs();
-}
-
-function AddNewVariant() {
-	//The `variants` property of a document is an array of variant objects. The variant object has three properties:
-	//	- variant: an object with one key value pair, with the key as the name of the variant, and the value its value
-	//	- assets: an array of asset objects. Each aset object has three properties:
-	//		- assetId: unique Id of the asset
-	//		- include: array of items in the asset to include
-	//		- exclude: array of items in the asset to exclude
-	//	- dependencies: an array of strings
-	var newKey;
-	if (document.getElementById('IsGlobalVariant').checked) {
-		newKey = document.getElementById('VariantKey').value;
-	} else {
-		newKey = `${selectedDoc.group}:${selectedDoc.name}:${document.getElementById('VariantKey').value}`;
-	}
-	var newValue = document.getElementById('VariantValue').value;
-	var newVariant = {
-		variant: { [newKey]: newValue },
-		assets: new Array()
-	}
-
-	//To avoid writing null properties, only add the property if the input is not blank
-	var newAsset = new Object();
-	if (document.getElementById('VariantAssetId').value !== '') {
-		newAsset.assetId = document.getElementById('VariantAssetId').value;
-	}
-	if (document.getElementById('VariantInclude').value !== '') {
-		newAsset.include = TextToArray(document.getElementById('VariantInclude').value);
-	}
-	if (document.getElementById('VariantExclude').value !== '') {
-		newAsset.exclude = TextToArray(document.getElementById('VariantExclude').value);
-	}
-	if (document.getElementById('VariantDependencies').value !== '') {
-		newVariant.dependencies = TextToArray(document.getElementById('VariantDependencies').value);
-	}
-
-	newVariant.assets.push(newAsset);
-	if (selectedDoc.variants === undefined) {
-		selectedDoc.variants = new Array(newVariant);
-	} else {
-		selectedDoc.variants.push(newVariant);
-	}
-
-	//Add variant descriptions (if any)
-	if (document.getElementById('VariantDescription').value !== '') {
-		selectedDoc.variantDescriptions = newPackage = {
-			[newKey]: {
-				[newValue]: document.getElementById('VariantDescription').value
-			}
-		};
-	}
-
-	UpdateData();
-	ResetVariantInputs();
-}
-
 
 
 // --------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------------   Assets   ----------------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
+/**
+ * Resets the Asset input form fields.
+ */
+function ResetAssetInputs() {
+	document.getElementById('AssetUrl').value = '';
+	document.getElementById('AssetId').value = '';
+	document.getElementById('AssetVersion').value = '';
+	document.getElementById('AssetLastModified').value = 0;
+	document.getElementById('AssetLastModifiedText').value = '';
+	document.getElementById('AssetArchiveVersion').selectedIndex = 0;
+	document.getElementById('AssetChecksum').value = '';
+	document.getElementById('AssetNonPersistentUrl').value = '';
+
+	document.getElementById('CurrentDocumentType').innerHTML = 'asset';
+	document.getElementById('CurrentDocumentName').innerHTML = '[new asset]';
+}
 /**
  * Fill the Asset input form fields with the values from the currently selected asset number.
  */
