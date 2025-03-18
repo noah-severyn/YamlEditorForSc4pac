@@ -312,8 +312,6 @@ function UpdateData(dumpData = true) {
 
 	// Update the trees with local assets and packages
 	UpdateMainTree();
-	UpdateIncludedAssetTree();
-	UpdateVariantTree();
 	
 	if (dumpData) {
 		cm.off('change', CodeMirrorOnChange);
@@ -413,6 +411,7 @@ function UpdateMainTree() {
 			SetSelectedDoc(selectedIdx - 1, 'p');
 			FillPackageForm();
 			UpdateIncludedAssetTree();
+			UpdateVariantTree();
 		} else {
 			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			SelectTab('AssetPropertiesTab');
@@ -440,63 +439,24 @@ function UpdateIncludedAssetTree() {
 }
 
 function UpdateVariantTree() {
-	var pkgVariants;
-	
-	if (selectedDoc == null || selectedDoc.variants == null) {
-		pkgVariants = [];
-	} else {
-		var pkgId = selectedDoc.group + ':' + selectedDoc.name + ':';
-		//let allVariantNames = doc.variants.map((v) => Object.keys(v.variant)[0]);
-		//let uniqueVariantNames = [...new Set(allVariantNames)]; //https://stackoverflow.com/a/33121880/10802255
-		//console.log(allVariantNames);
-		//console.log(uniqueVariantNames);
+	let variants = selectedDoc.get('variants').items;
+	let pkgVariants = [];
 
-		//pkgVariants = uniqueVariantNames.map((uName) => ({
-		//	name: uName.replace(pkgId, ''),
-		//	expanded: true,
-		//	//First find all with the current name, then return all the values (options) associated with that variant. Lastly format that list correctly for the tree view.
-		//	children: doc.variants
-		//		.filter((i) => Object.keys(i.variant)[0] === uName)
-		//		.map((i) => Object.values(i.variant)[0])
-		//		.map((i) => ({name: i, children: []}))
-		//}));
-		let allVariantNames = selectedDoc.variants.map((v) => ({ key: Object.keys(v.variant)[0], value: Object.values(v.variant)[0] }));
+	for (let idx = 0; idx < variants.length; idx++) {
+		let variant = variants[idx].get('variant').items; // a variant can have one or more key-value pairs
+		let title = '▸ ' + variant.map(v => v.value.value).join(' - ');
 
-		pkgVariants = allVariantNames.map((v) => ({
-			name: v.key.replace(pkgId, '') + ':' + v.value,
-			expanded: true,
-			children: [
-				{ name: 'Header', children: [] },
-				{
-					name: 'Assets (' + GetVariant(v.key, v.value).assets.length + ')',
-					expanded: false,
-					children: GetVariant(v.key, v.value).assets.map((item) => ({ name: item.assetId, children: [] }))
-				},
-			]
-		}));
+		//variant key is selectedDoc.get('variants').items[0].get('variant').items[0].key.value
+		//variant val is selectedDoc.get('variants').items[0].get('variant').items[0].value.value
+		pkgVariants.push({ name: title, expanded: false, children: []})
 	}
 
 	var pkgVariantsData = [{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }]
 	vtv = new TreeView(pkgVariantsData, 'VariantTreeView');
 	vtv.on("select", function (t) {
 		var selectedItem = t.data.name;
-		var selectedVariant;
-		
-		if (selectedItem === "Header") {
-			selectedVariant = t.target.target.parentElement.parentElement.parentElement.parentElement.firstChild.textContent.substring(1);
-		} else {
-			selectedVariant = t.target.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstChild.textContent.substring(1);
-		}
 
-		var variantKey = pkgId + selectedVariant.substring(0, selectedVariant.indexOf(':'));
-		var variantValue = selectedVariant.substring(selectedVariant.indexOf(':') + 1);
-		var activeVariant = GetVariant(variantKey, variantValue);
-		FillVariantFormHeader(activeVariant);
-
-		if (selectedItem !== "Header") {
-			let selectedAsset = activeVariant.assets.filter(i => i.assetId === selectedItem)[0];
-			FillVariantFormAsset(selectedAsset);
-		}
+		console.log(selectedItem + ' clicked');
 	});
 
 	/**
