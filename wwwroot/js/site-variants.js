@@ -17,9 +17,10 @@
  * Resets the Varaint input form fields.
  */
 function ResetVariantInputs() {
-	//document.getElementById('IsLocalVariant').checked = false;
-	//document.getElementById('VariantName').value = '';
-	//document.getElementById('VariantValue').value = '';
+	document.querySelectorAll('.VariantKVItem').forEach(e => e.remove());
+	document.getElementById('IsLocalVariant').checked = false;
+	document.getElementById('VariantName').value = '';
+	document.getElementById('VariantValue').value = '';
 	document.getElementById('VariantDescription').value = '';
 	document.getElementById('VariantDependencies').value = '';
 	document.getElementById('VariantAssetId').value = '';
@@ -30,17 +31,9 @@ function ResetVariantInputs() {
 }
 
 
-function AddVariantKeyValueSet(idx, name, value) {
-	//<div class="mb-2 input-group">
-	//	<label class="input-group-text w1">Name</label>
-	//	<input id="VariantName" class="form-control" type="text" />
-	//	<label class="input-group-text w1">Value</label>
-	//	<input id="VariantValue" class="form-control" type="text" />
-	//	<button id="x" class="btn btn-outline-danger" type="button">Remove</button>
-	//</div>
-
+function CreateVariantKeyValueSet(idx, name, value) {
 	const inputGroupDiv = document.createElement('div');
-	inputGroupDiv.className = 'mb-2 input-group';
+	inputGroupDiv.className = 'mb-2 input-group input-group-sm VariantKVItem';
 	inputGroupDiv.id = 'VariantKVSet' + idx;
 
 	const nameLabel = document.createElement('label');
@@ -49,9 +42,10 @@ function AddVariantKeyValueSet(idx, name, value) {
 	inputGroupDiv.appendChild(nameLabel);
 
 	const nameInput = document.createElement('input');
-	nameInput.id = 'VariantName';
+	nameInput.id = 'VariantName' + idx;
 	nameInput.className = 'form-control';
 	nameInput.type = 'text';
+	nameInput.value = name;
 	inputGroupDiv.appendChild(nameInput);
 
 	const valueLabel = document.createElement('label');
@@ -60,13 +54,14 @@ function AddVariantKeyValueSet(idx, name, value) {
 	inputGroupDiv.appendChild(valueLabel);
 
 	const valueInput = document.createElement('input');
-	valueInput.id = 'VariantValue';
+	valueInput.id = 'VariantValue' + idx;
 	valueInput.className = 'form-control';
 	valueInput.type = 'text';
+	valueInput.value = value;
 	inputGroupDiv.appendChild(valueInput);
 
 	const removeBtn = document.createElement('button');
-	removeBtn.id = 'x';
+	removeBtn.id = 'RemoveVariantKVSet' + idx;
 	removeBtn.className = 'btn btn-outline-danger';
 	removeBtn.type = 'button';
 	removeBtn.textContent = 'Remove';
@@ -75,12 +70,17 @@ function AddVariantKeyValueSet(idx, name, value) {
 			//delete variantData.variant[key];
 			//renderVariantForm(index);
 			//updateVariantList();
+			RemoveVariantKeyValueSet(idx);
 			console.log('deleted ' + idx);
 		};
 	})(idx));
 	inputGroupDiv.appendChild(removeBtn);
 
-	document.getElementById('VariantKeyValuesContainer').insertBefore(inputGroupDiv, document.getElementById('VariantKeyValueInputForm'));
+	document.getElementById('VariantKeyValuesContainer').insertBefore(inputGroupDiv, document.getElementById('VariantKeyValueInputForm').nextSibling);
+}
+
+function RemoveVariantKeyValueSet(idx) {
+	document.getElementById('VariantKVSet' + idx).remove();
 }
 
 
@@ -226,3 +226,13 @@ function AddVariantKeyValueSet(idx, name, value) {
 //	document.getElementById('VariantInclude').value = ArrayToText(vAsset.include);
 //	document.getElementById('VariantExclude').value = ArrayToText(vAsset.exclude);
 //}
+function FillVariantForm(variantIdx) {
+	ResetVariantInputs();
+	let variant = selectedDoc.get('variants').items[variantIdx];
+	let variantKVsets = variant.get('variant').items; // a variant can have one or more key-value pairs
+
+	for (var idx = 0; idx < variantKVsets.length; idx++) {
+		let kvset = variantKVsets[idx];
+		CreateVariantKeyValueSet(idx, kvset.key.value, kvset.value.value);
+	}
+}

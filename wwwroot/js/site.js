@@ -439,12 +439,15 @@ function UpdateIncludedAssetTree() {
 }
 
 function UpdateVariantTree() {
+	if (selectedDoc.get('variants') === undefined) {
+		return;
+	}
 	let variants = selectedDoc.get('variants').items;
 	let pkgVariants = [];
 
 	for (let idx = 0; idx < variants.length; idx++) {
 		let variant = variants[idx].get('variant').items; // a variant can have one or more key-value pairs
-		let title = '▸ ' + variant.map(v => v.value.value).join(' - ');
+		let title = idx + ' - ' + variant.map(v => v.value.value).join(' - '); //▸
 
 		//variant key is selectedDoc.get('variants').items[0].get('variant').items[0].key.value
 		//variant val is selectedDoc.get('variants').items[0].get('variant').items[0].value.value
@@ -455,7 +458,7 @@ function UpdateVariantTree() {
 	vtv = new TreeView(pkgVariantsData, 'VariantTreeView');
 	vtv.on("select", function (t) {
 		var selectedItem = t.data.name;
-
+		FillVariantForm(selectedItem.substring(0, selectedItem.indexOf(' ')));
 		console.log(selectedItem + ' clicked');
 	});
 }
