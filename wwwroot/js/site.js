@@ -96,6 +96,10 @@ var atv;
  */
 var vtv;
 /**
+ * Variant Asset Tree View element
+ */
+let vatv;
+/**
  * Load From ... dialog element
  */
 const loadFileDialog = document.getElementById('LoadFromChannelDialog');
@@ -222,6 +226,7 @@ const variantPackageSelect = new TomSelect("#VariantDependencies", {
 });
 
 const variantAssetSelect = new TomSelect("#VariantAssetId", {
+	maxItems: 1,
 	create: false,
 	valueField: 'value',
 	labelField: 'id',
@@ -238,6 +243,22 @@ const variantAssetSelect = new TomSelect("#VariantAssetId", {
 			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
 		}
 	}
+});
+/**
+ * Variant Asset Include TomSelect element
+ */
+const variantIncludeSelect = new TomSelect("#VariantInclude", {
+	persist: false,
+	createOnBlur: true,
+	create: true
+});
+/**
+ * Variant Asset Exclude TomSelect element
+ */
+const variantExcludeSelect = new TomSelect("#VariantExclude", {
+	persist: false,
+	createOnBlur: true,
+	create: true
 });
 
 
@@ -457,12 +478,42 @@ function UpdateVariantTree() {
 	var pkgVariantsData = [{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }]
 	vtv = new TreeView(pkgVariantsData, 'VariantTreeView');
 	vtv.on("select", function (t) {
-		var selectedItem = t.data.name;
-		FillVariantForm(selectedItem.substring(0, selectedItem.indexOf(' ')));
+		let selectedItem = t.data.name;
+		let selectedIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
+		FillVariantHeaderForm(selectedIdx);
+		UpdateVariantAssetTree(selectedIdx);
 		console.log(selectedItem + ' clicked');
 	});
 }
 
+function UpdateVariantAssetTree(variantIdx) {
+	if (selectedDoc.get('variants') === undefined) {
+		return;
+	}
+	let variant = selectedDoc.get('variants').items[variantIdx];
+	let assets = variant.get('assets').items;
+	let variantAssets = [];
+
+	for (let idx = 0; idx < assets.length; idx++) {
+		let asset = assets[idx];
+		let assetId = asset.get('assetId');
+		let include = asset.get('include'); //the include/exclude may be undefined, so check before accessing their .items property
+		let exclude = asset.get('exclude');
+
+
+		variantAssets.push({ name: idx + ' - ' + assetId, expanded: false, children: [] })
+	}
+
+	let variantAssetData = [{ name: 'Assets (' + variantAssets.length + ')', expanded: true, children: variantAssets }]
+	vatv = new TreeView(variantAssetData, 'VariantAssetTreeView');
+	vatv.on("select", function (t) {
+		let selectedItem = t.data.name;
+		let selectedIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
+
+		FillVariantAssetForm(variantIdx, selectedIdx)
+		console.log(selectedItem + ' clicked');
+	});
+}
 
 
 

@@ -181,7 +181,7 @@
 							</div>
 
 							<div class="col-sm-12 col-md-8">
-								<!--<p>The <b>key</b> is the name of the variant, and the <b>value</b> is its value.</p>-->
+								<p>A variant may have one or more <b>Name-Value</b> sets uniquely identifying it.</p>
 								<form id="PackageVariantsForm">
 									<div id="VariantKeyValuesContainer">
 										<div id="VariantKeyValueInputForm" class="mb-2 input-group">
@@ -197,25 +197,36 @@
 										</div>
 									</div>
 
-									<div class="mb-2 input-group">
+									<!--<div class="mb-2 input-group">
 										<label class="input-group-text w2">Description</label>
 										<input id="VariantDescription" class="form-control" type="text" />
-									</div>
+									</div>-->
 
 									<div class="mb-2 input-group">
 										<label class="input-group-text w2">Dependencies</label>
 										<input id="VariantDependencies" class="form-control" />
 									</div>
 
-									<div class="mb-2 input-group">
-										<label class="input-group-text w2">Asset Id</label>
-										<input id="VariantAssetId" class="form-control" />
-									</div>
-									<div class="input-group mb-2">
-										<label class="input-group-text w1">Include</label>
-										<textarea id="VariantInclude" class="form-control" rows="3"></textarea>
-										<label class="input-group-text w1">Exclude</label>
-										<textarea id="VariantExclude" class="form-control" rows="3"></textarea>
+									<div style="display:flex" class="row">
+										<div class="col-sm-12 col-md-4">
+											<div id="VariantAssetTreeView"></div>
+										</div>
+										<div class="col-sm-12 col-md-8">
+											<div class="mb-2 input-group">
+												<label class="input-group-text w1" for="VariantAssetId">Asset Id</label>
+												<input id="VariantAssetId" class="form-control" />
+											</div>
+
+											<div class="mb-2 input-group">
+												<label class="input-group-text w1" for="VariantInclude">Include</label>
+												<input id="VariantInclude" class="form-control" />
+											</div>
+
+											<div class="input-group mb-2">
+												<label class="input-group-text w1" for="VariantExclude">Exclude</label>
+												<input id="VariantExclude" class="form-control" />
+											</div>
+										</div>
 									</div>
 
 									<div class="mb-2 btn-group">

@@ -21,13 +21,13 @@ function ResetVariantInputs() {
 	document.getElementById('IsLocalVariant').checked = false;
 	document.getElementById('VariantName').value = '';
 	document.getElementById('VariantValue').value = '';
-	document.getElementById('VariantDescription').value = '';
+	//document.getElementById('VariantDescription').value = '';
 	document.getElementById('VariantDependencies').value = '';
 	document.getElementById('VariantAssetId').value = '';
 	document.getElementById('VariantInclude').value = '';
 	document.getElementById('VariantExclude').value = '';
-	variantAssetSelect.clear(true);
 	variantPackageSelect.clear(true);
+	ResetVariantAssetForm();
 }
 
 
@@ -220,13 +220,7 @@ function RemoveVariantKeyValueSet(idx) {
 //	document.getElementById('VariantDescription').value = selectedDoc.variantDescriptions[key][Object.values(vData.variant)[0]];
 //}
 
-
-//function FillVariantFormAsset(vAsset) {
-//	document.getElementById('VariantAssetId').value = vAsset.assetId;
-//	document.getElementById('VariantInclude').value = ArrayToText(vAsset.include);
-//	document.getElementById('VariantExclude').value = ArrayToText(vAsset.exclude);
-//}
-function FillVariantForm(variantIdx) {
+function FillVariantHeaderForm(variantIdx) {
 	ResetVariantInputs();
 	let variant = selectedDoc.get('variants').items[variantIdx];
 	let variantKVsets = variant.get('variant').items; // a variant can have one or more key-value pairs
@@ -234,5 +228,42 @@ function FillVariantForm(variantIdx) {
 	for (var idx = 0; idx < variantKVsets.length; idx++) {
 		let kvset = variantKVsets[idx];
 		CreateVariantKeyValueSet(idx, kvset.key.value, kvset.value.value);
+	}
+}
+/**
+ * Resets the Included Asset input form fields.
+ */
+function ResetVariantAssetForm() {
+	variantAssetSelect.clear(true);
+	variantIncludeSelect.clear(true);
+	variantIncludeSelect.clearOptions();
+	variantExcludeSelect.clear(true);
+	variantExcludeSelect.clearOptions();
+}
+/**
+ * Fill the Varaint input form fields with the specified variant.
+ * @param {number} variantIdx Index of the target variant within the selected document
+ * @param {number} variantAssetIdx Index of the target asset within the targeted variant
+ */
+function FillVariantAssetForm(variantIdx, variantAssetIdx) {
+	ResetVariantAssetForm();
+	let variant = selectedDoc.get('variants').items[variantIdx];
+	let asset = variant.get('assets').items[variantAssetIdx];
+
+	(variantAssetSelect.createItem(asset.get('assetId')) || variantAssetSelect.addItem(asset.get('assetId'), true));
+
+	if (asset.has('include')) {
+		let includes = asset.get('include').items;
+		includes.forEach(incl => {
+			variantIncludeSelect.addOption({ value: incl.value, text: incl.value });
+			variantIncludeSelect.addItem(incl.value, true);
+		}); 
+	}
+	if (asset.has('exclude')) {
+		let excludes = asset.get('exclude').items;
+		excludes.forEach(excl => {
+			variantExcludeSelect.addOption({ value: excl.value, text: excl.value });
+			variantExcludeSelect.addItem(excl.value, true);
+		});
 	}
 }
