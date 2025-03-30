@@ -105,16 +105,6 @@ document.getElementById('NewPackageAssetButton').addEventListener('click', () =>
 // --------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------   Package Variant tab events   ------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
-for (const input of document.querySelectorAll('#VariantKey, #VariantValue, #VariantDescription, #VariantsPacPackageList, #VariantsLocalPackageList')) {
-	input.addEventListener('input', event => {
-		UpdateVariantData(event.target);
-	});
-}
-for (const input of document.querySelectorAll('#VariantsPacAssetList, #VariantsLocalAssetList, #VariantInclude, #VariantExclude')) {
-	input.addEventListener('change', event => {
-		UpdateVariantData(event.target);
-	});
-}
 document.getElementById('ResetVariantFormButton').addEventListener('click', () => {
 	ResetVariantInputs();
 });
@@ -134,7 +124,8 @@ document.getElementById('VariantAddKeyValueBtn').addEventListener('click', () =>
 	let vIdx = document.getElementById('VariantKeyValuesContainer').childElementCount - 1;
 	let vKey = document.getElementById('VariantName').value;
 	let vValue = document.getElementById('VariantValue').value;
-	CreateVariantKeyValueSet(vIdx, vKey, vValue);
+	CreateVariantKeyValueElements(vIdx, vKey, vValue);
+	AddVariantKeyValueSet(vKey, vValue);
 });
 
 

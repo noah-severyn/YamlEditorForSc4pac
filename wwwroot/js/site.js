@@ -81,8 +81,14 @@ var currDocIdx = null;
  * The currently selected ("active") document being edited - may be a package or an asset.
  */
 var selectedDoc = null;
-
+/**
+ * Index of the currently selected included asset ("package asset") within this package.
+ */
 var selectedPkgAssetIdx = null;
+/**
+ * Index of the currently selected variant within this package.
+ */
+var selectedPkgVariantIdx = null;
 /**
  * Main Tree View element
  */
@@ -206,7 +212,7 @@ const pkgAssetExcSelect = new TomSelect("#PackageAssetExclude", {
 	create: true
 });
 
-const variantPackageSelect = new TomSelect("#VariantDependencies", {
+const variantDependencySelect = new TomSelect("#VariantDependencies", {
 	create: false,
 	valueField: 'value',
 	labelField: 'id',
@@ -278,9 +284,7 @@ const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstra
  * Sync changes between the codepane and UI with the current state of the `yamlData` array (UI ←→ yamlData ←→ codepane).
  * 
  * Dumps yamlData to the codepane by default.
- * @param {boolean} dumpData Whether to update the code pane. Should be disabled if this is called from the codepane (as the codepane would already be up to date). Default is FALSE.
- * 
- * The default *must* be FALSE because setting the code text will re-trigger the change event a second time
+ * @param {boolean} [dumpData=true] Whether to update the code pane. Should be disabled if this is called from the codepane (as the codepane would already be up to date). Default is TRUE.
  */
 function UpdateData(dumpData = true) {
 	//When updating a text input, the input event occurs immediately, but the change event doesn't occur until you commit the change by lose focus or submit the form.
@@ -314,7 +318,7 @@ function UpdateData(dumpData = true) {
 	SetTabState();
 
 	//Update the Tomselect dropdowns with the local packages and assets
-	[pkgDependencySelect, variantPackageSelect, pkgAssetSelect, variantAssetSelect].forEach(tscontrol => {
+	[pkgDependencySelect, variantDependencySelect, pkgAssetSelect, variantAssetSelect].forEach(tscontrol => {
 		let allOpts = tscontrol.options
 		for (const key in allOpts) {
 			if (allOpts[key].channel === 'local') {
@@ -327,12 +331,13 @@ function UpdateData(dumpData = true) {
 	//pkgAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
 	//variantAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
 	pkgDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
-	variantPackageSelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
+	variantDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
 	pkgAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
 	variantAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
 
 	// Update the trees with local assets and packages
 	UpdateMainTree();
+	UpdateVariantTree();
 	
 	if (dumpData) {
 		cm.off('change', CodeMirrorOnChange);
@@ -445,10 +450,8 @@ function UpdateMainTree() {
 }
 
 function UpdateIncludedAssetTree() {
-	var pkgAssets;
-	if (selectedDoc == null || selectedDoc.get('assets') == null) {
-		pkgAssets = [];
-	} else {
+	var pkgAssets = [];
+	if (selectedDoc !== null && selectedDoc.get('assets') !== undefined) {
 		pkgAssets = selectedDoc.get('assets').toJSON().map((i) => ({ name: i.assetId, children: [] }));
 	}
 
@@ -460,48 +463,46 @@ function UpdateIncludedAssetTree() {
 }
 
 function UpdateVariantTree() {
-	if (selectedDoc.get('variants') === undefined) {
-		return;
-	}
-	let variants = selectedDoc.get('variants').items;
 	let pkgVariants = [];
-
-	for (let idx = 0; idx < variants.length; idx++) {
-		let variant = variants[idx].get('variant').items; // a variant can have one or more key-value pairs
-		let title = idx + ' - ' + variant.map(v => v.value.value).join(' - '); //▸
-
-		//variant key is selectedDoc.get('variants').items[0].get('variant').items[0].key.value
-		//variant val is selectedDoc.get('variants').items[0].get('variant').items[0].value.value
-		pkgVariants.push({ name: title, expanded: false, children: []})
+	let variants = [];
+	if (selectedDoc !== null && selectedDoc.get('variants') !== undefined) {
+		variants = selectedDoc.get('variants').items;
+		for (let idx = 0; idx < variants.length; idx++) {
+			let variant = variants[idx].get('variant').items; // a variant can have one or more key-value pairs
+			let title = idx + ' - ' + variant.map(v => v.value.value).join(' - '); //▸
+			pkgVariants.push({ name: title, expanded: false, children: [] })
+		}
 	}
 
 	var pkgVariantsData = [{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }]
 	vtv = new TreeView(pkgVariantsData, 'VariantTreeView');
 	vtv.on("select", function (t) {
 		let selectedItem = t.data.name;
-		let selectedIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
-		FillVariantHeaderForm(selectedIdx);
-		UpdateVariantAssetTree(selectedIdx);
-		console.log(selectedItem + ' clicked');
+		selectedPkgVariantIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
+
+		let kvSets = variants[selectedPkgVariantIdx].get('variant').items 
+		let kvTitle = kvSets.map(kv => kv.key.value + ': ' + kv.value.value).join(', ');
+		document.getElementById('CurrentVariantId').innerHTML = kvTitle;
+
+		FillVariantHeaderForm(selectedPkgVariantIdx);
+		UpdateVariantAssetTree();
+		console.log('variant idx ' + selectedPkgVariantIdx);
 	});
 }
 
-function UpdateVariantAssetTree(variantIdx) {
-	if (selectedDoc.get('variants') === undefined) {
-		return;
-	}
-	let variant = selectedDoc.get('variants').items[variantIdx];
-	let assets = variant.get('assets').items;
+function UpdateVariantAssetTree() {
 	let variantAssets = [];
+	if (selectedDoc !== null && selectedDoc.get('variants') !== undefined) {
+		let variant = selectedDoc.get('variants').items[selectedPkgVariantIdx];
+		let assets = variant.get('assets').items;
+		for (let idx = 0; idx < assets.length; idx++) {
+			let asset = assets[idx];
+			let assetId = asset.get('assetId');
+			let include = asset.get('include'); //the include/exclude may be undefined, so check before accessing their .items property
+			let exclude = asset.get('exclude');
 
-	for (let idx = 0; idx < assets.length; idx++) {
-		let asset = assets[idx];
-		let assetId = asset.get('assetId');
-		let include = asset.get('include'); //the include/exclude may be undefined, so check before accessing their .items property
-		let exclude = asset.get('exclude');
-
-
-		variantAssets.push({ name: idx + ' - ' + assetId, expanded: false, children: [] })
+			variantAssets.push({ name: idx + ' - ' + assetId, expanded: false, children: [] })
+		}
 	}
 
 	let variantAssetData = [{ name: 'Assets (' + variantAssets.length + ')', expanded: true, children: variantAssets }]

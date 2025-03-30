@@ -68,6 +68,10 @@ body {
 .tooltip-inner {
     max-width: 100% !important;
 }
+    .tooltip-inner code {
+        color: #ff5722;
+        font-weight: bold;
+    }
 
 #Column0, #Column1, #Column2 {
     /*border: 1px solid black;*/

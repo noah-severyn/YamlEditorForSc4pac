@@ -14,30 +14,59 @@
 //// ---------------------------------------------------   Variants   ---------------------------------------------------
 //// --------------------------------------------------------------------------------------------------------------------
 /**
- * Resets the Varaint input form fields.
+ * Resets the variant header and asset form fields.
  */
 function ResetVariantInputs() {
-	document.querySelectorAll('.VariantKVItem').forEach(e => e.remove());
-	document.getElementById('IsLocalVariant').checked = false;
-	document.getElementById('VariantName').value = '';
-	document.getElementById('VariantValue').value = '';
-	//document.getElementById('VariantDescription').value = '';
-	document.getElementById('VariantDependencies').value = '';
-	document.getElementById('VariantAssetId').value = '';
-	document.getElementById('VariantInclude').value = '';
-	document.getElementById('VariantExclude').value = '';
-	variantPackageSelect.clear(true);
+	ResetVariantHeaderForm();
 	ResetVariantAssetForm();
 }
 
 
-function CreateVariantKeyValueSet(idx, name, value) {
+function UpdateVariantData(element) {
+	let variantItem = selectedDoc.get('variants').items[selectedPkgVariantIdx];
+	let newVal = element.value;
+
+	if (element.id.startsWith('VariantName')) {
+		//let idx = element.id.match(/\d+/g).map(Number)[0];
+		let idx = element.id.substring(element.id.length - 1);
+
+		//Note that this event is triggered after the input has changed, so we no longer know what the original key is. Find the one that most closely matches this and use it.
+		let keys = variantItem.get('variant').items.map(k => k.key.value);
+		let maxSS;
+		for (let idx = 0; idx < keys.length; idx++) {
+			let ss = StringSimilarity(newVal, keys[idx]);
+			if (ss > maxSS) {
+				maxSS = ss;
+			}
+		}
+
+		let keyidx = keys.indexOf(maxSS);
+		let key = keys[keyidx];
+		let existingVal = variantItem.getIn(['variant', key]);
+		variantItem.deleteIn(['variant', key]);
+		variantItem.setIn(['varaint', newVal], existingVal);
+	}
+	else if (element.id.startsWith('VariantValue')) {
+		let idx = element.id.substring(element.id.length - 1);
+		let key = document.getElementById('VariantName' + idx).value;
+		variantItem.setIn(['variant', key], newVal);
+	}
+	UpdateData();
+}
+
+/**
+ * Add a new input group element to the variant header container with the specified name-value set.
+ * @param {number} idx The 0-based index of this key-value set. Equal to the count of existing key-value sets in this variant plus one. A maximum 10 key-value sets is supported.
+ * @param {string} name The variant name (or key)
+ * @param {string} value The variant value
+ */
+function CreateVariantKeyValueElements(idx, name, value) {
 	const inputGroupDiv = document.createElement('div');
 	inputGroupDiv.className = 'mb-2 input-group input-group-sm VariantKVItem';
 	inputGroupDiv.id = 'VariantKVSet' + idx;
 
 	const nameLabel = document.createElement('label');
-	nameLabel.className = 'input-group-text w1';
+	nameLabel.className = 'input-group-text';
 	nameLabel.textContent = 'Name';
 	inputGroupDiv.appendChild(nameLabel);
 
@@ -46,10 +75,14 @@ function CreateVariantKeyValueSet(idx, name, value) {
 	nameInput.className = 'form-control';
 	nameInput.type = 'text';
 	nameInput.value = name;
+	nameInput.addEventListener("input", function(event) {
+		UpdateVariantData(event.target);
+		console.log(event.target.id + ' updated');
+	});
 	inputGroupDiv.appendChild(nameInput);
 
 	const valueLabel = document.createElement('label');
-	valueLabel.className = 'input-group-text w1';
+	valueLabel.className = 'input-group-text';
 	valueLabel.textContent = 'Value';
 	inputGroupDiv.appendChild(valueLabel);
 
@@ -58,6 +91,10 @@ function CreateVariantKeyValueSet(idx, name, value) {
 	valueInput.className = 'form-control';
 	valueInput.type = 'text';
 	valueInput.value = value;
+	valueInput.addEventListener("input", function (event) {
+		UpdateVariantData(event.target);
+		console.log(event.target.id + ' updated');
+	});
 	inputGroupDiv.appendChild(valueInput);
 
 	const removeBtn = document.createElement('button');
@@ -67,20 +104,39 @@ function CreateVariantKeyValueSet(idx, name, value) {
 	removeBtn.textContent = 'Remove';
 	removeBtn.addEventListener("click", (function (idx) {
 		return function () {
-			//delete variantData.variant[key];
-			//renderVariantForm(index);
-			//updateVariantList();
 			RemoveVariantKeyValueSet(idx);
 			console.log('deleted ' + idx);
 		};
 	})(idx));
 	inputGroupDiv.appendChild(removeBtn);
 
-	document.getElementById('VariantKeyValuesContainer').insertBefore(inputGroupDiv, document.getElementById('VariantKeyValueInputForm').nextSibling);
+	document.getElementById('VariantKeyValuesContainer').appendChild(inputGroupDiv);
+	document.getElementById('VariantName').value = '';
+	document.getElementById('VariantValue').value = '';
 }
 
+
+/**
+ * Add a new key value set to the currently selected varaint.
+ * @param {string} key Variant key (name)
+ * @param {string} value Variant value
+ */
+function AddVariantKeyValueSet(key, value) {
+	let variantItem = selectedDoc.get('variants').items[selectedPkgVariantIdx];
+	variantItem.addIn(['variant', key], value);
+	UpdateData();
+}
+
+/**
+ * Removes the key value set at the specified index from the currently selected varaint.
+ * @param {number} idx Index of the key-value set to remove
+ */
 function RemoveVariantKeyValueSet(idx) {
+	let variantItem = selectedDoc.get('variants').items[selectedPkgVariantIdx];
+	let key = variantItem.get('variant').items[idx].key.value;
+	variantItem.deleteIn(['variant', key]);
 	document.getElementById('VariantKVSet' + idx).remove();
+	UpdateData();
 }
 
 
@@ -206,32 +262,39 @@ function RemoveVariantKeyValueSet(idx) {
 //	UpdateData();
 //	ResetVariantInputs();
 //}
-///**
-// * Fill the Varaint input form fields with the specified variant.
-// */
-//function FillVariantFormHeader(vData) {
-//	var key = Object.keys(vData.variant)[0];
-//	var idx = key.lastIndexOf(':');
-//	document.getElementById('IsGlobalVariant').checked = (key.substring(0, idx) !== selectedDoc.group + ':' + selectedDoc.name);
-//	document.getElementById('VariantKey').value = key.substring(idx + 1);
-//	document.getElementById('VariantValue').value = Object.values(vData.variant)[0];
-//	document.getElementById('VariantDescription').value = '';
-//	document.getElementById('VariantDependencies').value = ArrayToText(vData.dependencies);
-//	document.getElementById('VariantDescription').value = selectedDoc.variantDescriptions[key][Object.values(vData.variant)[0]];
-//}
 
+/**
+ * Resets the Varaint input form fields.
+ */
+function ResetVariantHeaderForm() {
+	document.querySelectorAll('.VariantKVItem').forEach(e => e.remove());
+	document.getElementById('IsLocalVariant').checked = false;
+	document.getElementById('VariantName').value = '';
+	document.getElementById('VariantValue').value = '';
+	variantDependencySelect.clear(true);
+	//UpdateVariantTree();
+}
+/**
+ * Fill the Varaint header fields (key-value sets/dependencies) with values from the specified variant.
+ * @param {number} variantIdx Index of the target variant within the selected document
+ */
 function FillVariantHeaderForm(variantIdx) {
-	ResetVariantInputs();
+	ResetVariantHeaderForm();
 	let variant = selectedDoc.get('variants').items[variantIdx];
 	let variantKVsets = variant.get('variant').items; // a variant can have one or more key-value pairs
 
 	for (var idx = 0; idx < variantKVsets.length; idx++) {
 		let kvset = variantKVsets[idx];
-		CreateVariantKeyValueSet(idx, kvset.key.value, kvset.value.value);
+		CreateVariantKeyValueElements(idx, kvset.key.value, kvset.value.value);
 	}
 }
+
+
+
+
+
 /**
- * Resets the Included Asset input form fields.
+ * Resets the AssetId/Include/Exclude fields on the variant form
  */
 function ResetVariantAssetForm() {
 	variantAssetSelect.clear(true);
@@ -239,9 +302,10 @@ function ResetVariantAssetForm() {
 	variantIncludeSelect.clearOptions();
 	variantExcludeSelect.clear(true);
 	variantExcludeSelect.clearOptions();
+	//UpdateVariantAssetTree();
 }
 /**
- * Fill the Varaint input form fields with the specified variant.
+ * Fill the Varaint input form fields with values from the specified variant.
  * @param {number} variantIdx Index of the target variant within the selected document
  * @param {number} variantAssetIdx Index of the target asset within the targeted variant
  */
