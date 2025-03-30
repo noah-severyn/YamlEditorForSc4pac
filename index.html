@@ -175,15 +175,15 @@
 
 					<!-- Package Variants tab -->
 					<fieldset id="PackageVariantsContent" class="tab-pane m-3" tabindex="0">
+						<h4>Editing variant: <span id="CurrentVariantId" style="font-style: italic">[new variant]</span></h4>
 						<div style="display:flex" class="row">
 							<div class="col-sm-12 col-md-4">
 								<div id="VariantTreeView"></div>
 							</div>
 
 							<div class="col-sm-12 col-md-8">
-								<h5>Editing variant: <span id="CurrentVariantId" style="font-style: italic">[new variant]</span></h5>
-								<p>A variant may have one or more <b>Name-Value</b> sets uniquely identifying it.</p>
-								<form id="PackageVariantsForm">
+								<p>A variant has one or more <b>Key-Value</b> sets uniquely identifying it.</p>
+								<form id="PackageVariantsFormHeader">
 									<div id="VariantKeyValuesContainer">
 										<div id="VariantKeyValueInputForm" class="mb-2 input-group">
 											<div class="form-check mt-2 me-2">
@@ -207,36 +207,42 @@
 										<label class="input-group-text w2">Dependencies</label>
 										<input id="VariantDependencies" class="form-control" />
 									</div>
+								</form>
+							</div>
+						</div>
 
-									<div style="display:flex" class="row">
-										<div class="col-sm-12 col-md-4">
-											<div id="VariantAssetTreeView"></div>
-										</div>
-										<div class="col-sm-12 col-md-8">
-											<div class="mb-2 input-group">
-												<label class="input-group-text w1" for="VariantAssetId">Asset Id</label>
-												<input id="VariantAssetId" class="form-control" />
-											</div>
+						<hr />
 
-											<div class="mb-2 input-group">
-												<label class="input-group-text w1" for="VariantInclude">Include</label>
-												<input id="VariantInclude" class="form-control" />
-											</div>
+						<div style="display:flex" class="row">
+							<div class="col-sm-12 col-md-4">
+								<div id="VariantAssetTreeView"></div>
+							</div>
 
-											<div class="input-group mb-2">
-												<label class="input-group-text w1" for="VariantExclude">Exclude</label>
-												<input id="VariantExclude" class="form-control" />
-											</div>
-										</div>
+							<div class="col-sm-12 col-md-8">
+								<p>A variant has one or more <b>Assets</b>, each with it's own Include/Exclude rules.</p>
+								<form id="PackageVariantsFormLower">
+									<div class="mb-2 input-group">
+										<label class="input-group-text w1" for="VariantAssetId">Asset Id</label>
+										<input id="VariantAssetId" class="form-control" />
 									</div>
 
-									<div class="mb-2 btn-group">
-										<button id="ResetVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
-										<button id="RemoveVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Variant</button>
-										<!--<button id="AddAssetToVariantButton" class="btn btn-outline-primary btn-sm" type="button">Add Asset to Variant</button>
-										<button id="RemoveAssetFromVariantButton" class="btn btn-outline-primary btn-sm" type="button">Remove Asset from Variant</button>-->
+									<div class="mb-2 input-group">
+										<label class="input-group-text w1" for="VariantInclude">Include</label>
+										<input id="VariantInclude" class="form-control" />
+									</div>
+
+									<div class="input-group mb-2">
+										<label class="input-group-text w1" for="VariantExclude">Exclude</label>
+										<input id="VariantExclude" class="form-control" />
 									</div>
 								</form>
+								
+								<div class="mb-2 btn-group">
+									<button id="ResetVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
+									<button id="RemoveVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Variant</button>
+									<!--<button id="AddAssetToVariantButton" class="btn btn-outline-primary btn-sm" type="button">Add Asset to Variant</button>
+									<button id="RemoveAssetFromVariantButton" class="btn btn-outline-primary btn-sm" type="button">Remove Asset from Variant</button>-->
+								</div>
 							</div>
 						</div>
 					</fieldset>
@@ -397,6 +403,6 @@
 	<script type="text/javascript" src="wwwroot/js/site-events.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site-file-io.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site-variants.js"></script>
-	<script type="text/javascript" src="wwwroot/js/site.js" ></script>
+	<script type="text/javascript" src="wwwroot/js/site.js"></script>
 </body>
 </html>
