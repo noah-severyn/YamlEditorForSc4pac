@@ -105,6 +105,12 @@ document.getElementById('NewPackageAssetButton').addEventListener('click', () =>
 // --------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------   Package Variant tab events   ------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
+for (const input of document.querySelectorAll('#VariantDependencies, #VariantAssetId, #VariantAssetInclude, #VariantAssetExclude')) {
+	input.addEventListener('input', event => {
+		//ValidateInput(event.target.id);
+		UpdateVariantData(event.target);
+	});
+};
 document.getElementById('ResetVariantFormButton').addEventListener('click', () => {
 	ResetVariantInputs();
 });

@@ -53,6 +53,23 @@ function UpdateVariantData(element) {
 		let key = document.getElementById('VariantName' + idx).value;
 		variantItem.setIn(['variant', key], newVal);
 	}
+	else if (element.id === 'VariantDependencies') {
+		if (element.value !== '') {
+			if (variantItem.get('dependencies') === undefined) {
+				const newSeq = selectedDoc.createNode([element.value]);
+				newSeq.type = 'SEQ';
+				variantItem.set('dependencies', newSeq);
+			} else {
+				variantItem.get('dependencies').items = [];
+				variantDependencySelect.getValue().split(',').forEach(dep => {
+					variantItem.get('dependencies').add(dep);
+				});
+			}
+
+		} else if (element.value === '' && variantItem.has('dependencies')) {
+			variantItem.delete('dependencies');
+		}
+	}
 	UpdateData();
 }
 
@@ -157,15 +174,6 @@ function RemoveVariantKeyValueSet(idx) {
 
 
 
-//function VariantAddDependency(input) {
-//	var currentDependencies = document.getElementById('VariantDependencies').value;
-//	if (currentDependencies === '') {
-//		document.getElementById('VariantDependencies').value = input.value + ';\n'
-//	} else {
-//		document.getElementById('VariantDependencies').value = currentDependencies + input.value + ';\n';
-//	}
-//	variantPackageSelect.clear(true);
-//}
 //function AddAssetToVariant() {
 //	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
 
@@ -187,14 +195,6 @@ function RemoveVariantKeyValueSet(idx) {
 //function RemoveAssetFromVariant() {
 //	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
 //	variant.assets = variant.assets.filter((i) => i.assetId !== document.getElementById('VariantAssetId').value);
-//}
-//function RemoveVariant() {
-//	selectedDoc.variants = selectedDoc.variants.filter((i) =>
-//		(Object.keys(i.variant)[0] !== document.getElementById('VariantKey').value) &&
-//		(Object.values(i.variant)[0] !== document.getElementById('VariantValue').value)
-//	);
-//	UpdateData();
-//	ResetVariantInputs();
 //}
 
 /**
@@ -229,6 +229,13 @@ function FillVariantHeaderForm(variantIdx) {
 	for (var idx = 0; idx < variantKVsets.length; idx++) {
 		let kvset = variantKVsets[idx];
 		CreateVariantKeyValueElements(idx, kvset.key.value, kvset.value.value);
+	}
+
+	if (variant.get('dependencies') !== undefined) {
+		let deps = variant.get('dependencies').items;
+		deps.forEach(dep => {
+			variantDependencySelect.addItem(dep.value, true);
+		});
 	}
 }
 
