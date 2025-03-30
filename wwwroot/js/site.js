@@ -271,7 +271,7 @@ const variantExcludeSelect = new TomSelect("#VariantExclude", {
 let localAssets = [];
 let localPackages = [];
 
-ResetAllInputs();
+ClearAll();
 SetTabState();
 
 //Initialize all tooltips

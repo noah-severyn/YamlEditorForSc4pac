@@ -85,24 +85,19 @@ function SelectTab(elementId, triggerEvent = true) {
 
 
 /**
- * Clears all inputs and resets the code pane.
+ * Clears all input form fields and resets the code pane.
  */
 function ClearAll() {
-	ResetAllInputs();
-	cm.setValue('');
-	yamlData.length = 0;
-	document.getElementById('YamlFileName').textContent = '';
-	UpdateData();
-}
-/**
- * Resets all input form fields.
- */
-function ResetAllInputs() {
 	ResetIncludedAssetForm();
 	ResetVariantInputs();
 	ResetIncludedAssetForm();
 	ResetAssetInputs();
 	ResetPackageInputs(); //Reset package inputs last to the heading and the selected tab are aligned
+
+	cm.setValue('');
+	yamlData.length = 0;
+	document.getElementById('YamlFileName').textContent = '';
+	UpdateData();
 }
 
 
