@@ -19,6 +19,8 @@
 function ResetVariantInputs() {
 	ResetVariantHeaderForm();
 	ResetVariantAssetForm();
+	document.getElementById('CurrentVariantId').innerHTML = '[new variant]';
+	selectedPkgVariantIdx = null;
 }
 
 
@@ -118,12 +120,26 @@ function CreateVariantKeyValueElements(idx, name, value) {
 
 /**
  * Add a new key value set to the currently selected varaint.
+ * 
+ * If `selectedPkgVariantIdx` is null then the key value set will be added to a new variant. 
  * @param {string} key Variant key (name)
  * @param {string} value Variant value
  */
 function AddVariantKeyValueSet(key, value) {
-	let variantItem = selectedDoc.get('variants').items[selectedPkgVariantIdx];
-	variantItem.addIn(['variant', key], value);
+	if (selectedPkgVariantIdx === null) {
+		selectedPkgVariantIdx = selectedDoc.get('variants').items.length;
+		const newMap = selectedDoc.createNode({
+			variant: {
+				[key]: value
+			},
+		});
+		newMap.get('variant').flow = true; // Use inline array brace style
+		selectedDoc.get('variants').items.push(newMap);
+	}
+	else {
+		let variantItem = selectedDoc.get('variants').items[selectedPkgVariantIdx];
+		variantItem.addIn(['variant', key], value);
+	}
 	UpdateData();
 }
 
@@ -149,33 +165,6 @@ function RemoveVariantKeyValueSet(idx) {
 //		document.getElementById('VariantDependencies').value = currentDependencies + input.value + ';\n';
 //	}
 //	variantPackageSelect.clear(true);
-//}
-//function UpdateVariantData(elem) {
-//	//Prevent adding a variant if any required fields are blank
-//	if (document.getElementById('VariantKey').value === '' || document.getElementById('VariantValue').value === '') {
-//		document.getElementById('AddVariantButton').disabled = true
-//		document.getElementById('RemoveVariantButton').disabled = true;
-//	} else {
-//		document.getElementById('AddVariantButton').disabled = false;
-//		document.getElementById('RemoveVariantButton').disabled = false;
-//	}
-
-//	if (elem.id === 'VariantsPacAssetList' || elem.id === 'VariantsLocalAssetList') {
-//		document.getElementById('VariantAssetId').value = elem.value;
-//		if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
-//		elem.value = '';
-//	} else if (elem.id === 'VariantsPacPackageList' || elem.id === 'VariantsLocalPackageList') {
-//		document.getElementById('VariantDependencies').value = document.getElementById('VariantDependencies').value + elem.value + ';\n';
-//		if (variantPackageSelect = document.getElementById('VariantsPacPackageList').tomselect) variantPackageSelect.clear(true);
-//		elem.value = '';
-//	} else {
-//		ValidateInput(elem.id);
-//		//TODO - update variant data
-//		//Not going to bother implementing all of the onchange stuff here because I want to redesign how this works (see pr #43)
-//		//Also it's a convoluted process where once the variant key name is changed the current setup will not be able to find the named variant any more
-
-//	}
-//	UpdateData();
 //}
 //function AddAssetToVariant() {
 //	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
@@ -208,60 +197,14 @@ function RemoveVariantKeyValueSet(idx) {
 //	ResetVariantInputs();
 //}
 
-//function AddNewVariant() {
-//	//The `variants` property of a document is an array of variant objects. The variant object has three properties:
-//	//	- variant: an object with one key value pair, with the key as the name of the variant, and the value its value
-//	//	- assets: an array of asset objects. Each aset object has three properties:
-//	//		- assetId: unique Id of the asset
-//	//		- include: array of items in the asset to include
-//	//		- exclude: array of items in the asset to exclude
-//	//	- dependencies: an array of strings
-//	var newKey;
-//	if (document.getElementById('IsGlobalVariant').checked) {
-//		newKey = document.getElementById('VariantKey').value;
-//	} else {
-//		newKey = `${selectedDoc.group}:${selectedDoc.name}:${document.getElementById('VariantKey').value}`;
-//	}
-//	var newValue = document.getElementById('VariantValue').value;
-//	var newVariant = {
-//		variant: { [newKey]: newValue },
-//		assets: new Array()
-//	}
+/**
+ * Removes the currently selected variant from the currently selected document.
+ */
+function RemoveVariant() {
+	selectedDoc.deleteIn(['variants', selectedPkgVariantIdx]);
+	UpdateData();
+}
 
-//	//To avoid writing null properties, only add the property if the input is not blank
-//	var newAsset = new Object();
-//	if (document.getElementById('VariantAssetId').value !== '') {
-//		newAsset.assetId = document.getElementById('VariantAssetId').value;
-//	}
-//	if (document.getElementById('VariantInclude').value !== '') {
-//		newAsset.include = TextToArray(document.getElementById('VariantInclude').value);
-//	}
-//	if (document.getElementById('VariantExclude').value !== '') {
-//		newAsset.exclude = TextToArray(document.getElementById('VariantExclude').value);
-//	}
-//	if (document.getElementById('VariantDependencies').value !== '') {
-//		newVariant.dependencies = TextToArray(document.getElementById('VariantDependencies').value);
-//	}
-
-//	newVariant.assets.push(newAsset);
-//	if (selectedDoc.variants === undefined) {
-//		selectedDoc.variants = new Array(newVariant);
-//	} else {
-//		selectedDoc.variants.push(newVariant);
-//	}
-
-//	//Add variant descriptions (if any)
-//	if (document.getElementById('VariantDescription').value !== '') {
-//		selectedDoc.variantDescriptions = newPackage = {
-//			[newKey]: {
-//				[newValue]: document.getElementById('VariantDescription').value
-//			}
-//		};
-//	}
-
-//	UpdateData();
-//	ResetVariantInputs();
-//}
 
 /**
  * Resets the Varaint input form fields.

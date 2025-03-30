@@ -114,12 +114,9 @@ document.getElementById('ResetVariantFormButton').addEventListener('click', () =
 //document.getElementById('RemoveAssetFromVariantButton').addEventListener('click', () => {
 //	RemoveAssetFromVariant();
 //});
-//document.getElementById('AddVariantButton').addEventListener('click', () => {
-//	AddNewVariant();
-//});
-//document.getElementById('RemoveVariantButton').addEventListener('click', () => {
-//	RemoveVariant();
-//});
+document.getElementById('RemoveVariantButton').addEventListener('click', () => {
+	RemoveVariant();
+});
 document.getElementById('VariantAddKeyValueBtn').addEventListener('click', () => {
 	let vIdx = document.getElementById('VariantKeyValuesContainer').childElementCount - 1;
 	let vKey = document.getElementById('VariantName').value;

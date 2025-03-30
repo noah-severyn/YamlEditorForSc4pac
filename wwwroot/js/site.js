@@ -494,14 +494,18 @@ function UpdateVariantAssetTree() {
 	let variantAssets = [];
 	if (selectedDoc !== null && selectedDoc.get('variants') !== undefined) {
 		let variant = selectedDoc.get('variants').items[selectedPkgVariantIdx];
-		let assets = variant.get('assets').items;
-		for (let idx = 0; idx < assets.length; idx++) {
-			let asset = assets[idx];
-			let assetId = asset.get('assetId');
-			let include = asset.get('include'); //the include/exclude may be undefined, so check before accessing their .items property
-			let exclude = asset.get('exclude');
 
-			variantAssets.push({ name: idx + ' - ' + assetId, expanded: false, children: [] })
+		//The assets list may be undefined if it's a new variant the user just created
+		if (variant.get('assets') !== undefined) {
+			let assets = variant.get('assets').items;
+			for (let idx = 0; idx < assets.length; idx++) {
+				let asset = assets[idx];
+				let assetId = asset.get('assetId');
+				let include = asset.get('include'); //the include/exclude may be undefined, so check before accessing their .items property
+				let exclude = asset.get('exclude');
+
+				variantAssets.push({ name: idx + ' - ' + assetId, expanded: false, children: [] })
+			}
 		}
 	}
 
