@@ -79,24 +79,24 @@
 					<fieldset id="PackagePropertiesContent" class="tab-pane active m-3" tabindex="0">
 						<form id="PackagePropertiesForm">
 							<div class="input-group mb-2">
-								<span class="input-group-text required-label w2">Group</span>
+								<label class="input-group-text required-label w2" for="PackageGroup">Group</label>
 								<input id="PackageGroup" class="form-control required" />
 							</div>
 							<div class="input-group mb-2">
-								<span class="input-group-text required-label w2">Name</span>
+								<label class="input-group-text required-label w2" for="PackageName">Name</label>
 								<input id="PackageName" class="form-control required" type="text" />
 							</div>
 							<div class="input-group mb-2">
-								<span class="input-group-text required-label w2">Version</span>
+								<label class="input-group-text required-label w2" for="PackageVersion">Version</label>
 								<input id="PackageVersion" class="form-control required" type="text" />
 							</div>
 							<div class="input-group mb-2">
-								<span class="input-group-text required-label w2">Subfolder</span>
+								<label class="input-group-text required-label w2" for="PackageSubfolder">Subfolder</label>
 								<input id="PackageSubfolder" class="form-control required" required />
 							</div>
 
 							<div class="input-group mb-2">
-								<span class="input-group-text w2">Dependencies</span>
+								<label class="input-group-text w2" for="PackageDependencies">Dependencies</label>
 								<input id="PackageDependencies" class="form-control required" autocomplete="off">
 							</div>
 						</form>
@@ -106,27 +106,27 @@
 					<fieldset id="PackageInfoContent" class="tab-pane m-3" tabindex="0">
 						<form id="PackageInfoForm">
 							<div class="input-group mb-2">
-								<label id="PackageWebsiteLabel" class="input-group-text w2">Website(s)</label>
+								<label id="PackageWebsiteLabel" class="input-group-text w2" for="PackageWebsite">Website(s)</label>
 								<input id="PackageWebsite" class="form-control" />
 							</div>
 							<div class="input-group mb-2">
-								<span class="input-group-text required-label w2">Summary</span>
+								<label class="input-group-text required-label w2" for="PackageSummary">Summary</label>
 								<input id="PackageSummary" class="form-control required" type="text" />
 							</div>
 							<div class="input-group mb-2">
-								<span class="input-group-text w2">Warning</span>
+								<label class="input-group-text w2" for="PackageWarning">Warning</label>
 								<input id="PackageWarning" class="form-control" type="text" />
 							</div>
 							<div class="input-group mb-2">
-								<span class="input-group-text w2">Conflicts</span>
+								<label class="input-group-text w2" for="PackageConflicts">Conflicts</label>
 								<input id="PackageConflicts" class="form-control" type="text" />
 							</div>
 							<div class="input-group mb-2">
-								<span class="input-group-text w2">Author</span>
+								<label class="input-group-text w2" for="PackageAuthor">Author</label>
 								<input id="PackageAuthor" class="form-control" type="text" />
 							</div>
 							<div class="input-group mb-2">
-								<span class="input-group-text w-100">Description</span>
+								<label class="input-group-text w-100" for="PackageDescription">Description</label>
 								<!--<div class="form-check form-switch mt-2 me-2 ms-2">
 									<input id="ToggleImagePreview" class="form-check-input" type="checkbox" role="switch" checked>
 									<label class="form-check-label" for="ToggleImagePreview">Preview Images</label>
@@ -134,7 +134,7 @@
 								<textarea id="PackageDescription" class="form-control" rows="9"></textarea>
 							</div>
 							<div class="input-group mb-2">
-								<span class="input-group-text w2">Images</span>
+								<label class="input-group-text w2" for="PackageImages">Images</label>
 								<input id="PackageImages" class="form-control required" autocomplete="off">
 							</div>
 						</form>
@@ -154,15 +154,15 @@
 								<p>These assets will always be installed, regardless of the chosen variant or option.</p>
 								<form id="IncludedAssetsForm">
 									<div class="mb-2 input-group">
-										<span class="input-group-text w1">Asset Id</span>
+										<label class="input-group-text w1" for="PackageAssetId">Asset Id</label>
 										<input id="PackageAssetId" class="form-control" />
 									</div>
 									<div class="mb-2 input-group">
-										<span class="input-group-text w1">Include</span>
+										<label class="input-group-text w1" for="PackageAssetInclude">Include</label>
 										<input id="PackageAssetInclude" class="form-control" />
 									</div>
 									<div class="mb-2 input-group">
-										<span class="input-group-text w1">Exclude</span>
+										<label class="input-group-text w1" for="PackageAssetExclude">Exclude</label>
 										<input id="PackageAssetExclude" class="form-control" />
 									</div>
 									<div class="mb-2 btn-group">
@@ -190,9 +190,9 @@
 												<input id="IsLocalVariant" class="form-check-input" type="checkbox" checked>
 												<label class="form-check-label" for="IsLocalVariant" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" data-bs-title="Variants can be defined globally for the entire Plugins folder (e.g. <code>nightmode</code>, <code>driveside</code>, <code>roadstyle</code>, <code>CAM</code>), or locally on a per-package basis (e.g. <code>kodlovag:uniform-street-lighting-mod:light-color</code>).">Local variant</label>
 											</div>
-											<label class="input-group-text required-label w1">Name</label>
+											<label class="input-group-text required-label w1" for="VariantName">Name</label>
 											<input id="VariantName" class="form-control" type="text" />
-											<label class="input-group-text required-label w1">Value</label>
+											<label class="input-group-text required-label w1" for="VariantValue">Value</label>
 											<input id="VariantValue" class="form-control" type="text" />
 											<button id="VariantAddKeyValueBtn" class="btn btn-outline-primary" type="button">Add</button>
 										</div>
@@ -204,7 +204,7 @@
 									</div>-->
 
 									<div class="mb-2 input-group">
-										<label class="input-group-text w2">Dependencies</label>
+										<label class="input-group-text w2" for="VariantDependencies">Dependencies</label>
 										<input id="VariantDependencies" class="form-control" />
 									</div>
 								</form>
@@ -273,9 +273,9 @@
 								<label for="AssetUrl" class="required-label">Url</label>
 							</div>
 							<div class="mb-2 input-group">
-								<label id="AssetArchiveTypeLabel" class="input-group-text w2">Archive Type</label>
+								<label class="input-group-text w2" for="AssetArchiveType">Archive Type</label>
 								<input id="AssetArchiveType" class="form-control" type="text" value="Clickteam" disabled title="Currently only Clickteam installers are supported by sc4pac" />
-								<label id="AssetArchiveVersionLabel" class="input-group-text w2">Version</label>
+								<label class="input-group-text w2" for="AssetArchiveVersion">Version</label>
 								<select id="AssetArchiveVersion" class="form-select">
 									<option value="0" selected>No installer</option>
 									<option value="40">40</option>
@@ -286,11 +286,11 @@
 								</select>
 							</div>
 							<div class="mb-2 input-group">
-								<label id="AssetChecksumLabel" class="input-group-text w2">sha256</label>
+								<label class="input-group-text w2" for="AssetChecksum">sha256</label>
 								<input id="AssetChecksum" class="form-control" type="text" />
 							</div>
 							<div class="mb-2 input-group">
-								<label class="input-group-text w2" title="Non Persistent Url">Non Perst. Url</label>
+								<label class="input-group-text w2" title="Non Persistent Url" for="AssetNonPersistentUrl">Non Perst. Url</label>
 								<input id="AssetNonPersistentUrl" class="form-control" type="text" />
 
 							</div>

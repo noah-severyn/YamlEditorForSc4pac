@@ -87,6 +87,7 @@ function CreateVariantKeyValueElements(idx, name, value) {
 	const nameLabel = document.createElement('label');
 	nameLabel.className = 'input-group-text';
 	nameLabel.textContent = 'Name';
+	nameLabel.htmlFor = 'VariantName' + idx;
 	inputGroupDiv.appendChild(nameLabel);
 
 	const nameInput = document.createElement('input');
@@ -103,6 +104,7 @@ function CreateVariantKeyValueElements(idx, name, value) {
 	const valueLabel = document.createElement('label');
 	valueLabel.className = 'input-group-text';
 	valueLabel.textContent = 'Value';
+	valueLabel.htmlFor = 'VariantValue' + idx;
 	inputGroupDiv.appendChild(valueLabel);
 
 	const valueInput = document.createElement('input');
