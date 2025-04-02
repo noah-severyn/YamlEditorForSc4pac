@@ -199,20 +199,26 @@
 									</div>
 
 									<!--<div class="mb-2 input-group">
-										<label class="input-group-text w2">Description</label>
-										<input id="VariantDescription" class="form-control" type="text" />
-									</div>-->
+			<label class="input-group-text w2">Description</label>
+			<input id="VariantDescription" class="form-control" type="text" />
+		</div>-->
 
 									<div class="mb-2 input-group">
 										<label class="input-group-text w2" for="VariantDependencies">Dependencies</label>
 										<input id="VariantDependencies" class="form-control" />
 									</div>
 								</form>
+
+								<div class="mb-2 btn-group">
+									<button id="ResetUpperVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
+									<button id="RemoveVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Variant</button>
+								</div>
 							</div>
 						</div>
 
 						<hr />
 
+						<h4>Editing asset: <span id="CurrentVariantAssetId" style="font-style: italic">[new asset]</span></h4>
 						<div style="display:flex" class="row">
 							<div class="col-sm-12 col-md-4">
 								<div id="VariantAssetTreeView"></div>
@@ -227,21 +233,19 @@
 									</div>
 
 									<div class="mb-2 input-group">
-										<label class="input-group-text w1" for="VariantInclude">Include</label>
-										<input id="VariantInclude" class="form-control" />
+										<label class="input-group-text w1" for="VariantAssetInclude">Include</label>
+										<input id="VariantAssetInclude" class="form-control" />
 									</div>
 
 									<div class="input-group mb-2">
-										<label class="input-group-text w1" for="VariantExclude">Exclude</label>
-										<input id="VariantExclude" class="form-control" />
+										<label class="input-group-text w1" for="VariantAssetExclude">Exclude</label>
+										<input id="VariantAssetExclude" class="form-control" />
 									</div>
 								</form>
-								
+
 								<div class="mb-2 btn-group">
-									<button id="ResetVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
-									<button id="RemoveVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Variant</button>
-									<!--<button id="AddAssetToVariantButton" class="btn btn-outline-primary btn-sm" type="button">Add Asset to Variant</button>
-									<button id="RemoveAssetFromVariantButton" class="btn btn-outline-primary btn-sm" type="button">Remove Asset from Variant</button>-->
+									<button id="ResetLowerVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
+									<button id="RemoveAssetFromVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Asset from Variant</button>
 								</div>
 							</div>
 						</div>

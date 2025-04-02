@@ -89,7 +89,8 @@ function SelectTab(elementId, triggerEvent = true) {
  */
 function ClearAll() {
 	ResetIncludedAssetForm();
-	ResetVariantInputs();
+	ResetVariantHeaderForm();
+	ResetVariantAssetForm();
 	ResetIncludedAssetForm();
 	ResetAssetInputs();
 	ResetPackageInputs(); //Reset package inputs last to the heading and the selected tab are aligned

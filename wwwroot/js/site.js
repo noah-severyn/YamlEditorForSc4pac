@@ -88,7 +88,11 @@ var selectedPkgAssetIdx = null;
 /**
  * Index of the currently selected variant within this package.
  */
-var selectedPkgVariantIdx = null;
+var selectedVariantIdx = null;
+/**
+ * Index of the currently selected asset within the currently selected variant.
+ */
+var selectedVariantAssetIdx = null;
 /**
  * Main Tree View element
  */
@@ -253,7 +257,7 @@ const variantAssetSelect = new TomSelect("#VariantAssetId", {
 /**
  * Variant Asset Include TomSelect element
  */
-const variantIncludeSelect = new TomSelect("#VariantInclude", {
+const variantIncludeSelect = new TomSelect("#VariantAssetInclude", {
 	persist: false,
 	createOnBlur: true,
 	create: true
@@ -261,7 +265,7 @@ const variantIncludeSelect = new TomSelect("#VariantInclude", {
 /**
  * Variant Asset Exclude TomSelect element
  */
-const variantExcludeSelect = new TomSelect("#VariantExclude", {
+const variantExcludeSelect = new TomSelect("#VariantAssetExclude", {
 	persist: false,
 	createOnBlur: true,
 	create: true
@@ -477,23 +481,24 @@ function UpdateVariantTree() {
 	var pkgVariantsData = [{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }]
 	vtv = new TreeView(pkgVariantsData, 'VariantTreeView');
 	vtv.on("select", function (t) {
+		ResetVariantHeaderForm();
 		let selectedItem = t.data.name;
-		selectedPkgVariantIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
+		selectedVariantIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
 
-		let kvSets = variants[selectedPkgVariantIdx].get('variant').items 
+		let kvSets = variants[selectedVariantIdx].get('variant').items 
 		let kvTitle = kvSets.map(kv => kv.key.value + ': ' + kv.value.value).join(', ');
 		document.getElementById('CurrentVariantId').innerHTML = kvTitle;
 
-		FillVariantHeaderForm(selectedPkgVariantIdx);
+		FillVariantHeaderForm();
 		UpdateVariantAssetTree();
-		console.log('variant idx ' + selectedPkgVariantIdx);
+		console.log('variant idx ' + selectedVariantIdx);
 	});
 }
 
 function UpdateVariantAssetTree() {
 	let variantAssets = [];
 	if (selectedDoc !== null && selectedDoc.get('variants') !== undefined) {
-		let variant = selectedDoc.get('variants').items[selectedPkgVariantIdx];
+		let variant = selectedDoc.get('variants').items[selectedVariantIdx];
 
 		//The assets list may be undefined if it's a new variant the user just created
 		if (variant.get('assets') !== undefined) {
@@ -512,10 +517,13 @@ function UpdateVariantAssetTree() {
 	let variantAssetData = [{ name: 'Assets (' + variantAssets.length + ')', expanded: true, children: variantAssets }]
 	vatv = new TreeView(variantAssetData, 'VariantAssetTreeView');
 	vatv.on("select", function (t) {
+		ResetVariantAssetForm();
 		let selectedItem = t.data.name;
-		let selectedIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
-
-		FillVariantAssetForm(variantIdx, selectedIdx)
+		selectedVariantAssetIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
+		let assetName = selectedItem.substring(selectedItem.indexOf(' - ') + 3);
+		document.getElementById('CurrentVariantAssetId').innerHTML = assetName;
+		
+		FillVariantAssetForm();
 		console.log(selectedItem + ' clicked');
 	});
 }

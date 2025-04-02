@@ -13,19 +13,14 @@
 //// --------------------------------------------------------------------------------------------------------------------
 //// ---------------------------------------------------   Variants   ---------------------------------------------------
 //// --------------------------------------------------------------------------------------------------------------------
-/**
- * Resets the variant header and asset form fields.
- */
-function ResetVariantInputs() {
-	ResetVariantHeaderForm();
-	ResetVariantAssetForm();
-	document.getElementById('CurrentVariantId').innerHTML = '[new variant]';
-	selectedPkgVariantIdx = null;
-}
 
 
 function UpdateVariantData(element) {
-	let variantItem = selectedDoc.get('variants').items[selectedPkgVariantIdx];
+	let variantItem = selectedDoc.get('variants').items[selectedVariantIdx];
+	let assetItem;
+	if (selectedVariantAssetIdx !== null) {
+		assetItem =  variantItem.get('assets').items[selectedVariantAssetIdx];
+	}
 	let newVal = element.value;
 
 	if (element.id.startsWith('VariantName')) {
@@ -68,6 +63,56 @@ function UpdateVariantData(element) {
 
 		} else if (element.value === '' && variantItem.has('dependencies')) {
 			variantItem.delete('dependencies');
+		}
+	}
+	else if (element.id === 'VariantAssetId') {
+		if (selectedVariantAssetIdx === null) {
+			if (variantItem.get('assets') === undefined) {
+				const newSeq = selectedDoc.createNode([{ assetId: element.value }]);
+				newSeq.type = 'SEQ';
+				variantItem.set('assets', newSeq);
+			} else {
+				variantItem.get('assets').add(selectedDoc.createNode({ assetId: element.value }));
+			}
+		} else {
+			assetItem.set('assetId', element.value);
+		}
+		UpdateVariantAssetTree();
+
+		
+	}
+	else if (element.id === 'VariantAssetInclude') {
+		if (element.value !== '') {
+			if (assetItem.get('include') === undefined) {
+				const newSeq = selectedDoc.createNode([element.value]);
+				newSeq.type = 'SEQ';
+				assetItem.set('include', newSeq);
+			} else {
+				assetItem.get('include').items = [];
+				variantIncludeSelect.getValue().split(',').forEach(item => {
+					assetItem.get('include').add(item);
+				});
+			}
+
+		} else if (element.value === '' && assetItem.has('include')) {
+			assetItem.delete('include');
+		}
+	}
+	else if (element.id === 'VariantAssetExclude') {
+		if (element.value !== '') {
+			if (assetItem.get('exclude') === undefined) {
+				const newSeq = selectedDoc.createNode([element.value]);
+				newSeq.type = 'SEQ';
+				assetItem.set('exclude', newSeq);
+			} else {
+				assetItem.get('exclude').items = [];
+				variantExcludeSelect.getValue().split(',').forEach(item => {
+					assetItem.get('exclude').add(item);
+				});
+			}
+
+		} else if (element.value === '' && assetItem.has('exclude')) {
+			assetItem.delete('exclude');
 		}
 	}
 	UpdateData();
@@ -145,8 +190,8 @@ function CreateVariantKeyValueElements(idx, name, value) {
  * @param {string} value Variant value
  */
 function AddVariantKeyValueSet(key, value) {
-	if (selectedPkgVariantIdx === null) {
-		selectedPkgVariantIdx = selectedDoc.get('variants').items.length;
+	if (selectedVariantIdx === null) {
+		selectedVariantIdx = selectedDoc.get('variants').items.length;
 		const newMap = selectedDoc.createNode({
 			variant: {
 				[key]: value
@@ -156,7 +201,7 @@ function AddVariantKeyValueSet(key, value) {
 		selectedDoc.get('variants').items.push(newMap);
 	}
 	else {
-		let variantItem = selectedDoc.get('variants').items[selectedPkgVariantIdx];
+		let variantItem = selectedDoc.get('variants').items[selectedVariantIdx];
 		variantItem.addIn(['variant', key], value);
 	}
 	UpdateData();
@@ -167,7 +212,7 @@ function AddVariantKeyValueSet(key, value) {
  * @param {number} idx Index of the key-value set to remove
  */
 function RemoveVariantKeyValueSet(idx) {
-	let variantItem = selectedDoc.get('variants').items[selectedPkgVariantIdx];
+	let variantItem = selectedDoc.get('variants').items[selectedVariantIdx];
 	let key = variantItem.get('variant').items[idx].key.value;
 	variantItem.deleteIn(['variant', key]);
 	document.getElementById('VariantKVSet' + idx).remove();
@@ -175,35 +220,22 @@ function RemoveVariantKeyValueSet(idx) {
 }
 
 
-
-//function AddAssetToVariant() {
-//	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
-
-//	var newAsset = {
-//		assetId: document.getElementById('VariantAssetId').value,
-//		include: TextToArray(document.getElementById('VariantInclude').value),
-//		exclude: TextToArray(document.getElementById('VariantExclude').value),
-//	};
-//	variant.assets.push(newAsset);
-
-
-//	document.getElementById('VariantAssetId').value = '';
-//	document.getElementById('VariantInclude').value = '';
-//	document.getElementById('VariantExclude').value = '';
-//	if (variantPackageSelect = document.getElementById('VariantsPacAssetList').tomselect) variantPackageSelect.clear(true);
-//	document.getElementById('VariantsLocalAssetList').value = '';
-//	UpdateData();
-//}
-//function RemoveAssetFromVariant() {
-//	var variant = GetVariant(selectedDoc.group + ':' + selectedDoc.name + ':' + document.getElementById('VariantKey').value, document.getElementById('VariantValue').value);
-//	variant.assets = variant.assets.filter((i) => i.assetId !== document.getElementById('VariantAssetId').value);
-//}
+/**
+ * Removes the currently selected asset from the currently selected variant.
+ */
+function RemoveAssetFromVariant() {
+	selectedDoc.get('variants').items[selectedVariantIdx].deleteIn(['assets', selectedVariantAssetIdx]);
+	ResetVariantAssetForm();
+	UpdateData();
+}
 
 /**
  * Removes the currently selected variant from the currently selected document.
  */
 function RemoveVariant() {
-	selectedDoc.deleteIn(['variants', selectedPkgVariantIdx]);
+	selectedDoc.deleteIn(['variants', selectedVariantIdx]);
+	ResetVariantHeaderForm();
+	ResetVariantAssetForm();
 	UpdateData();
 }
 
@@ -217,15 +249,15 @@ function ResetVariantHeaderForm() {
 	document.getElementById('VariantName').value = '';
 	document.getElementById('VariantValue').value = '';
 	variantDependencySelect.clear(true);
+	document.getElementById('CurrentVariantId').innerHTML = '[new variant]';
+	selectedVariantIdx = null;
 	//UpdateVariantTree();
 }
 /**
  * Fill the Varaint header fields (key-value sets/dependencies) with values from the specified variant.
- * @param {number} variantIdx Index of the target variant within the selected document
  */
-function FillVariantHeaderForm(variantIdx) {
-	ResetVariantHeaderForm();
-	let variant = selectedDoc.get('variants').items[variantIdx];
+function FillVariantHeaderForm() {
+	let variant = selectedDoc.get('variants').items[selectedVariantIdx];
 	let variantKVsets = variant.get('variant').items; // a variant can have one or more key-value pairs
 
 	for (var idx = 0; idx < variantKVsets.length; idx++) {
@@ -254,17 +286,16 @@ function ResetVariantAssetForm() {
 	variantIncludeSelect.clearOptions();
 	variantExcludeSelect.clear(true);
 	variantExcludeSelect.clearOptions();
+	document.getElementById('CurrentVariantAssetId').innerHTML = '[new asset]';
+	selectedVariantAssetIdx = null;
 	//UpdateVariantAssetTree();
 }
 /**
  * Fill the Varaint input form fields with values from the specified variant.
- * @param {number} variantIdx Index of the target variant within the selected document
- * @param {number} variantAssetIdx Index of the target asset within the targeted variant
  */
-function FillVariantAssetForm(variantIdx, variantAssetIdx) {
-	ResetVariantAssetForm();
-	let variant = selectedDoc.get('variants').items[variantIdx];
-	let asset = variant.get('assets').items[variantAssetIdx];
+function FillVariantAssetForm() {
+	let variant = selectedDoc.get('variants').items[selectedVariantIdx];
+	let asset = variant.get('assets').items[selectedVariantAssetIdx];
 
 	(variantAssetSelect.createItem(asset.get('assetId')) || variantAssetSelect.addItem(asset.get('assetId'), true));
 

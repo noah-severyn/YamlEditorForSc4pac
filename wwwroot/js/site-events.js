@@ -111,17 +111,17 @@ for (const input of document.querySelectorAll('#VariantDependencies, #VariantAss
 		UpdateVariantData(event.target);
 	});
 };
-document.getElementById('ResetVariantFormButton').addEventListener('click', () => {
-	ResetVariantInputs();
+document.getElementById('ResetUpperVariantFormButton').addEventListener('click', () => {
+	ResetVariantHeaderForm();
 });
-//document.getElementById('AddAssetToVariantButton').addEventListener('click', () => {
-//	AddAssetToVariant();
-//});
-//document.getElementById('RemoveAssetFromVariantButton').addEventListener('click', () => {
-//	RemoveAssetFromVariant();
-//});
+document.getElementById('ResetLowerVariantFormButton').addEventListener('click', () => {
+	ResetVariantAssetForm();
+});
 document.getElementById('RemoveVariantButton').addEventListener('click', () => {
 	RemoveVariant();
+});
+document.getElementById('RemoveAssetFromVariantButton').addEventListener('click', () => {
+	RemoveAssetFromVariant();
 });
 document.getElementById('VariantAddKeyValueBtn').addEventListener('click', () => {
 	let vIdx = document.getElementById('VariantKeyValuesContainer').childElementCount - 1;
