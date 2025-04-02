@@ -81,8 +81,18 @@ var currDocIdx = null;
  * The currently selected ("active") document being edited - may be a package or an asset.
  */
 var selectedDoc = null;
-
+/**
+ * Index of the currently selected included asset ("package asset") within this package.
+ */
 var selectedPkgAssetIdx = null;
+/**
+ * Index of the currently selected variant within this package.
+ */
+var selectedVariantIdx = null;
+/**
+ * Index of the currently selected asset within the currently selected variant.
+ */
+var selectedVariantAssetIdx = null;
 /**
  * Main Tree View element
  */
@@ -95,6 +105,10 @@ var atv;
  * Variant Tree View element
  */
 var vtv;
+/**
+ * Variant Asset Tree View element
+ */
+let vatv;
 /**
  * Load From ... dialog element
  */
@@ -202,7 +216,7 @@ const pkgAssetExcSelect = new TomSelect("#PackageAssetExclude", {
 	create: true
 });
 
-const variantPackageSelect = new TomSelect("#VariantDependencies", {
+const variantDependencySelect = new TomSelect("#VariantDependencies", {
 	create: false,
 	valueField: 'value',
 	labelField: 'id',
@@ -222,6 +236,7 @@ const variantPackageSelect = new TomSelect("#VariantDependencies", {
 });
 
 const variantAssetSelect = new TomSelect("#VariantAssetId", {
+	maxItems: 1,
 	create: false,
 	valueField: 'value',
 	labelField: 'id',
@@ -239,12 +254,28 @@ const variantAssetSelect = new TomSelect("#VariantAssetId", {
 		}
 	}
 });
+/**
+ * Variant Asset Include TomSelect element
+ */
+const variantIncludeSelect = new TomSelect("#VariantAssetInclude", {
+	persist: false,
+	createOnBlur: true,
+	create: true
+});
+/**
+ * Variant Asset Exclude TomSelect element
+ */
+const variantExcludeSelect = new TomSelect("#VariantAssetExclude", {
+	persist: false,
+	createOnBlur: true,
+	create: true
+});
 
 
 let localAssets = [];
 let localPackages = [];
 
-ResetAllInputs();
+ClearAll();
 SetTabState();
 
 //Initialize all tooltips
@@ -257,9 +288,7 @@ const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstra
  * Sync changes between the codepane and UI with the current state of the `yamlData` array (UI ←→ yamlData ←→ codepane).
  * 
  * Dumps yamlData to the codepane by default.
- * @param {boolean} dumpData Whether to update the code pane. Should be disabled if this is called from the codepane (as the codepane would already be up to date). Default is FALSE.
- * 
- * The default *must* be FALSE because setting the code text will re-trigger the change event a second time
+ * @param {boolean} [dumpData=true] Whether to update the code pane. Should be disabled if this is called from the codepane (as the codepane would already be up to date). Default is TRUE.
  */
 function UpdateData(dumpData = true) {
 	//When updating a text input, the input event occurs immediately, but the change event doesn't occur until you commit the change by lose focus or submit the form.
@@ -293,7 +322,7 @@ function UpdateData(dumpData = true) {
 	SetTabState();
 
 	//Update the Tomselect dropdowns with the local packages and assets
-	[pkgDependencySelect, variantPackageSelect, pkgAssetSelect, variantAssetSelect].forEach(tscontrol => {
+	[pkgDependencySelect, variantDependencySelect, pkgAssetSelect, variantAssetSelect].forEach(tscontrol => {
 		let allOpts = tscontrol.options
 		for (const key in allOpts) {
 			if (allOpts[key].channel === 'local') {
@@ -306,13 +335,12 @@ function UpdateData(dumpData = true) {
 	//pkgAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
 	//variantAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
 	pkgDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
-	variantPackageSelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
+	variantDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
 	pkgAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
 	variantAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
 
 	// Update the trees with local assets and packages
 	UpdateMainTree();
-	UpdateIncludedAssetTree();
 	UpdateVariantTree();
 	
 	if (dumpData) {
@@ -413,6 +441,7 @@ function UpdateMainTree() {
 			SetSelectedDoc(selectedIdx - 1, 'p');
 			FillPackageForm();
 			UpdateIncludedAssetTree();
+			UpdateVariantTree();
 		} else {
 			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			SelectTab('AssetPropertiesTab');
@@ -425,10 +454,8 @@ function UpdateMainTree() {
 }
 
 function UpdateIncludedAssetTree() {
-	var pkgAssets;
-	if (selectedDoc == null || selectedDoc.get('assets') == null) {
-		pkgAssets = [];
-	} else {
+	var pkgAssets = [];
+	if (selectedDoc !== null && selectedDoc.get('assets') !== undefined) {
 		pkgAssets = selectedDoc.get('assets').toJSON().map((i) => ({ name: i.assetId, children: [] }));
 	}
 
@@ -440,87 +467,66 @@ function UpdateIncludedAssetTree() {
 }
 
 function UpdateVariantTree() {
-	var pkgVariants;
-	
-	if (selectedDoc == null || selectedDoc.variants == null) {
-		pkgVariants = [];
-	} else {
-		var pkgId = selectedDoc.group + ':' + selectedDoc.name + ':';
-		//let allVariantNames = doc.variants.map((v) => Object.keys(v.variant)[0]);
-		//let uniqueVariantNames = [...new Set(allVariantNames)]; //https://stackoverflow.com/a/33121880/10802255
-		//console.log(allVariantNames);
-		//console.log(uniqueVariantNames);
-
-		//pkgVariants = uniqueVariantNames.map((uName) => ({
-		//	name: uName.replace(pkgId, ''),
-		//	expanded: true,
-		//	//First find all with the current name, then return all the values (options) associated with that variant. Lastly format that list correctly for the tree view.
-		//	children: doc.variants
-		//		.filter((i) => Object.keys(i.variant)[0] === uName)
-		//		.map((i) => Object.values(i.variant)[0])
-		//		.map((i) => ({name: i, children: []}))
-		//}));
-		let allVariantNames = selectedDoc.variants.map((v) => ({ key: Object.keys(v.variant)[0], value: Object.values(v.variant)[0] }));
-
-		pkgVariants = allVariantNames.map((v) => ({
-			name: v.key.replace(pkgId, '') + ':' + v.value,
-			expanded: true,
-			children: [
-				{ name: 'Header', children: [] },
-				{
-					name: 'Assets (' + GetVariant(v.key, v.value).assets.length + ')',
-					expanded: false,
-					children: GetVariant(v.key, v.value).assets.map((item) => ({ name: item.assetId, children: [] }))
-				},
-			]
-		}));
+	let pkgVariants = [];
+	let variants = [];
+	if (selectedDoc !== null && selectedDoc.get('variants') !== undefined) {
+		variants = selectedDoc.get('variants').items;
+		for (let idx = 0; idx < variants.length; idx++) {
+			let variant = variants[idx].get('variant').items; // a variant can have one or more key-value pairs
+			let title = idx + ' - ' + variant.map(v => v.value.value).join(' - '); //▸
+			pkgVariants.push({ name: title, expanded: false, children: [] })
+		}
 	}
 
 	var pkgVariantsData = [{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }]
 	vtv = new TreeView(pkgVariantsData, 'VariantTreeView');
 	vtv.on("select", function (t) {
-		var selectedItem = t.data.name;
-		var selectedVariant;
-		
-		if (selectedItem === "Header") {
-			selectedVariant = t.target.target.parentElement.parentElement.parentElement.parentElement.firstChild.textContent.substring(1);
-		} else {
-			selectedVariant = t.target.target.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.firstChild.textContent.substring(1);
-		}
+		ResetVariantHeaderForm();
+		let selectedItem = t.data.name;
+		selectedVariantIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
 
-		var variantKey = pkgId + selectedVariant.substring(0, selectedVariant.indexOf(':'));
-		var variantValue = selectedVariant.substring(selectedVariant.indexOf(':') + 1);
-		var activeVariant = GetVariant(variantKey, variantValue);
-		FillVariantFormHeader(activeVariant);
+		let kvSets = variants[selectedVariantIdx].get('variant').items 
+		let kvTitle = kvSets.map(kv => kv.key.value + ': ' + kv.value.value).join(', ');
+		document.getElementById('CurrentVariantId').innerHTML = kvTitle;
 
-		if (selectedItem !== "Header") {
-			let selectedAsset = activeVariant.assets.filter(i => i.assetId === selectedItem)[0];
-			FillVariantFormAsset(selectedAsset);
-		}
+		FillVariantHeaderForm();
+		UpdateVariantAssetTree();
+		console.log('variant idx ' + selectedVariantIdx);
 	});
-
-	/**
-	 * Fill the Varaint input form fields with the specified variant.
-	 */
-	function FillVariantFormHeader(vData) {
-		var key = Object.keys(vData.variant)[0];
-		var idx = key.lastIndexOf(':');
-		document.getElementById('IsGlobalVariant').checked = (key.substring(0, idx) !== selectedDoc.group + ':' + selectedDoc.name);
-		document.getElementById('VariantKey').value = key.substring(idx + 1);
-		document.getElementById('VariantValue').value = Object.values(vData.variant)[0];
-		document.getElementById('VariantDescription').value = '';
-		document.getElementById('VariantDependencies').value = ArrayToText(vData.dependencies);
-		document.getElementById('VariantDescription').value = selectedDoc.variantDescriptions[key][Object.values(vData.variant)[0]];
-	}
-
-
-	function FillVariantFormAsset(vAsset) {
-		document.getElementById('VariantAssetId').value = vAsset.assetId;
-		document.getElementById('VariantInclude').value = ArrayToText(vAsset.include);
-		document.getElementById('VariantExclude').value = ArrayToText(vAsset.exclude);
-	}
 }
 
+function UpdateVariantAssetTree() {
+	let variantAssets = [];
+	if (selectedDoc !== null && selectedDoc.get('variants') !== undefined) {
+		let variant = selectedDoc.get('variants').items[selectedVariantIdx];
+
+		//The assets list may be undefined if it's a new variant the user just created
+		if (variant.get('assets') !== undefined) {
+			let assets = variant.get('assets').items;
+			for (let idx = 0; idx < assets.length; idx++) {
+				let asset = assets[idx];
+				let assetId = asset.get('assetId');
+				let include = asset.get('include'); //the include/exclude may be undefined, so check before accessing their .items property
+				let exclude = asset.get('exclude');
+
+				variantAssets.push({ name: idx + ' - ' + assetId, expanded: false, children: [] })
+			}
+		}
+	}
+
+	let variantAssetData = [{ name: 'Assets (' + variantAssets.length + ')', expanded: true, children: variantAssets }]
+	vatv = new TreeView(variantAssetData, 'VariantAssetTreeView');
+	vatv.on("select", function (t) {
+		ResetVariantAssetForm();
+		let selectedItem = t.data.name;
+		selectedVariantAssetIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
+		let assetName = selectedItem.substring(selectedItem.indexOf(' - ') + 3);
+		document.getElementById('CurrentVariantAssetId').innerHTML = assetName;
+		
+		FillVariantAssetForm();
+		console.log(selectedItem + ' clicked');
+	});
+}
 
 
 

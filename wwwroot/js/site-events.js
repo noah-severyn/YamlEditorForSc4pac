@@ -105,30 +105,30 @@ document.getElementById('NewPackageAssetButton').addEventListener('click', () =>
 // --------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------   Package Variant tab events   ------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
-for (const input of document.querySelectorAll('#VariantKey, #VariantValue, #VariantDescription, #VariantsPacPackageList, #VariantsLocalPackageList')) {
+for (const input of document.querySelectorAll('#VariantDependencies, #VariantAssetId, #VariantAssetInclude, #VariantAssetExclude')) {
 	input.addEventListener('input', event => {
+		//ValidateInput(event.target.id);
 		UpdateVariantData(event.target);
 	});
-}
-for (const input of document.querySelectorAll('#VariantsPacAssetList, #VariantsLocalAssetList, #VariantInclude, #VariantExclude')) {
-	input.addEventListener('change', event => {
-		UpdateVariantData(event.target);
-	});
-}
-document.getElementById('ResetVariantFormButton').addEventListener('click', () => {
-	ResetVariantInputs();
+};
+document.getElementById('ResetUpperVariantFormButton').addEventListener('click', () => {
+	ResetVariantHeaderForm();
 });
-document.getElementById('AddAssetToVariantButton').addEventListener('click', () => {
-	AddAssetToVariant();
+document.getElementById('ResetLowerVariantFormButton').addEventListener('click', () => {
+	ResetVariantAssetForm();
+});
+document.getElementById('RemoveVariantButton').addEventListener('click', () => {
+	RemoveVariant();
 });
 document.getElementById('RemoveAssetFromVariantButton').addEventListener('click', () => {
 	RemoveAssetFromVariant();
 });
-document.getElementById('AddVariantButton').addEventListener('click', () => {
-	AddNewVariant();
-});
-document.getElementById('RemoveVariantButton').addEventListener('click', () => {
-	RemoveVariant();
+document.getElementById('VariantAddKeyValueBtn').addEventListener('click', () => {
+	let vIdx = document.getElementById('VariantKeyValuesContainer').childElementCount - 1;
+	let vKey = document.getElementById('VariantName').value;
+	let vValue = document.getElementById('VariantValue').value;
+	CreateVariantKeyValueElements(vIdx, vKey, vValue);
+	AddVariantKeyValueSet(vKey, vValue);
 });
 
 

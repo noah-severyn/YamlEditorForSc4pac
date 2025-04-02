@@ -57,7 +57,7 @@ async function LoadData() {
     pkgSubfolderSelect.addOptions(AllSubfolders.map(fldr => ({ value: fldr, text: fldr })));
     pkgDependencySelect.addOptions(AllPackages.map(pkg => ({ value: pkg.id, id: pkg.id, channel: pkg.channel })));
     pkgAssetSelect.addOptions(AllAssets.map(asset => ({ value: asset.id, id: asset.id, channel: asset.channel })));
-    variantPackageSelect.addOptions(AllPackages.map(pkg => ({ value: pkg.id, id: pkg.id, channel: pkg.channel })));
+    variantDependencySelect.addOptions(AllPackages.map(pkg => ({ value: pkg.id, id: pkg.id, channel: pkg.channel })));
     variantAssetSelect.addOptions(AllAssets.map(asset => ({ value: asset.id, id: asset.id, channel: asset.channel })));
 
     //AllGroups.map(g => ({ value: g.split("|")[1], text: g.split("|")[1] })),
