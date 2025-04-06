@@ -93,6 +93,9 @@ for (const input of document.querySelectorAll('#PackagePropertiesForm .form-cont
 		UpdatePackageData();
 	});
 };
+document.getElementById('IsLocalVariant').addEventListener('click', () => {
+	ToggleLocalVariant();
+});
 document.getElementById('ResetIncludedAssetButton').addEventListener('click', () => {
 	ResetIncludedAssetForm();
 });

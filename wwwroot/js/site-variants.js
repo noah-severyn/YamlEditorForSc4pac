@@ -29,19 +29,23 @@ function UpdateVariantData(element) {
 
 		//Note that this event is triggered after the input has changed, so we no longer know what the original key is. Find the one that most closely matches this and use it.
 		let keys = variantItem.get('variant').items.map(k => k.key.value);
-		let maxSS;
+		let maxSS = 0;
+		let maxIdx = 0;
 		for (let idx = 0; idx < keys.length; idx++) {
 			let ss = StringSimilarity(newVal, keys[idx]);
 			if (ss > maxSS) {
 				maxSS = ss;
+				maxIdx = idx;
 			}
 		}
 
-		let keyidx = keys.indexOf(maxSS);
-		let key = keys[keyidx];
+		let key = keys[maxIdx];
 		let existingVal = variantItem.getIn(['variant', key]);
 		variantItem.deleteIn(['variant', key]);
-		variantItem.setIn(['varaint', newVal], existingVal);
+
+		let newPair = selectedDoc.createPair(newVal, existingVal);
+		variantItem.get('variant').items.push(newPair);
+		//variantItem.setIn(['variant', newVal], existingVal);
 	}
 	else if (element.id.startsWith('VariantValue')) {
 		let idx = element.id.substring(element.id.length - 1);
@@ -183,7 +187,23 @@ function CreateVariantKeyValueElements(idx, name, value) {
 
 
 /**
- * Add a new key value set to the currently selected varaint.
+ * Toggle between a local variant (where the package name is prepended to the variant name) and a global variant.
+ */
+function ToggleLocalVariant() {
+	let nameInput = document.getElementById('VariantName');
+	let pkg = selectedDoc.get('group') + ':' + selectedDoc.get('name');
+	if (document.getElementById('IsLocalVariant').checked) {
+		nameInput.value = pkg + ':' + nameInput.value;
+	} else {
+		nameInput.value =  nameInput.value.replace(pkg + ':', '')
+	}
+
+	nameInput.selectionStart = nameInput.selectionEnd = nameInput.value.length;
+}
+
+
+/**
+ * Add a new key value set to the currently selected variant.
  * 
  * If `selectedPkgVariantIdx` is null then the key value set will be added to a new variant. 
  * @param {string} key Variant key (name)
@@ -191,14 +211,20 @@ function CreateVariantKeyValueElements(idx, name, value) {
  */
 function AddVariantKeyValueSet(key, value) {
 	if (selectedVariantIdx === null) {
-		selectedVariantIdx = selectedDoc.get('variants').items.length;
 		const newMap = selectedDoc.createNode({
 			variant: {
 				[key]: value
 			},
 		});
 		newMap.get('variant').flow = true; // Use inline array brace style
-		selectedDoc.get('variants').items.push(newMap);
+		if (selectedDoc.get('variants') === undefined) {
+			const newSeq = selectedDoc.createNode([newMap]);
+			newSeq.type = 'SEQ';
+			selectedDoc.set('variants', newSeq);
+		} else {
+			selectedDoc.variants.add(newMap);
+		}
+		selectedVariantIdx = selectedDoc.get('variants').items.length - 1;
 	}
 	else {
 		let variantItem = selectedDoc.get('variants').items[selectedVariantIdx];
@@ -208,7 +234,7 @@ function AddVariantKeyValueSet(key, value) {
 }
 
 /**
- * Removes the key value set at the specified index from the currently selected varaint.
+ * Removes the key value set at the specified index from the currently selected variant.
  * @param {number} idx Index of the key-value set to remove
  */
 function RemoveVariantKeyValueSet(idx) {
@@ -241,7 +267,7 @@ function RemoveVariant() {
 
 
 /**
- * Resets the Varaint input form fields.
+ * Resets the variant input form fields.
  */
 function ResetVariantHeaderForm() {
 	document.querySelectorAll('.VariantKVItem').forEach(e => e.remove());
@@ -254,7 +280,7 @@ function ResetVariantHeaderForm() {
 	//UpdateVariantTree();
 }
 /**
- * Fill the Varaint header fields (key-value sets/dependencies) with values from the specified variant.
+ * Fill the variant header fields (key-value sets/dependencies) with values from the specified variant.
  */
 function FillVariantHeaderForm() {
 	let variant = selectedDoc.get('variants').items[selectedVariantIdx];
@@ -291,7 +317,7 @@ function ResetVariantAssetForm() {
 	//UpdateVariantAssetTree();
 }
 /**
- * Fill the Varaint input form fields with values from the specified variant.
+ * Fill the variant input form fields with values from the specified variant.
  */
 function FillVariantAssetForm() {
 	let variant = selectedDoc.get('variants').items[selectedVariantIdx];
