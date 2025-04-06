@@ -187,7 +187,23 @@ function CreateVariantKeyValueElements(idx, name, value) {
 
 
 /**
- * Add a new key value set to the currently selected varaint.
+ * Toggle between a local variant (where the package name is prepended to the variant name) and a global variant.
+ */
+function ToggleLocalVariant() {
+	let nameInput = document.getElementById('VariantName');
+	let pkg = selectedDoc.get('group') + ':' + selectedDoc.get('name');
+	if (document.getElementById('IsLocalVariant').checked) {
+		nameInput.value = pkg + ':' + nameInput.value;
+	} else {
+		nameInput.value =  nameInput.value.replace(pkg + ':', '')
+	}
+
+	nameInput.selectionStart = nameInput.selectionEnd = nameInput.value.length;
+}
+
+
+/**
+ * Add a new key value set to the currently selected variant.
  * 
  * If `selectedPkgVariantIdx` is null then the key value set will be added to a new variant. 
  * @param {string} key Variant key (name)
