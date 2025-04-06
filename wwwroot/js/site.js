@@ -476,6 +476,12 @@ function UpdateVariantTree() {
 			let title = idx + ' - ' + variant.map(v => v.value.value).join(' - '); //▸
 			pkgVariants.push({ name: title, expanded: false, children: [] })
 		}
+
+		if (selectedVariantIdx !== null) {
+			let kvSets = variants[selectedVariantIdx].get('variant').items
+			let kvTitle = kvSets.map(kv => kv.key.value + ': ' + kv.value.value).join(', ');
+			document.getElementById('CurrentVariantId').innerHTML = kvTitle;
+		}
 	}
 
 	var pkgVariantsData = [{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }]
