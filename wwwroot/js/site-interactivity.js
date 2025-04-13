@@ -433,9 +433,7 @@ function UpdateAssetData() {
 		selectedDoc.setIn(['lastModified'], document.getElementById('AssetLastModified').value + 'Z');
 	}
 	if (document.getElementById('AssetArchiveVersion').value !== '0') {
-		if (selectedDoc.has('archiveType')) {
-			selectedDoc.setIn(['archiveType', 'format'], "Clickteam");
-		}
+		selectedDoc.setIn(['archiveType', 'format'], document.getElementById('AssetArchiveFormat').value);
 		selectedDoc.setIn(['archiveType', 'version'], document.getElementById('AssetArchiveVersion').value);
 	} else {
 		selectedDoc.deleteIn(['archiveType']);
