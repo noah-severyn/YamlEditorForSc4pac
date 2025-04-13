@@ -98,6 +98,7 @@ function ClearAll() {
 	cm.setValue('');
 	yamlData.length = 0;
 	document.getElementById('YamlFileName').textContent = '';
+	currDocIdx = null;
 	UpdateData();
 }
 
@@ -114,9 +115,11 @@ function ValidateInput(elementId) {
 	var locn = inputElement.selectionStart;
 
 	var fieldName = elementId.replaceAll('Package', '').replaceAll('Asset', '');
-	if (fieldName === 'Subfolder' || fieldName === 'LastModified') {
+	if (fieldName === 'VariantName') {
+		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-:]/g, '').toLowerCase();
+	} else if (fieldName === 'Subfolder' || fieldName === 'LastModified') {
 		return;
-	} else if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'Id' || fieldName === 'VariantKey' || fieldName === 'VariantValue') {
+	} else if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'Id' || fieldName === 'Value') {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-]/g, '').toLowerCase();
 	} else if (fieldName === 'Dependencies') {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-:;\n]/g, '').toLowerCase();

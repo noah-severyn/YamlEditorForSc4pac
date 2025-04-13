@@ -79,6 +79,7 @@ body {
 /* This is the code editor */
 .CodeMirror.cm-s-default {
     height: 75%;
+    font-size: .95em;
 }
 /* This is the markdown editor */
 .CodeMirror.cm-s-easymde {

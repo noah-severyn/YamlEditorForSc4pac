@@ -93,9 +93,6 @@ for (const input of document.querySelectorAll('#PackagePropertiesForm .form-cont
 		UpdatePackageData();
 	});
 };
-document.getElementById('IsLocalVariant').addEventListener('click', () => {
-	ToggleLocalVariant();
-});
 document.getElementById('ResetIncludedAssetButton').addEventListener('click', () => {
 	ResetIncludedAssetForm();
 });
@@ -110,10 +107,17 @@ document.getElementById('NewPackageAssetButton').addEventListener('click', () =>
 // --------------------------------------------------------------------------------------------------------------------
 for (const input of document.querySelectorAll('#VariantDependencies, #VariantAssetId, #VariantAssetInclude, #VariantAssetExclude')) {
 	input.addEventListener('input', event => {
-		//ValidateInput(event.target.id);
 		UpdateVariantData(event.target);
 	});
 };
+for (const input of document.querySelectorAll('#VariantName, #VariantValue')) {
+	input.addEventListener('input', event => {
+		ValidateInput(event.target.id);
+	});
+};
+document.getElementById('IsLocalVariant').addEventListener('click', () => {
+	ToggleLocalVariant();
+});
 document.getElementById('ResetUpperVariantFormButton').addEventListener('click', () => {
 	ResetVariantHeaderForm();
 });
