@@ -182,6 +182,10 @@
 							</div>
 
 							<div class="col-sm-12 col-md-8">
+								<div class="mb-2 btn-group">
+									<button id="ResetUpperVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">New Variant</button>
+									<button id="RemoveVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Variant</button>
+								</div>
 								<p>A variant has one or more <b>Key-Value</b> sets uniquely identifying it.</p>
 								<form id="PackageVariantsFormHeader">
 									<div id="VariantKeyValuesContainer">
@@ -198,21 +202,11 @@
 										</div>
 									</div>
 
-									<!--<div class="mb-2 input-group">
-			<label class="input-group-text w2">Description</label>
-			<input id="VariantDescription" class="form-control" type="text" />
-		</div>-->
-
 									<div class="mb-2 input-group">
 										<label class="input-group-text w2" for="VariantDependencies">Dependencies</label>
 										<input id="VariantDependencies" class="form-control" />
 									</div>
 								</form>
-
-								<div class="mb-2 btn-group">
-									<button id="ResetUpperVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
-									<button id="RemoveVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Variant</button>
-								</div>
 							</div>
 						</div>
 
@@ -225,6 +219,10 @@
 							</div>
 
 							<div class="col-sm-12 col-md-8">
+								<div class="mb-2 btn-group">
+									<button id="ResetLowerVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">New Asset</button>
+									<button id="RemoveAssetFromVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Asset from Variant</button>
+								</div>
 								<p>A variant has one or more <b>Assets</b>, each with it's own Include/Exclude rules.</p>
 								<form id="PackageVariantsFormLower">
 									<div class="mb-2 input-group">
@@ -242,11 +240,6 @@
 										<input id="VariantAssetExclude" class="form-control" />
 									</div>
 								</form>
-
-								<div class="mb-2 btn-group">
-									<button id="ResetLowerVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
-									<button id="RemoveAssetFromVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Asset from Variant</button>
-								</div>
 							</div>
 						</div>
 					</fieldset>
