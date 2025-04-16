@@ -81,9 +81,6 @@ function UpdateVariantData(element) {
 		} else {
 			assetItem.set('assetId', element.value);
 		}
-		UpdateVariantAssetTree();
-
-		
 	}
 	else if (element.id === 'VariantAssetInclude') {
 		if (element.value !== '') {
@@ -223,7 +220,7 @@ function AddVariantKeyValueSet(key, value) {
 			newSeq.type = 'SEQ';
 			selectedDoc.set('variants', newSeq);
 		} else {
-			selectedDoc.variants.add(newMap);
+			selectedDoc.get('variants').add(newMap);
 		}
 		selectedVariantIdx = selectedDoc.get('variants').items.length - 1;
 	}

@@ -348,6 +348,7 @@ function UpdateData(dumpData = true) {
 	SetSelectedDoc(currDocIdx);
 	UpdateMainTree();
 	UpdateVariantTree();
+	UpdateVariantAssetTree();
 
 	function DumpYaml() {
 		if (yamlData.length === 0) {
@@ -495,13 +496,12 @@ function UpdateVariantTree() {
 
 		FillVariantHeaderForm();
 		UpdateVariantAssetTree();
-		console.log('variant idx ' + selectedVariantIdx);
 	});
 }
 
 function UpdateVariantAssetTree() {
 	let variantAssets = [];
-	if (selectedDoc !== null && selectedDoc.get('variants') !== undefined) {
+	if (selectedDoc !== null && selectedDoc.get('variants') !== undefined && selectedVariantAssetIdx !== null) {
 		let variant = selectedDoc.get('variants').items[selectedVariantIdx];
 
 		//The assets list may be undefined if it's a new variant the user just created
