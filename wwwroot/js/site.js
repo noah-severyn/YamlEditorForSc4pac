@@ -74,7 +74,7 @@ function CodeMirrorOnChange(instance, changeObj) {
  */
 var yamlData = [];
 /**
- * Index of the currently selected document within `yamlData`. If this is null, then the `selectedDoc` is new and has not yet been added to `yamlData`.
+ * Index of the currently selected document within `yamlData`. If this is null, then the `selectedDoc` is new and has not yet been added to `yamlData` OR there are no documents to be selected.
  */
 var currDocIdx = null;
 /**
@@ -339,10 +339,6 @@ function UpdateData(dumpData = true) {
 	pkgAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
 	variantAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
 
-	// Update the trees with local assets and packages
-	UpdateMainTree();
-	UpdateVariantTree();
-	
 	if (dumpData) {
 		cm.off('change', CodeMirrorOnChange);
 		cm.setValue(DumpYaml());
@@ -350,6 +346,9 @@ function UpdateData(dumpData = true) {
 	}
 	
 	SetSelectedDoc(currDocIdx);
+	UpdateMainTree();
+	UpdateVariantTree();
+	UpdateVariantAssetTree();
 
 	function DumpYaml() {
 		if (yamlData.length === 0) {
@@ -496,8 +495,8 @@ function UpdateVariantTree() {
 		document.getElementById('CurrentVariantId').innerHTML = kvTitle;
 
 		FillVariantHeaderForm();
+		ResetVariantAssetForm();
 		UpdateVariantAssetTree();
-		console.log('variant idx ' + selectedVariantIdx);
 	});
 }
 

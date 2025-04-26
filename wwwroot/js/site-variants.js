@@ -81,9 +81,6 @@ function UpdateVariantData(element) {
 		} else {
 			assetItem.set('assetId', element.value);
 		}
-		UpdateVariantAssetTree();
-
-		
 	}
 	else if (element.id === 'VariantAssetInclude') {
 		if (element.value !== '') {
@@ -190,6 +187,7 @@ function CreateVariantKeyValueElements(idx, name, value) {
  * Toggle between a local variant (where the package name is prepended to the variant name) and a global variant.
  */
 function ToggleLocalVariant() {
+	if (selectedDoc === null) { return; }
 	let nameInput = document.getElementById('VariantName');
 	let pkg = selectedDoc.get('group') + ':' + selectedDoc.get('name');
 	if (document.getElementById('IsLocalVariant').checked) {
@@ -198,7 +196,7 @@ function ToggleLocalVariant() {
 		nameInput.value =  nameInput.value.replace(pkg + ':', '')
 	}
 
-	nameInput.selectionStart = nameInput.selectionEnd = nameInput.value.length;
+	nameInput.focus();
 }
 
 
@@ -222,7 +220,7 @@ function AddVariantKeyValueSet(key, value) {
 			newSeq.type = 'SEQ';
 			selectedDoc.set('variants', newSeq);
 		} else {
-			selectedDoc.variants.add(newMap);
+			selectedDoc.get('variants').add(newMap);
 		}
 		selectedVariantIdx = selectedDoc.get('variants').items.length - 1;
 	}
