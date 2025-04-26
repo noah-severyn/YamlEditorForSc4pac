@@ -495,13 +495,14 @@ function UpdateVariantTree() {
 		document.getElementById('CurrentVariantId').innerHTML = kvTitle;
 
 		FillVariantHeaderForm();
+		ResetVariantAssetForm();
 		UpdateVariantAssetTree();
 	});
 }
 
 function UpdateVariantAssetTree() {
 	let variantAssets = [];
-	if (selectedDoc !== null && selectedDoc.get('variants') !== undefined && selectedVariantAssetIdx !== null) {
+	if (selectedDoc !== null && selectedDoc.get('variants') !== undefined) {
 		let variant = selectedDoc.get('variants').items[selectedVariantIdx];
 
 		//The assets list may be undefined if it's a new variant the user just created
