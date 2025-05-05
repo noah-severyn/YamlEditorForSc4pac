@@ -250,10 +250,16 @@ function UpdatePackageData() {
 		selectedDoc.setIn(['subfolder'], document.getElementById('PackageSubfolder').value);
 	}
 	if (document.getElementById('PackageDependencies').value !== '') {
-		selectedDoc.get('dependencies').items = [];
-		pkgDependencySelect.getValue().split(',').forEach(dep => {
-			selectedDoc.get('dependencies').add(dep);
-		});
+		if (selectedDoc.get('dependencies') === undefined) {
+			const newSeq = selectedDoc.createNode([document.getElementById('PackageDependencies').value]);
+			newSeq.type = 'SEQ';
+			selectedDoc.set('dependencies', newSeq);
+		} else {
+			selectedDoc.get('dependencies').items = [];
+			pkgDependencySelect.getValue().split(',').forEach(dep => {
+				selectedDoc.get('dependencies').add(dep);
+			});
+		}
 	} else if (document.getElementById('PackageDependencies').value === '' && selectedDoc.has('dependencies')) {
 		selectedDoc.delete('dependencies');
 	}
