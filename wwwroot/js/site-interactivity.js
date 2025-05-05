@@ -11,8 +11,8 @@ function EnableAssetTab() {
 	document.getElementById('PackageInfoTab').removeAttribute('data-bs-toggle');
 	document.getElementById('IncludedAssetsTab').classList.add('disabled');
 	document.getElementById('IncludedAssetsTab').removeAttribute('data-bs-toggle');
-	document.getElementById('PackageVaraintsTab').classList.add('disabled');
-	document.getElementById('PackageVaraintsTab').removeAttribute('data-bs-toggle');
+	document.getElementById('PackageVariantsTab').classList.add('disabled');
+	document.getElementById('PackageVariantsTab').removeAttribute('data-bs-toggle');
 
 	document.getElementById('AssetPropertiesTab').classList.remove('disabled');
 	document.getElementById('AssetPropertiesTab').setAttribute('data-bs-toggle', 'tab');
@@ -27,8 +27,8 @@ function EnablePackageTabs() {
 	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
 	document.getElementById('IncludedAssetsTab').classList.remove('disabled');
 	document.getElementById('IncludedAssetsTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageVaraintsTab').classList.remove('disabled');
-	document.getElementById('PackageVaraintsTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('PackageVariantsTab').classList.remove('disabled');
+	document.getElementById('PackageVariantsTab').setAttribute('data-bs-toggle', 'tab');
 
 	document.getElementById('AssetPropertiesTab').classList.add('disabled');
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
@@ -43,8 +43,8 @@ function EnablePartialPackageTabs() {
 	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
 	document.getElementById('IncludedAssetsTab').classList.add('disabled');
 	document.getElementById('IncludedAssetsTab').removeAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageVaraintsTab').classList.add('disabled');
-	document.getElementById('PackageVaraintsTab').removeAttribute('data-bs-toggle', 'tab');
+	document.getElementById('PackageVariantsTab').classList.add('disabled');
+	document.getElementById('PackageVariantsTab').removeAttribute('data-bs-toggle', 'tab');
 
 	document.getElementById('AssetPropertiesTab').classList.add('disabled');
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
@@ -110,16 +110,15 @@ function ClearAll() {
  * @param {string} elementId The Id of the input element being changed
  */
 function ValidateInput(elementId) {
-	var inputElement = document.getElementById(elementId);
-	var inputText = inputElement.value;
-	var locn = inputElement.selectionStart;
+	let inputElement = document.getElementById(elementId);
+	let inputText = inputElement.value;
 
-	var fieldName = elementId.replaceAll('Package', '').replaceAll('Asset', '');
+	let fieldName = elementId.replaceAll('Package', '').replaceAll('Asset', '');
 	if (fieldName === 'VariantName') {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-:]/g, '').toLowerCase();
 	} else if (fieldName === 'Subfolder' || fieldName === 'LastModified') {
 		return;
-	} else if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'Id' || fieldName === 'Value') {
+	} else if (fieldName === 'VariantValue' || fieldName === 'Group' || fieldName === 'Name' || fieldName === 'Id' || fieldName === 'Value') {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-]/g, '').toLowerCase();
 	} else if (fieldName === 'Dependencies') {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-:;\n]/g, '').toLowerCase();
