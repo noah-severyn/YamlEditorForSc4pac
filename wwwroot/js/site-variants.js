@@ -78,6 +78,8 @@ function UpdateVariantData(element) {
 			} else {
 				variantItem.get('assets').add(selectedDoc.createNode({ assetId: element.value }));
 			}
+			selectedVariantAssetIdx = variantItem.get('assets').items.length - 1;
+			document.getElementById('CurrentVariantAssetId').innerHTML = 'Editing asset: ' + variantItem.get('assets').items[selectedVariantAssetIdx].get('assetId')
 		} else {
 			assetItem.set('assetId', element.value);
 		}
@@ -114,6 +116,13 @@ function UpdateVariantData(element) {
 
 		} else if (element.value === '' && assetItem.has('exclude')) {
 			assetItem.delete('exclude');
+		}
+	}
+	else if (element.id === 'VariantDescription') {
+		if (element.value !== '') {
+
+		} else if (element.value === '' && selectedDoc.has('variantInfo')) {
+			selectedDoc.delete('variantInfo');
 		}
 	}
 	UpdateData();
@@ -274,13 +283,14 @@ function ResetVariantHeaderForm() {
 	document.getElementById('VariantValue').value = '';
 	variantDependencySelect.clear(true);
 	document.getElementById('CurrentVariantId').innerHTML = '[new variant]';
+	document.getElementById('CurrentVariantId2').innerHTML = '[new variant]';
 	selectedVariantIdx = null;
 	//UpdateVariantTree();
 }
 /**
- * Fill the variant header fields (key-value sets/dependencies) with values from the specified variant.
+ * Fill the variant form fields (key-value sets, dependencies, and descriptions).
  */
-function FillVariantHeaderForm() {
+function FillVariantForm() {
 	let variant = selectedDoc.get('variants').items[selectedVariantIdx];
 	let variantKVsets = variant.get('variant').items; // a variant can have one or more key-value pairs
 
@@ -294,6 +304,17 @@ function FillVariantHeaderForm() {
 		deps.forEach(dep => {
 			variantDependencySelect.addItem(dep.value, true);
 		});
+	}
+
+	let vInfo = selectedDoc.get('variantInfo').items
+	if (vInfo !== undefined) {
+		let vKey = variantKVsets[0].key.value;
+		let vItem = vInfo.find(i => i.get('variantId') === vKey)
+		document.getElementById('VariantDescription').value = vItem.get('description');
+
+		let vValue = variantKVsets[0].value.value
+		let vValueDesc = vItem.get('values').items.find(i => i.get('value') === vValue).get('description');
+		document.getElementById('VariantValueDescription').value = vValueDesc;
 	}
 }
 

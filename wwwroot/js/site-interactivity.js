@@ -9,10 +9,10 @@ function EnableAssetTab() {
 	document.getElementById('PackagePropertiesTab').removeAttribute('data-bs-toggle');
 	document.getElementById('PackageInfoTab').classList.add('disabled');
 	document.getElementById('PackageInfoTab').removeAttribute('data-bs-toggle');
-	document.getElementById('IncludedAssetsTab').classList.add('disabled');
-	document.getElementById('IncludedAssetsTab').removeAttribute('data-bs-toggle');
-	document.getElementById('PackageVariantsTab').classList.add('disabled');
-	document.getElementById('PackageVariantsTab').removeAttribute('data-bs-toggle');
+	document.getElementById('PackageAssetsTab').classList.add('disabled');
+	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle');
+	document.getElementById('VariantsTab').classList.add('disabled');
+	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle');
 
 	document.getElementById('AssetPropertiesTab').classList.remove('disabled');
 	document.getElementById('AssetPropertiesTab').setAttribute('data-bs-toggle', 'tab');
@@ -25,10 +25,10 @@ function EnablePackageTabs() {
 	document.getElementById('PackagePropertiesTab').setAttribute('data-bs-toggle', 'tab');
 	document.getElementById('PackageInfoTab').classList.remove('disabled');
 	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('IncludedAssetsTab').classList.remove('disabled');
-	document.getElementById('IncludedAssetsTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageVariantsTab').classList.remove('disabled');
-	document.getElementById('PackageVariantsTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('PackageAssetsTab').classList.remove('disabled');
+	document.getElementById('PackageAssetsTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('VariantsTab').classList.remove('disabled');
+	document.getElementById('VariantsTab').setAttribute('data-bs-toggle', 'tab');
 
 	document.getElementById('AssetPropertiesTab').classList.add('disabled');
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
@@ -41,10 +41,10 @@ function EnablePartialPackageTabs() {
 	document.getElementById('PackagePropertiesTab').setAttribute('data-bs-toggle', 'tab');
 	document.getElementById('PackageInfoTab').classList.remove('disabled');
 	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('IncludedAssetsTab').classList.add('disabled');
-	document.getElementById('IncludedAssetsTab').removeAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageVariantsTab').classList.add('disabled');
-	document.getElementById('PackageVariantsTab').removeAttribute('data-bs-toggle', 'tab');
+	document.getElementById('PackageAssetsTab').classList.add('disabled');
+	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle', 'tab');
+	document.getElementById('VariantsTab').classList.add('disabled');
+	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle', 'tab');
 
 	document.getElementById('AssetPropertiesTab').classList.add('disabled');
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');

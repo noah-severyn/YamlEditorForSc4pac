@@ -87,7 +87,7 @@ document.addEventListener("keydown", function (e) {
 // --------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------   Package tabs events   ---------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
-for (const input of document.querySelectorAll('#PackagePropertiesForm .form-control, #PackageInfoForm .form-control, #IncludedAssetsForm .form-control')) {
+for (const input of document.querySelectorAll('#PackagePropertiesForm .form-control, #PackageInfoForm .form-control, #PackageAssetsForm .form-control')) {
 	input.addEventListener('input', event => {
 		ValidateInput(event.target.id);
 		UpdatePackageData();
@@ -105,7 +105,7 @@ document.getElementById('NewPackageAssetButton').addEventListener('click', () =>
 // --------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------   Package Variant tab events   ------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
-for (const input of document.querySelectorAll('#VariantDependencies, #VariantAssetId, #VariantAssetInclude, #VariantAssetExclude')) {
+for (const input of document.querySelectorAll('#VariantDependencies, #VariantAssetId, #VariantAssetInclude, #VariantAssetExclude, #VariantDescription')) {
 	input.addEventListener('input', event => {
 		UpdateVariantData(event.target);
 	});

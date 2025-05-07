@@ -27,9 +27,9 @@ function CodeMirrorOnChange(instance, changeObj) {
 		if (baseNode === 'info') {
 			tabName = 'PackageInfoTab';
 		} else if (baseNode === 'assets') {
-			tabName = 'IncludedAssetsTab';
+			tabName = 'PackageAssetsTab';
 		} else if (baseNode === 'variants') {
-			tabName = 'PackageVariantsTab';
+			tabName = 'VariantsTab';
 		} else if (['url', 'assetId', 'lastModified', 'checksum', 'nonPersistentUrl', 'archiveType'].includes(baseNode)) {
 			tabName = 'AssetPropertiesTab';
 		} else {
@@ -480,6 +480,7 @@ function UpdateVariantTree() {
 			let kvSets = variants[selectedVariantIdx].get('variant').items
 			let kvTitle = kvSets.map(kv => kv.key.value + ': ' + kv.value.value).join(', ');
 			document.getElementById('CurrentVariantId').innerHTML = kvTitle;
+			document.getElementById('CurrentVariantId2').innerHTML = kvTitle;
 		}
 	}
 
@@ -493,8 +494,9 @@ function UpdateVariantTree() {
 		let kvSets = variants[selectedVariantIdx].get('variant').items 
 		let kvTitle = kvSets.map(kv => kv.key.value + ': ' + kv.value.value).join(', ');
 		document.getElementById('CurrentVariantId').innerHTML = kvTitle;
+		document.getElementById('CurrentVariantId2').innerHTML = kvTitle;
 
-		FillVariantHeaderForm();
+		FillVariantForm();
 		ResetVariantAssetForm();
 		UpdateVariantAssetTree();
 	});
@@ -506,7 +508,7 @@ function UpdateVariantAssetTree() {
 		let variant = selectedDoc.get('variants').items[selectedVariantIdx];
 
 		//The assets list may be undefined if it's a new variant the user just created
-		if (variant.get('assets') !== undefined) {
+		if (variant !== undefined && variant.get('assets') !== undefined) {
 			let assets = variant.get('assets').items;
 			for (let idx = 0; idx < assets.length; idx++) {
 				let asset = assets[idx];
