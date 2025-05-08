@@ -85,3 +85,11 @@ body {
 .CodeMirror.cm-s-easymde {
     width: 100%;
 }
+
+.plus {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+.desc {
+    padding-left: 1em;
+}
