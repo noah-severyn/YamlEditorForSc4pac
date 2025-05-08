@@ -17,14 +17,23 @@
 
 function UpdateVariantData(element) {
 	let variantItem = selectedDoc.get('variants').items[selectedVariantIdx];
+	let variantInfo = selectedDoc.get('variantInfo');
 	let assetItem;
-	if (selectedVariantAssetIdx !== null) {
-		assetItem =  variantItem.get('assets').items[selectedVariantAssetIdx];
+	let variantKey;
+	let variantValue;
+	let vInfoItem;
+	if (selectedVariantIdx !== null) {
+		variantKey = variantItem.get('variant').items[0].key.value;
+		variantValue = variantItem.get('variant').items[0].value.value
 	}
-	let newVal = element.value;
+	if (selectedVariantAssetIdx !== null) {
+		assetItem = variantItem.get('assets').items[selectedVariantAssetIdx];
+	}
+	if (variantInfo !== undefined) {
+		vInfoItem = variantInfo.items.find(i => i.get('variantId') === variantKey);
+	}
 
 	if (element.id.startsWith('VariantName')) {
-		//let idx = element.id.match(/\d+/g).map(Number)[0];
 		let idx = element.id.substring(element.id.length - 1);
 
 		//Note that this event is triggered after the input has changed, so we no longer know what the original key is. Find the one that most closely matches this and use it.
@@ -32,7 +41,7 @@ function UpdateVariantData(element) {
 		let maxSS = 0;
 		let maxIdx = 0;
 		for (let idx = 0; idx < keys.length; idx++) {
-			let ss = StringSimilarity(newVal, keys[idx]);
+			let ss = StringSimilarity(element.value, keys[idx]);
 			if (ss > maxSS) {
 				maxSS = ss;
 				maxIdx = idx;
@@ -43,14 +52,13 @@ function UpdateVariantData(element) {
 		let existingVal = variantItem.getIn(['variant', key]);
 		variantItem.deleteIn(['variant', key]);
 
-		let newPair = selectedDoc.createPair(newVal, existingVal);
+		let newPair = selectedDoc.createPair(element.value, existingVal);
 		variantItem.get('variant').items.push(newPair);
-		//variantItem.setIn(['variant', newVal], existingVal);
 	}
-	else if (element.id.startsWith('VariantValue')) {
+	else if (element.id.match(/VariantValue\d{1,2}/g)) {
 		let idx = element.id.substring(element.id.length - 1);
 		let key = document.getElementById('VariantName' + idx).value;
-		variantItem.setIn(['variant', key], newVal);
+		variantItem.setIn(['variant', key], element.value);
 	}
 	else if (element.id === 'VariantDependencies') {
 		if (element.value !== '') {
@@ -120,9 +128,44 @@ function UpdateVariantData(element) {
 	}
 	else if (element.id === 'VariantDescription') {
 		if (element.value !== '') {
-
+			if (variantInfo !== undefined) {
+				vInfoItem.set('description', element.value);
+			} else {
+				const newSeq = selectedDoc.createNode([{ variantId: variantKey, description: element.value }]);
+				newSeq.type = 'SEQ';
+				selectedDoc.set('variantInfo', newSeq);
+			}
 		} else if (element.value === '' && selectedDoc.has('variantInfo')) {
 			selectedDoc.delete('variantInfo');
+		}
+	}
+	else if (element.id === 'VariantValueDescription') {
+		if (element.value !== '') {
+			if (vInfoItem.get('values') === undefined) {
+				const newSeq = selectedDoc.createNode([])
+				newSeq.type = 'SEQ';
+				vInfoItem.set('values', newSeq);
+			}
+
+			const valueItem = vInfoItem.get('values').items.find(i => i.get('value') === variantValue);
+			if (valueItem !== undefined) {
+				valueItem.set('description', element.value);
+			} else {
+				if (variantInfo === undefined) {
+					const newSeq = selectedDoc.createNode([{ variantId: variantKey, description: element.value }]);
+					newSeq.type = 'SEQ';
+					selectedDoc.set('variantInfo', newSeq);
+				}
+				
+				const newItem = selectedDoc.createNode({ value: variantValue, description: element.value });
+				vInfoItem.get('values').add(newItem);
+			}
+		} else if (element.value === '' && selectedDoc) {
+			const valueIdx = vInfoItem.get('values').items.findIndex(i => i.get('value') === variantValue);
+			vInfoItem.deleteIn(['values', valueIdx]);
+			if (vInfoItem.get('values').items.length === 0) {
+				vInfoItem.delete('values');
+			}
 		}
 	}
 	UpdateData();
@@ -267,7 +310,7 @@ function RemoveAssetFromVariant() {
  */
 function RemoveVariant() {
 	selectedDoc.deleteIn(['variants', selectedVariantIdx]);
-	ResetVariantHeaderForm();
+	ResetVariantForm();
 	ResetVariantAssetForm();
 	UpdateData();
 }
@@ -276,11 +319,13 @@ function RemoveVariant() {
 /**
  * Resets the variant input form fields.
  */
-function ResetVariantHeaderForm() {
+function ResetVariantForm() {
 	document.querySelectorAll('.VariantKVItem').forEach(e => e.remove());
 	document.getElementById('IsLocalVariant').checked = false;
 	document.getElementById('VariantName').value = '';
 	document.getElementById('VariantValue').value = '';
+	document.getElementById('VariantDescription').value = '';
+	document.getElementById('VariantValueDescription').value = '';
 	variantDependencySelect.clear(true);
 	document.getElementById('CurrentVariantId').innerHTML = '[new variant]';
 	document.getElementById('CurrentVariantId2').innerHTML = '[new variant]';
@@ -309,12 +354,14 @@ function FillVariantForm() {
 	let vInfo = selectedDoc.get('variantInfo').items
 	if (vInfo !== undefined) {
 		let vKey = variantKVsets[0].key.value;
-		let vItem = vInfo.find(i => i.get('variantId') === vKey)
+		let vItem = vInfo.find(i => i.get('variantId') === vKey);
 		document.getElementById('VariantDescription').value = vItem.get('description');
 
 		let vValue = variantKVsets[0].value.value
-		let vValueDesc = vItem.get('values').items.find(i => i.get('value') === vValue).get('description');
-		document.getElementById('VariantValueDescription').value = vValueDesc;
+		let vValueItem = vItem.get('values').items.find(i => i.get('value') === vValue);
+		if (vValueItem !== undefined) {
+			document.getElementById('VariantValueDescription').value = vValueItem.get('description');
+		}
 	}
 }
 

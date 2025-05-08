@@ -89,7 +89,7 @@ function SelectTab(elementId, triggerEvent = true) {
  */
 function ClearAll() {
 	ResetIncludedAssetForm();
-	ResetVariantHeaderForm();
+	ResetVariantForm();
 	ResetVariantAssetForm();
 	ResetIncludedAssetForm();
 	ResetAssetInputs();

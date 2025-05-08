@@ -487,7 +487,7 @@ function UpdateVariantTree() {
 	var pkgVariantsData = [{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }]
 	vtv = new TreeView(pkgVariantsData, 'VariantTreeView');
 	vtv.on("select", function (t) {
-		ResetVariantHeaderForm();
+		ResetVariantForm();
 		let selectedItem = t.data.name;
 		selectedVariantIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
 
