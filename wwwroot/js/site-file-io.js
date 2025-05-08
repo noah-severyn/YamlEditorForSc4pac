@@ -77,10 +77,10 @@ async function LoadFromGithub(srcElem, channel) {
 	if (level === 1) {
 		switch (channel.toLowerCase()) {
 			case 'default':
-				srcUrl = 'https://api.github.com/repos/memo33/sc4pac/git/trees/2b987426294c3fb8b66b1875d629d5937ad921ac';
+				srcUrl = 'https://api.github.com/repos/memo33/sc4pac/git/trees/a58cd015bf2cd9909de87aa71a1643e47fc08256';
 				break;
 			case 'simtropolis':
-				srcUrl = 'https://api.github.com/repos/sebamarynissen/simtropolis-channel/git/trees/04887d7d070e600ea0fb4a7cc22314c5fb0af436';
+				srcUrl = 'https://api.github.com/repos/sebamarynissen/simtropolis-channel/git/trees/01c9e940e0bbfa704a8500f1a2aeba472f9664e9';
 				break;
 			case 'zasco':
 				srcUrl = 'https://api.github.com/repos/Zasco/sc4pac-channel/git/trees/ad3f15a09bf296df6ef87be2175542f1ee671407';

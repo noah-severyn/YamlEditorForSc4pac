@@ -167,12 +167,9 @@ for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
 // -------------------------------------------   Preferences dialog events   ------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 document.getElementById('OpenPreferencesButton').addEventListener('click', () => {
-	document.getElementById('AllowPartialPackages').checked = localStorage.getItem('allow-partial-packages');
+	document.getElementById('PreferStChannelFilenames').checked = localStorage.getItem('use-st-channel-filenames');
 
 	preferencesDialog.show();
-});
-document.getElementById('AllowPartialPackages').addEventListener('click', () => {
-	localStorage.setItem('allow-partial-packages', document.getElementById('AllowPartialPackages').checked);
 });
 document.getElementById('PreferStChannelFilenames').addEventListener('click', () => {
 	localStorage.setItem('use-st-channel-filenames', document.getElementById('PreferStChannelFilenames').checked);
