@@ -297,26 +297,21 @@ function UpdateData(dumpData = true) {
 	//codemirror.onchange() { metadata.update() }
 	//metadata.update() { treeview.update(); form.update(); codemirror.update() }
 
-	if (currDocIdx === null) {
-		return;
-	}
-
 	var countOfAssets = 0;
 	var countOfPackages = 0;
 	localAssets.length = 0;
 	localPackages.length = 0;
 
-	if (yamlData !== null) {
-		yamlData.forEach((doc) => {
-			if (IsAsset(doc)) {
-				countOfAssets++;
-				localAssets.push(doc.toJSON().assetId);
-			} else if (IsPackage(doc)) {
-				countOfPackages++;
-				localPackages.push(doc.toJSON().group + ':' + doc.toJSON().name);
-			}
-		});
-	}
+	yamlData.forEach((doc) => {
+		if (IsAsset(doc)) {
+			countOfAssets++;
+			localAssets.push(doc.toJSON().assetId);
+		} else if (IsPackage(doc)) {
+			countOfPackages++;
+			localPackages.push(doc.toJSON().group + ':' + doc.toJSON().name);
+		}
+	});
+	
 	document.getElementById('CurrentItemCount').innerHTML = `This file contains: ${countOfPackages} package${(countOfPackages !== 1 ? 's' : '')}, ${countOfAssets} asset${(countOfAssets !== 1 ? 's' : '')}`;
 
 	SetTabState();
@@ -330,10 +325,6 @@ function UpdateData(dumpData = true) {
 			}
 		}
 	});
-	//pkgDependencySelect.addOptions(localPackages.map(p => ({ value: 'local|' + p, id: p, channel: 'local' })));
-	//variantPackageSelect.addOptions(localPackages.map(p => ({ value: 'local|' + p, id: p, channel: 'local' })));
-	//pkgAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
-	//variantAssetSelect.addOptions(localAssets.map(a => ({ value: 'local|' + a, id: a, channel: 'local' })));
 	pkgDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
 	variantDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
 	pkgAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
@@ -595,7 +586,7 @@ function SetSelectedDoc(index, type) {
 	if (index === undefined) {
 		index = 0;
 	}
-	if (index < 0) {
+	if (index < 0 || index === null) {
 		selectedDoc = null;
 		currDocIdx = null;
 		return;
