@@ -44,18 +44,18 @@ document.getElementById('LoadFromFile').addEventListener('click', () => {
 });
 document.getElementById('LoadFromGitDefault').addEventListener('click', event => {
 	ClearAll();
-	LoadFromGithub(event.target, 'default');
+	void LoadFromGithub(event.target, 'default');
 });
 document.getElementById('LoadFromGitSimtrop').addEventListener('click', event => {
 	ClearAll();
-	LoadFromGithub(event.target, 'simtropolis');
+	void LoadFromGithub(event.target, 'simtropolis');
 });
 document.getElementById('LoadFromGitZasco').addEventListener('click', event => {
 	ClearAll();
-	LoadFromGithub(event.target, 'zasco');
+	void LoadFromGithub(event.target, 'zasco');
 });
 document.getElementById('CopyToClipButton').addEventListener('click', () => {
-	navigator.clipboard.writeText(cm.getValue());
+	void navigator.clipboard.writeText(cm.getValue());
 });
 document.getElementById('SaveAsButton').addEventListener('click', () => {
 	SaveAs();
@@ -87,12 +87,12 @@ document.addEventListener("keydown", function (e) {
 // --------------------------------------------------------------------------------------------------------------------
 // ----------------------------------------------   Package tabs events   ---------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
-for (const input of document.querySelectorAll('#PackagePropertiesForm .form-control, #PackageInfoForm .form-control, #IncludedAssetsForm .form-control')) {
+for (const input of document.querySelectorAll('#PackagePropertiesForm .form-control, #PackageInfoForm .form-control, #PackageAssetsForm .form-control')) {
 	input.addEventListener('input', event => {
 		ValidateInput(event.target.id);
 		UpdatePackageData();
 	});
-};
+}
 document.getElementById('ResetIncludedAssetButton').addEventListener('click', () => {
 	ResetIncludedAssetForm();
 });
@@ -105,21 +105,21 @@ document.getElementById('NewPackageAssetButton').addEventListener('click', () =>
 // --------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------   Package Variant tab events   ------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
-for (const input of document.querySelectorAll('#VariantDependencies, #VariantAssetId, #VariantAssetInclude, #VariantAssetExclude')) {
+for (const input of document.querySelectorAll('#VariantDependencies, #VariantAssetId, #VariantAssetInclude, #VariantAssetExclude, #VariantDescription, #VariantValueDescription')) {
 	input.addEventListener('input', event => {
 		UpdateVariantData(event.target);
 	});
-};
+}
 for (const input of document.querySelectorAll('#VariantName, #VariantValue')) {
 	input.addEventListener('input', event => {
 		ValidateInput(event.target.id);
 	});
-};
+}
 document.getElementById('IsLocalVariant').addEventListener('click', () => {
 	ToggleLocalVariant();
 });
 document.getElementById('ResetUpperVariantFormButton').addEventListener('click', () => {
-	ResetVariantHeaderForm();
+	ResetVariantForm();
 });
 document.getElementById('ResetLowerVariantFormButton').addEventListener('click', () => {
 	ResetVariantAssetForm();
@@ -147,9 +147,9 @@ for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
 	input.addEventListener('input', event => {
 		if (event.target.id === 'AssetLastModifiedText') {
 			// Convert UTC text pasted into the input box for to a valid datetime to populate the datetime picker.
-			var inputValue = document.getElementById('AssetLastModifiedText').value.replaceAll('"', '');
+			const inputValue = document.getElementById('AssetLastModifiedText').value.replaceAll('"', '');
 			try {
-				var newDate = new Date(inputValue).toISOString().slice(0, 19);
+				const newDate = new Date(inputValue).toISOString().slice(0, 19);
 				document.getElementById('AssetLastModified').value = newDate;
 			} catch (e) {
 				console.log(e);
@@ -167,12 +167,9 @@ for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
 // -------------------------------------------   Preferences dialog events   ------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 document.getElementById('OpenPreferencesButton').addEventListener('click', () => {
-	document.getElementById('AllowPartialPackages').checked = localStorage.getItem('allow-partial-packages');
+	document.getElementById('PreferStChannelFilenames').checked = localStorage.getItem('use-st-channel-filenames');
 
 	preferencesDialog.show();
-});
-document.getElementById('AllowPartialPackages').addEventListener('click', () => {
-	localStorage.setItem('allow-partial-packages', document.getElementById('AllowPartialPackages').checked);
 });
 document.getElementById('PreferStChannelFilenames').addEventListener('click', () => {
 	localStorage.setItem('use-st-channel-filenames', document.getElementById('PreferStChannelFilenames').checked);

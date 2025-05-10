@@ -9,10 +9,10 @@ function EnableAssetTab() {
 	document.getElementById('PackagePropertiesTab').removeAttribute('data-bs-toggle');
 	document.getElementById('PackageInfoTab').classList.add('disabled');
 	document.getElementById('PackageInfoTab').removeAttribute('data-bs-toggle');
-	document.getElementById('IncludedAssetsTab').classList.add('disabled');
-	document.getElementById('IncludedAssetsTab').removeAttribute('data-bs-toggle');
-	document.getElementById('PackageVaraintsTab').classList.add('disabled');
-	document.getElementById('PackageVaraintsTab').removeAttribute('data-bs-toggle');
+	document.getElementById('PackageAssetsTab').classList.add('disabled');
+	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle');
+	document.getElementById('VariantsTab').classList.add('disabled');
+	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle');
 
 	document.getElementById('AssetPropertiesTab').classList.remove('disabled');
 	document.getElementById('AssetPropertiesTab').setAttribute('data-bs-toggle', 'tab');
@@ -25,10 +25,10 @@ function EnablePackageTabs() {
 	document.getElementById('PackagePropertiesTab').setAttribute('data-bs-toggle', 'tab');
 	document.getElementById('PackageInfoTab').classList.remove('disabled');
 	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('IncludedAssetsTab').classList.remove('disabled');
-	document.getElementById('IncludedAssetsTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageVaraintsTab').classList.remove('disabled');
-	document.getElementById('PackageVaraintsTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('PackageAssetsTab').classList.remove('disabled');
+	document.getElementById('PackageAssetsTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('VariantsTab').classList.remove('disabled');
+	document.getElementById('VariantsTab').setAttribute('data-bs-toggle', 'tab');
 
 	document.getElementById('AssetPropertiesTab').classList.add('disabled');
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
@@ -41,10 +41,10 @@ function EnablePartialPackageTabs() {
 	document.getElementById('PackagePropertiesTab').setAttribute('data-bs-toggle', 'tab');
 	document.getElementById('PackageInfoTab').classList.remove('disabled');
 	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('IncludedAssetsTab').classList.add('disabled');
-	document.getElementById('IncludedAssetsTab').removeAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageVaraintsTab').classList.add('disabled');
-	document.getElementById('PackageVaraintsTab').removeAttribute('data-bs-toggle', 'tab');
+	document.getElementById('PackageAssetsTab').classList.add('disabled');
+	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle', 'tab');
+	document.getElementById('VariantsTab').classList.add('disabled');
+	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle', 'tab');
 
 	document.getElementById('AssetPropertiesTab').classList.add('disabled');
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
@@ -66,7 +66,7 @@ function SetTabState() {
 }
 /**
  * Maintain side effects of switching between the tabs and optionally activate the specified tab.
- * @param {string} elementId The Id of the tab element to select
+ * @param {string} elementId The id of the tab element to select
  * @param {boolean} triggerEvent Whether to trigger the click event to show the tab. Default is TRUE
  */
 function SelectTab(elementId, triggerEvent = true) {
@@ -89,7 +89,7 @@ function SelectTab(elementId, triggerEvent = true) {
  */
 function ClearAll() {
 	ResetIncludedAssetForm();
-	ResetVariantHeaderForm();
+	ResetVariantForm();
 	ResetVariantAssetForm();
 	ResetIncludedAssetForm();
 	ResetAssetInputs();
@@ -107,19 +107,18 @@ function ClearAll() {
 
 /**
  * Apply basic validation rules for the specified entry field.
- * @param {string} elementId The Id of the input element being changed
+ * @param {string} elementId The id of the input element being changed
  */
 function ValidateInput(elementId) {
-	var inputElement = document.getElementById(elementId);
-	var inputText = inputElement.value;
-	var locn = inputElement.selectionStart;
+	let inputElement = document.getElementById(elementId);
+	let inputText = inputElement.value;
 
-	var fieldName = elementId.replaceAll('Package', '').replaceAll('Asset', '');
+	let fieldName = elementId.replaceAll('Package', '').replaceAll('Asset', '');
 	if (fieldName === 'VariantName') {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-:]/g, '').toLowerCase();
 	} else if (fieldName === 'Subfolder' || fieldName === 'LastModified') {
 		return;
-	} else if (fieldName === 'Group' || fieldName === 'Name' || fieldName === 'Id' || fieldName === 'Value') {
+	} else if (fieldName === 'VariantValue' || fieldName === 'Group' || fieldName === 'Name' || fieldName === 'Id' || fieldName === 'Value') {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-]/g, '').toLowerCase();
 	} else if (fieldName === 'Dependencies') {
 		inputText = inputText.replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-:;\n]/g, '').toLowerCase();
@@ -230,7 +229,7 @@ function FillPackageForm() {
  * Updates the selectedDoc with the current state of the Package Properties and Package Info tabs.
  */
 function UpdatePackageData() {
-	//TODO rename this function to medatadata, also the asset function too
+	//TODO rename this function to metadata, also the asset function too
 	if (selectedDoc === null) {
 		selectedDoc = new YAML.Document(new Object());
 	}
@@ -363,9 +362,8 @@ function ResetIncludedAssetForm() {
  * Fill the Package Asset input form fields with the values from the currently selected package and asset index.
  */
 function FillIncludedAssetForm(assetName) {
-	var pkgAsset = selectedDoc.get('assets').toJSON().find((i) => i.assetId === assetName);
+	const pkgAsset = selectedDoc.get('assets').toJSON().find((i) => i.assetId === assetName);
 	selectedPkgAssetIdx = selectedDoc.get('assets').toJSON().findIndex((i) => i.assetId === assetName);
-	//pkgAssetSelect.addItem('local|' + assetName, true);
 	pkgAssetSelect.addItem(assetName, true);
 	pkgAsset.include.forEach(item => {
 		pkgAssetIncSelect.addOption({ value: item, text: item });

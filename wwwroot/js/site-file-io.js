@@ -2,21 +2,21 @@
  * Save YAML content to disk.
  */
 function SaveAs() {
-	var bb = new Blob([cm.getValue()], { type: 'application/yaml' });
-	var tmp = document.createElement('a');
-	var fileName;
+	const bb = new Blob([cm.getValue()], { type: 'application/yaml' });
+	const tmp = document.createElement('a');
+	let fileName;
 
 	if (yamlData[0] == null) {
 		fileName = "document.yaml";
 	}
-	//This will be filled in as the file was loaded from Github, so fileName is already in compliance with st-channel name (if appropriate)
+	//This will be filled in as the file was loaded from GitHub, so fileName is already in compliance with st-channel name (if appropriate)
 	else if (document.getElementById('YamlFileName').textContent !== '') {
 		fileName = document.getElementById('YamlFileName').textContent;
 	}
 
 	else {
 		if (localStorage.getItem('use-st-channel-filenames') === 'true') {
-			var pkg = GetDocument('p', 0);
+			const pkg = GetDocument('p', 0);
 			if (Object.hasOwn(pkg.info, 'website')) {
 				fileName = pkg.info.website.substring(45, pkg.info.website.indexOf('-'));
 			}
@@ -41,18 +41,18 @@ function SaveAs() {
  * Load YAML content from a local file.
  */
 function LoadFromFile() {
-	var tmp = document.createElement("input")
+	const tmp = document.createElement("input")
 	tmp.type = 'file'
 	tmp.style.display = 'none'
 	tmp.onchange = function (e) {
-		var file = e.target.files[0];
+		const file = e.target.files[0];
 		if (!file) {
 			return;
 		}
 		document.getElementById('YamlFileName').textContent = file.name
-		var reader = new FileReader();
+		const reader = new FileReader();
 		reader.onload = function (e) {
-			var contents = e.target.result;
+			const contents = e.target.result;
 			cm.setValue(contents);
 			tmp.remove();
 		}
@@ -63,27 +63,28 @@ function LoadFromFile() {
 
 
 /**
- * Load YAML content from a Github file tree.
+ * Load YAML content from a GitHub file tree.
  * @param {any} srcElem Source element this function is being called from.
  *
- * If the element is `a` then this is triggered from the open menu or the breadcrumb menu and we want to navigate to the base folder of the Github files; if the element is `BUTTON` then its being triggered from a button click in the modal dialog and we want to navigate to a subfolder of the Github files. Basically, links go to the root folder level, buttons go to a subfolder level.
+ * If the element is `a` then this is triggered from the open menu or the breadcrumb menu, and we want to navigate to the base folder of the GitHub files; if the element is `BUTTON` then its being triggered from a button click in the modal dialog, and we want to navigate to a subfolder of the GitHub files. Basically, links go to the root folder level, buttons go to a subfolder level.
  * @param {any} channel Name of the channel to fetch data from, e.g. 'default' or 'zasco' or 'simtropolis'
  */
 async function LoadFromGithub(srcElem, channel) {
-	var crumbNav = document.getElementById('ChannelBreadcrumb');
-	var level = (srcElem.tagName === 'A') ? 1 : 2;
+	const crumbNav = document.getElementById('ChannelBreadcrumb');
+	const level = (srcElem.tagName === 'A') ? 1 : 2;
 
 	//Set the base srcUrl and update the breadcrumb menu.
+	let srcUrl;
 	if (level === 1) {
 		switch (channel.toLowerCase()) {
 			case 'default':
-				srcUrl = 'https://api.github.com/repos/memo33/sc4pac/git/trees/2b987426294c3fb8b66b1875d629d5937ad921ac';
+				srcUrl = 'https://api.github.com/repos/memo33/sc4pac/branches/main';
 				break;
 			case 'simtropolis':
-				srcUrl = 'https://api.github.com/repos/sebamarynissen/simtropolis-channel/git/trees/04887d7d070e600ea0fb4a7cc22314c5fb0af436';
+				srcUrl = 'https://api.github.com/repos/sebamarynissen/simtropolis-channel/branches/main';
 				break;
 			case 'zasco':
-				srcUrl = 'https://api.github.com/repos/Zasco/sc4pac-channel/git/trees/ad3f15a09bf296df6ef87be2175542f1ee671407';
+				srcUrl = 'https://api.github.com/repos/Zasco/sc4pac-channel/branches/main';
 				break;
 		}
 		if (srcElem.textContent !== 'Root') {
@@ -99,7 +100,7 @@ async function LoadFromGithub(srcElem, channel) {
 	else {
 		srcUrl = srcElem.value;
 
-		var prevCrumb = crumbNav.firstElementChild
+		let prevCrumb = crumbNav.firstElementChild
 		prevCrumb.className = 'breadcrumb-item';
 		prevCrumb.textContent = '';
 
@@ -115,30 +116,67 @@ async function LoadFromGithub(srcElem, channel) {
 		crumbNav.appendChild(newCrumb);
 	}
 
+	if (level === 1) {
+		fetch(srcUrl)
+			.then(response => response.json())
+			.then(data => {
+				let mainUrl = data.commit.commit.tree.url;
+				return fetch(mainUrl);
+			})
+			.then(response => response.json())
+			.then(data => {
+				let srcUrl = data.tree.find(t => t.path === 'src').url;
+				return fetch(srcUrl);
+			})
+			.then(response => response.json())
+			.then(data => {
+				let yamlUrl = data.tree[0].url;
+				return fetch(yamlUrl);
+			})
+			.then(response => response.json())
+			.then(data => {
+				CreateButtonList(data, level);
+			})
+			.catch(error => console.error('Error fetching the tree data:', error));
+	}
+	else {
+		fetch(srcUrl)
+			.then(response => response.json())
+			.then(data => {
+				CreateButtonList(data, level);
+			})
+			.catch(error => console.error('Error fetching the tree data:', error));
+	}
 
-	fetch(srcUrl)
-		.then(response => response.json())
-		.then(data => {
-			let listDiv = loadFileDialog.querySelector('.list-group');
-			listDiv.textContent = '';
-			data.tree
-				.filter((obj) => obj.path.charAt(0) !== '.')
-				.forEach(obj => {
-					let btn = document.createElement('button');
-					btn.className = 'list-group-item list-group-item-action';
-					btn.textContent = obj.path;
-					btn.value = obj.url;
-					if (level === 1) {
-						btn.addEventListener('click', function () { LoadFromGithub(this, channel); });
-					} else {
-						btn.addEventListener('click', function () { GetContent(this.value, obj.path); });
-					}
+	
+	/**
+	 * Create a list of linked buttons for the modal dialog representing author folders or YAML files.
+	 */
+	function CreateButtonList(data, level) {
+		const listDiv = loadFileDialog.querySelector('.list-group');
+		listDiv.textContent = '';
+		data.tree
+			.filter((obj) => obj.path.charAt(0) !== '.')
+			.forEach(obj => {
+				const btn = document.createElement('button');
+				btn.className = 'list-group-item list-group-item-action';
+				btn.textContent = obj.path;
+				btn.value = obj.url;
+				if (level === 1) {
+					btn.addEventListener('click', function () { LoadFromGithub(this, channel); });
+				} else {
+					btn.addEventListener('click', function () { GetContent(this.value, obj.path); });
+				}
 
-					listDiv.appendChild(btn);
-				});
-		})
-		.catch(error => console.error('Error fetching the tree data:', error));
+				listDiv.appendChild(btn);
+			});
+	}
 
+	/**
+	 * Return the text content of a file from a GitHub url.
+	 * @param {any} url GitHub folder URL
+	 * @param {any} fileName Filename to fetch content in
+	 */
 	function GetContent(url, fileName) {
 		fetch(url)
 			.then(response => response.json())
@@ -148,19 +186,17 @@ async function LoadFromGithub(srcElem, channel) {
 			})
 			.catch(error => console.error('Error fetching the tree data:', error));
 
-		//Hide the modal display
-		var modal = bootstrap.Modal.getInstance(loadFileDialog)
+		const modal = bootstrap.Modal.getInstance(loadFileDialog);
 		modal.hide();
 	}
 
 	function DecodeBase64Unicode(base64) {
 		const binaryString = atob(base64);
-		const unicodeString = decodeURIComponent(
+		return decodeURIComponent(
 			binaryString
 				.split('')
 				.map(char => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`)
 				.join('')
 		);
-		return unicodeString;
 	}
 }
