@@ -64,10 +64,10 @@ function LoadFromFile() {
 
 /**
  * Load YAML content from a GitHub file tree.
- * @param {any} srcElem Source element this function is being called from.
+ * @param {Element} srcElem Source element this function is being called from.
  *
  * If the element is `a` then this is triggered from the open menu or the breadcrumb menu, and we want to navigate to the base folder of the GitHub files; if the element is `BUTTON` then its being triggered from a button click in the modal dialog, and we want to navigate to a subfolder of the GitHub files. Basically, links go to the root folder level, buttons go to a subfolder level.
- * @param {any} channel Name of the channel to fetch data from, e.g. 'default' or 'zasco' or 'simtropolis'
+ * @param {string} channel Name of the channel to fetch data from, e.g. 'default' or 'zasco' or 'simtropolis'
  */
 async function LoadFromGithub(srcElem, channel) {
 	const crumbNav = document.getElementById('ChannelBreadcrumb');
@@ -88,7 +88,7 @@ async function LoadFromGithub(srcElem, channel) {
 				break;
 		}
 		if (srcElem.textContent !== 'Root') {
-			loadFileDialog.querySelector('.modal-title').textContent = srcElem.innerHTML;
+			githubNavDialog._element.querySelector('.modal-title').textContent = srcElem.innerHTML;
 		}
 		if (crumbNav.children.length > 1) {
 			crumbNav.lastElementChild.remove();
@@ -153,7 +153,7 @@ async function LoadFromGithub(srcElem, channel) {
 	 * Create a list of linked buttons for the modal dialog representing author folders or YAML files.
 	 */
 	function CreateButtonList(data, level) {
-		const listDiv = loadFileDialog.querySelector('.list-group');
+		const listDiv = githubNavDialog._element.querySelector('.list-group');
 		listDiv.textContent = '';
 		data.tree
 			.filter((obj) => obj.path.charAt(0) !== '.')
@@ -165,7 +165,7 @@ async function LoadFromGithub(srcElem, channel) {
 				if (level === 1) {
 					btn.addEventListener('click', function () { LoadFromGithub(this, channel); });
 				} else {
-					btn.addEventListener('click', function () { GetContent(this.value, obj.path); });
+					btn.addEventListener('click', function () { GetFileContent(this.value, obj.path); });
 				}
 
 				listDiv.appendChild(btn);
@@ -177,7 +177,7 @@ async function LoadFromGithub(srcElem, channel) {
 	 * @param {any} url GitHub folder URL
 	 * @param {any} fileName Filename to fetch content in
 	 */
-	function GetContent(url, fileName) {
+	function GetFileContent(url, fileName) {
 		fetch(url)
 			.then(response => response.json())
 			.then(data => {
@@ -186,8 +186,7 @@ async function LoadFromGithub(srcElem, channel) {
 			})
 			.catch(error => console.error('Error fetching the tree data:', error));
 
-		const modal = bootstrap.Modal.getInstance(loadFileDialog);
-		modal.hide();
+		githubNavDialog.hide();
 	}
 
 	function DecodeBase64Unicode(base64) {
@@ -199,4 +198,61 @@ async function LoadFromGithub(srcElem, channel) {
 				.join('')
 		);
 	}
+}
+
+/**
+ * Fetch details from a given STEX file url and convert it to YAML metadata
+ * 
+ * May require disabling CORS with an extension like: https://addons.mozilla.org/en-US/firefox/addon/cross-domain-cors/
+ * @param {string} stexUrl STEX file url
+ * @param {string} apiKey Personal STEX API token
+ * 
+ */
+async function FetchFromStex(stexUrl, apiKey) {
+	if (stexUrl === '' || stexUrl === undefined) {
+		return;
+	}
+	if (apiKey === '' || apiKey === undefined) {
+		console.error('Error: No API key has been set');
+		return;
+	}
+
+	const stexId = stexUrl.match(/\d{2,5}/)[0];
+	const queryUrl = `https://community.simtropolis.com/stex/files-api.php?key=${apiKey}&id=${stexId}&desctype=html&images=main`;
+	const ts = new TurndownService()
+
+	fetch(queryUrl)
+		.then(response => response.json())
+		.then(data => {
+			const result = data[0];
+			const newPkg = new YAML.Document({
+				group: result.aliasAuthor,
+				name: result.aliasEntry,
+				version: result.release,
+				subfolder: "",
+				info: {
+					website: result.fileURL,
+					summary: result.title,
+					author: result.author,
+					description: ts.turndown(result.descHTML),
+					images: result.images
+				}
+			});
+			const newAssets = result.files.map(f => new YAML.Document({
+					url: result.fileURL + '/?do=download&r=' + f.id,
+					assetId: result.aliasAuthor + '-' + f.name.substring(0, f.name.lastIndexOf('.')).replaceAll(' ', '-').normalize('NFKD').replace(/[^\w-:;\n]/g, '').toLowerCase(),
+					version: result.release,
+					lastModified: result.updated
+				})
+			);
+
+			let yamlString = YAML.stringify(newPkg, options = { lineWidth: 0}) + '\n---\n';
+			yamlString = yamlString + newAssets.map(a => YAML.stringify(a)).join('\n---\n');
+
+			cm.setValue(yamlString);
+			document.getElementById('StexUrl').value = '';
+			stexFetchDialog.hide();
+
+		})
+		.catch(error => console.error('Error fetching from the STEX API:', error));
 }

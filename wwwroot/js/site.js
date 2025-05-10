@@ -112,11 +112,15 @@ let vatv;
 /**
  * Load From ... dialog element
  */
-const loadFileDialog = document.getElementById('LoadFromChannelDialog');
+const githubNavDialog = new bootstrap.Modal('#LoadFromChannelDialog');
 /**
  * Preferences dialog element
  */
 const preferencesDialog = new bootstrap.Modal('#PreferencesDialog');
+/**
+ * STEX metadata fetch dialog element
+ */
+const stexFetchDialog = new bootstrap.Modal('#LoadFromStexDialog');
 /**
  * Package summary markdown editor
  */

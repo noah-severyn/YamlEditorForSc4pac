@@ -33,6 +33,9 @@
 	<!--Easy Markdown Editor-->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
 	<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+
+	<!--HTML → Markdown-->
+	<script src="https://unpkg.com/turndown/dist/turndown.js"></script>
 </head>
 <body class="d-flex flex-column h-100 mb-0">
 	<header>
@@ -342,13 +345,15 @@
 							<li><a id="LoadFromFile" class="dropdown-item" href="#">Local File</a></li>
 							<li><a id="LoadFromGitDefault" class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Default channel</a></li>
 							<li><a id="LoadFromGitSimtrop" class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Simtropolis channel</a></li>
-							<li><a id="LoadFromGitZasco" class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Zasco's channel</a></li>
+							<!--<li><a id="LoadFromGitZasco" class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#LoadFromChannelDialog">Zasco's channel</a></li>-->
+							<li><a id="LoadFromStexUrl" class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#LoadFromStexDialog">STEX URL</a></li>
 						</ul>
 					</div>
 					<button id="CopyToClipButton" class="btn btn-primary" type="button">Copy to Clipboard</button>
 					<button id="SaveAsButton" class="btn btn-primary" type="button">Save As</button>
 					<button id="ClearAllButton" class="btn btn-danger" type="button">Clear All</button>
 					<button id="OpenPreferencesButton" class="btn btn-success" type="button">Preferences</button>
+					<!--<button id="StexFetch" class="btn btn-info" type="button">STEX Fetch</button>-->
 				</div>
 
 				<div class="box">
@@ -391,10 +396,41 @@
 									Use <code>st-channel</code> naming style when saving files
 								</label>
 							</div>
+							<div class="form-floating mb-2 mt-2">
+								<input id="StexApiKey" type="text" class="form-control" />
+								<label for="StexApiKey">STEX API Key</label>
+							</div>
 
 							<h3 class="modal-title fs-5 mt-3 mb-3" id="keyShtctModalLabel">Keyboard Shortcuts</h3>
 							<p><code>Ctrl</code><span class="plus">+</span><code>O</code><span class="desc">Open From File</span></p>
 							<p><code>Ctrl</code><span class="plus">+</span><code>S</code><span class="desc">Save to File</span></p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal fade" id="LoadFromStexDialog" tabindex="-1">
+				<div class="modal-dialog modal-dialog-scrollable modal-lg">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h1 class="modal-title fs-5">Fetch from STEX upload</h1>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+						</div>
+						<div class="modal-body">
+							<p>Paste a STEX url to use to create metadata from. This uses your STEX API key, which must first be entered in the Preferences dialog.</p>
+							<div class="form-floating mb-2 mt-2">
+								<input id="StexUrl" type="text" class="form-control" />
+								<label for="StexUrl">STEX Url</label>
+							</div>
+							<p>This is a very basic fetch operation and the results should always be thouroughly verified and tested as they may not be fully accurate. Specifically:</p>
+							<ul>
+								<li>The subfolder property for the package will likely need to be fixed as there is not a direct relation between the STEX categories and the sc4pac categories</li>
+								<li>Any linked dependencies and their sc4pac equivalent will not be detected. These must be added manually</li>
+								<li>No variants like <code>LHD</code>/<code>RHD</code> and <code>Maxisnite</code>/<code>Darknite</code> are detected. They will need to be created manually</li>
+							</ul>
+							<p>For a more comprehensive setup more suitable for batch additions and without some of these limitations, use the Node.js scripts created by smf_16 available in the <a href="https://github.com/sebamarynissen/simtropolis-channel/tree/main/scripts">simtropolis-channel</a> repository instead.</p>
+							<button id="StexFetchButton" class="btn btn-primary" type="button">Fetch Metadata</button>
+
 						</div>
 					</div>
 				</div>

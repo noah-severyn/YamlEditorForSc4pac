@@ -50,9 +50,15 @@ document.getElementById('LoadFromGitSimtrop').addEventListener('click', event =>
 	ClearAll();
 	void LoadFromGithub(event.target, 'simtropolis');
 });
-document.getElementById('LoadFromGitZasco').addEventListener('click', event => {
-	ClearAll();
-	void LoadFromGithub(event.target, 'zasco');
+//document.getElementById('LoadFromGitZasco').addEventListener('click', event => {
+//	ClearAll();
+//	void LoadFromGithub(event.target, 'zasco');
+//});
+document.getElementById('LoadFromStexUrl').addEventListener('click', () => {
+	stexFetchDialog.show();
+});
+document.getElementById('StexFetchButton').addEventListener('click', () => {
+	void FetchFromStex(document.getElementById('StexUrl').value, localStorage.getItem('stex-api-key'));
 });
 document.getElementById('CopyToClipButton').addEventListener('click', () => {
 	void navigator.clipboard.writeText(cm.getValue());
@@ -168,9 +174,13 @@ for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
 // --------------------------------------------------------------------------------------------------------------------
 document.getElementById('OpenPreferencesButton').addEventListener('click', () => {
 	document.getElementById('PreferStChannelFilenames').checked = localStorage.getItem('use-st-channel-filenames');
+	document.getElementById('StexApiKey').value = localStorage.getItem('stex-api-key');
 
 	preferencesDialog.show();
 });
 document.getElementById('PreferStChannelFilenames').addEventListener('click', () => {
 	localStorage.setItem('use-st-channel-filenames', document.getElementById('PreferStChannelFilenames').checked);
+});
+document.getElementById('StexApiKey').addEventListener('change', () => {
+	localStorage.setItem('stex-api-key', document.getElementById('StexApiKey').value);
 });
