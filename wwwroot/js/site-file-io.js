@@ -212,7 +212,7 @@ async function FetchFromStex(stexUrl, apiKey) {
 	if (stexUrl === '' || stexUrl === undefined) {
 		return;
 	}
-	if (apiKey === '' || apiKey === undefined) {
+	if (apiKey === '' || apiKey === undefined || apiKey === null) {
 		console.error('Error: No API key has been set');
 		return;
 	}
