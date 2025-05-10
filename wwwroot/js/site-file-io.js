@@ -80,7 +80,7 @@ async function LoadFromGithub(srcElem, channel) {
 				srcUrl = 'https://api.github.com/repos/memo33/sc4pac/git/trees/a58cd015bf2cd9909de87aa71a1643e47fc08256';
 				break;
 			case 'simtropolis':
-				srcUrl = 'https://api.github.com/repos/sebamarynissen/simtropolis-channel/git/trees/01c9e940e0bbfa704a8500f1a2aeba472f9664e9';
+				srcUrl = 'https://api.github.com/repos/sebamarynissen/simtropolis-channel/branches/main';
 				break;
 			case 'zasco':
 				srcUrl = 'https://api.github.com/repos/Zasco/sc4pac-channel/git/trees/ad3f15a09bf296df6ef87be2175542f1ee671407';
@@ -115,30 +115,70 @@ async function LoadFromGithub(srcElem, channel) {
 		crumbNav.appendChild(newCrumb);
 	}
 
+	if (level === 1) {
+		fetch(srcUrl)
+			.then(response => response.json())
+			.then(data => {
+				let mainUrl = data.commit.commit.tree.url;
+				console.log('1: ' + mainUrl);
+				return fetch(mainUrl);
+			})
+			.then(response => response.json())
+			.then(data => {
+				let srcUrl = data.tree.find(t => t.path === 'src').url;
+				console.log('2: ' + srcUrl);
+				return fetch(srcUrl);
+			})
+			.then(response => response.json())
+			.then(data => {
+				let yamlUrl = data.tree[0].url;
+				console.log(yamlUrl);
+				return fetch(yamlUrl);
+			})
+			.then(response => response.json())
+			.then(data => {
+				CreateButtonList(data, level);
+			})
+			.catch(error => console.error('Error fetching the tree data:', error));
+	}
+	else {
+		fetch(srcUrl)
+			.then(response => response.json())
+			.then(data => {
+				CreateButtonList(data, level);
+			})
+			.catch(error => console.error('Error fetching the tree data:', error));
+	}
 
-	fetch(srcUrl)
-		.then(response => response.json())
-		.then(data => {
-			let listDiv = loadFileDialog.querySelector('.list-group');
-			listDiv.textContent = '';
-			data.tree
-				.filter((obj) => obj.path.charAt(0) !== '.')
-				.forEach(obj => {
-					let btn = document.createElement('button');
-					btn.className = 'list-group-item list-group-item-action';
-					btn.textContent = obj.path;
-					btn.value = obj.url;
-					if (level === 1) {
-						btn.addEventListener('click', function () { LoadFromGithub(this, channel); });
-					} else {
-						btn.addEventListener('click', function () { GetContent(this.value, obj.path); });
-					}
+	
+	/**
+	 * Create a list of linked buttons for the modal dialog representing author folders or YAML files.
+	 */
+	function CreateButtonList(data, level) {
+		const listDiv = loadFileDialog.querySelector('.list-group');
+		listDiv.textContent = '';
+		data.tree
+			.filter((obj) => obj.path.charAt(0) !== '.')
+			.forEach(obj => {
+				const btn = document.createElement('button');
+				btn.className = 'list-group-item list-group-item-action';
+				btn.textContent = obj.path;
+				btn.value = obj.url;
+				if (level === 1) {
+					btn.addEventListener('click', function () { LoadFromGithub(this, channel); });
+				} else {
+					btn.addEventListener('click', function () { GetContent(this.value, obj.path); });
+				}
 
-					listDiv.appendChild(btn);
-				});
-		})
-		.catch(error => console.error('Error fetching the tree data:', error));
+				listDiv.appendChild(btn);
+			});
+	}
 
+	/**
+	 * Return the text content of a file from a Github url.
+	 * @param {any} url Github folder URL
+	 * @param {any} fileName Filename to fetch content in
+	 */
 	function GetContent(url, fileName) {
 		fetch(url)
 			.then(response => response.json())
@@ -148,8 +188,7 @@ async function LoadFromGithub(srcElem, channel) {
 			})
 			.catch(error => console.error('Error fetching the tree data:', error));
 
-		//Hide the modal display
-		var modal = bootstrap.Modal.getInstance(loadFileDialog)
+		const modal = bootstrap.Modal.getInstance(loadFileDialog);
 		modal.hide();
 	}
 
