@@ -271,8 +271,15 @@ const variantExcludeSelect = new TomSelect("#VariantAssetExclude", {
 	create: true
 });
 
-
+/**
+ * Assets defined in this local file
+ * @type {Array<string>}
+ */
 let localAssets = [];
+/**
+ * Packages defined in this local file
+ * @type {Array<string>}
+ */
 let localPackages = [];
 
 ClearAll();
@@ -316,19 +323,37 @@ function UpdateData(dumpData = true) {
 
 	SetTabState();
 
-	//Update the Tomselect dropdowns with the local packages and assets
-	[pkgDependencySelect, variantDependencySelect, pkgAssetSelect, variantAssetSelect].forEach(tscontrol => {
+	//Update the Tomselect dropdowns with the local packages and assets.Only remove a local package or asset from the TomSelects if it is not included in the local lists. If it's removed from the TomSelect while still present in the file as a local package or asset, the field in the currently selected node referencing this local package or asset will be set to a blank string. Example, editing an asset include/exclude field would otherwise cause the parent `assetId` field to be cleared if that asset is local. However, this is desired behavior if the parent node references a pkg/asset that has actually been removed from the local file.
+	[pkgDependencySelect, variantDependencySelect].forEach(tscontrol => {
 		let allOpts = tscontrol.options
 		for (const key in allOpts) {
-			if (allOpts[key].channel === 'local') {
+			if (allOpts[key].channel === 'local' && !localPackages.includes(allOpts[key].id)) {
 				tscontrol.removeOption(key);
 			}
 		}
+		localPackages.forEach(pkg => {
+			if (!Object.hasOwn(allOpts, pkg)) {
+				tscontrol.addOption({ value: pkg, id: pkg, channel: 'local' });
+			}
+		});
 	});
-	pkgDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
-	variantDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
-	pkgAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
-	variantAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
+	[pkgAssetSelect, variantAssetSelect].forEach(tscontrol => {
+		let allOpts = tscontrol.options
+		for (const key in allOpts) {
+			if (allOpts[key].channel === 'local' && !localAssets.includes(allOpts[key].id)) {
+				tscontrol.removeOption(key);
+			}
+		}
+		localAssets.forEach(asset => {
+			if (!Object.hasOwn(allOpts, asset)) {
+				tscontrol.addOption({ value: asset, id: asset, channel: 'local' });
+			}
+		});
+	});
+	//pkgDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
+	//variantDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
+	//pkgAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
+	//variantAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
 
 	if (dumpData) {
 		cm.off('change', CodeMirrorOnChange);

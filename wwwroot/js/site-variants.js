@@ -389,7 +389,7 @@ function FillVariantAssetForm() {
 	let variant = selectedDoc.get('variants').items[selectedVariantIdx];
 	let asset = variant.get('assets').items[selectedVariantAssetIdx];
 
-	(variantAssetSelect.createItem(asset.get('assetId')) || variantAssetSelect.addItem(asset.get('assetId'), true));
+	variantAssetSelect.addItem(asset.get('assetId'), true);
 
 	if (asset.has('include')) {
 		let includes = asset.get('include').items;
