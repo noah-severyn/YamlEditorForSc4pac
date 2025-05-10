@@ -3,19 +3,19 @@
 /**
  * List of assets from all channels
  */
-let AllAssets = new Array();
+let AllAssets = [];
 /**
  * List of package ids from all channels
  */
-let AllPackages = new Array();
+let AllPackages = [];
 /**
  * List of package groups from all channels
  */
-let AllGroups = new Array();
+let AllGroups = [];
 /**
  * List of subfolders inside the Plugins folder into which a package is installed
  */
-let AllSubfolders = new Array();
+let AllSubfolders = [];
 /**
  * List of all channels to use to initially load content. Note the order these are listed in is important to establish precedence when searching for a given package or asset id in an unknown channel. If given an id that could appear in multiple channels, we want to prioritize local first, then the default channel, then st-channel and sc4e-channel, then any other channels the user might have added.
  */
@@ -25,7 +25,7 @@ const ChannelInfo = [
 	{ name: 'simtrop', url: 'https://sc4pac.simtropolis.com/sc4pac-channel-contents.json', label: 'Simtropolis channel' },
     { name: 'zasco', url: 'https://zasco.github.io/sc4pac-channel/channel/sc4pac-channel-contents.json', label: 'Zasco\'s channel' },
 ];
-LoadData();
+void LoadData();
 
 
 async function LoadData() {
@@ -50,11 +50,11 @@ async function LoadData() {
                     console.error('There was a problem fetching data from ' + channel.url + ':', error);
                 });
         }
-    };
+    }
     AllGroups = [...new Set(AllGroups)]; // returns unique values
 
     pkgGroupSelect.addOptions(AllGroups.map(grp => ({ value: grp, text: grp })));
-    pkgSubfolderSelect.addOptions(AllSubfolders.map(fldr => ({ value: fldr, text: fldr })));
+    pkgSubfolderSelect.addOptions(AllSubfolders.map(folder => ({ value: folder, text: folder })));
     pkgDependencySelect.addOptions(AllPackages.map(pkg => ({ value: pkg.id, id: pkg.id, channel: pkg.channel })));
     pkgAssetSelect.addOptions(AllAssets.map(asset => ({ value: asset.id, id: asset.id, channel: asset.channel })));
     variantDependencySelect.addOptions(AllPackages.map(pkg => ({ value: pkg.id, id: pkg.id, channel: pkg.channel })));

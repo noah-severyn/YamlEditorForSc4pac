@@ -66,7 +66,7 @@ function SetTabState() {
 }
 /**
  * Maintain side effects of switching between the tabs and optionally activate the specified tab.
- * @param {string} elementId The Id of the tab element to select
+ * @param {string} elementId The id of the tab element to select
  * @param {boolean} triggerEvent Whether to trigger the click event to show the tab. Default is TRUE
  */
 function SelectTab(elementId, triggerEvent = true) {
@@ -107,7 +107,7 @@ function ClearAll() {
 
 /**
  * Apply basic validation rules for the specified entry field.
- * @param {string} elementId The Id of the input element being changed
+ * @param {string} elementId The id of the input element being changed
  */
 function ValidateInput(elementId) {
 	let inputElement = document.getElementById(elementId);
@@ -229,7 +229,7 @@ function FillPackageForm() {
  * Updates the selectedDoc with the current state of the Package Properties and Package Info tabs.
  */
 function UpdatePackageData() {
-	//TODO rename this function to medatadata, also the asset function too
+	//TODO rename this function to metadata, also the asset function too
 	if (selectedDoc === null) {
 		selectedDoc = new YAML.Document(new Object());
 	}
@@ -362,9 +362,8 @@ function ResetIncludedAssetForm() {
  * Fill the Package Asset input form fields with the values from the currently selected package and asset index.
  */
 function FillIncludedAssetForm(assetName) {
-	var pkgAsset = selectedDoc.get('assets').toJSON().find((i) => i.assetId === assetName);
+	const pkgAsset = selectedDoc.get('assets').toJSON().find((i) => i.assetId === assetName);
 	selectedPkgAssetIdx = selectedDoc.get('assets').toJSON().findIndex((i) => i.assetId === assetName);
-	//pkgAssetSelect.addItem('local|' + assetName, true);
 	pkgAssetSelect.addItem(assetName, true);
 	pkgAsset.include.forEach(item => {
 		pkgAssetIncSelect.addOption({ value: item, text: item });

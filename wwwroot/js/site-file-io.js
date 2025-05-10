@@ -2,21 +2,21 @@
  * Save YAML content to disk.
  */
 function SaveAs() {
-	var bb = new Blob([cm.getValue()], { type: 'application/yaml' });
-	var tmp = document.createElement('a');
-	var fileName;
+	const bb = new Blob([cm.getValue()], { type: 'application/yaml' });
+	const tmp = document.createElement('a');
+	let fileName;
 
 	if (yamlData[0] == null) {
 		fileName = "document.yaml";
 	}
-	//This will be filled in as the file was loaded from Github, so fileName is already in compliance with st-channel name (if appropriate)
+	//This will be filled in as the file was loaded from GitHub, so fileName is already in compliance with st-channel name (if appropriate)
 	else if (document.getElementById('YamlFileName').textContent !== '') {
 		fileName = document.getElementById('YamlFileName').textContent;
 	}
 
 	else {
 		if (localStorage.getItem('use-st-channel-filenames') === 'true') {
-			var pkg = GetDocument('p', 0);
+			const pkg = GetDocument('p', 0);
 			if (Object.hasOwn(pkg.info, 'website')) {
 				fileName = pkg.info.website.substring(45, pkg.info.website.indexOf('-'));
 			}
@@ -41,18 +41,18 @@ function SaveAs() {
  * Load YAML content from a local file.
  */
 function LoadFromFile() {
-	var tmp = document.createElement("input")
+	const tmp = document.createElement("input")
 	tmp.type = 'file'
 	tmp.style.display = 'none'
 	tmp.onchange = function (e) {
-		var file = e.target.files[0];
+		const file = e.target.files[0];
 		if (!file) {
 			return;
 		}
 		document.getElementById('YamlFileName').textContent = file.name
-		var reader = new FileReader();
+		const reader = new FileReader();
 		reader.onload = function (e) {
-			var contents = e.target.result;
+			const contents = e.target.result;
 			cm.setValue(contents);
 			tmp.remove();
 		}
@@ -63,17 +63,18 @@ function LoadFromFile() {
 
 
 /**
- * Load YAML content from a Github file tree.
+ * Load YAML content from a GitHub file tree.
  * @param {any} srcElem Source element this function is being called from.
  *
- * If the element is `a` then this is triggered from the open menu or the breadcrumb menu and we want to navigate to the base folder of the Github files; if the element is `BUTTON` then its being triggered from a button click in the modal dialog and we want to navigate to a subfolder of the Github files. Basically, links go to the root folder level, buttons go to a subfolder level.
+ * If the element is `a` then this is triggered from the open menu or the breadcrumb menu, and we want to navigate to the base folder of the GitHub files; if the element is `BUTTON` then its being triggered from a button click in the modal dialog, and we want to navigate to a subfolder of the GitHub files. Basically, links go to the root folder level, buttons go to a subfolder level.
  * @param {any} channel Name of the channel to fetch data from, e.g. 'default' or 'zasco' or 'simtropolis'
  */
 async function LoadFromGithub(srcElem, channel) {
-	var crumbNav = document.getElementById('ChannelBreadcrumb');
-	var level = (srcElem.tagName === 'A') ? 1 : 2;
+	const crumbNav = document.getElementById('ChannelBreadcrumb');
+	const level = (srcElem.tagName === 'A') ? 1 : 2;
 
 	//Set the base srcUrl and update the breadcrumb menu.
+	let srcUrl;
 	if (level === 1) {
 		switch (channel.toLowerCase()) {
 			case 'default':
@@ -99,7 +100,7 @@ async function LoadFromGithub(srcElem, channel) {
 	else {
 		srcUrl = srcElem.value;
 
-		var prevCrumb = crumbNav.firstElementChild
+		let prevCrumb = crumbNav.firstElementChild
 		prevCrumb.className = 'breadcrumb-item';
 		prevCrumb.textContent = '';
 
@@ -120,19 +121,16 @@ async function LoadFromGithub(srcElem, channel) {
 			.then(response => response.json())
 			.then(data => {
 				let mainUrl = data.commit.commit.tree.url;
-				console.log('1: ' + mainUrl);
 				return fetch(mainUrl);
 			})
 			.then(response => response.json())
 			.then(data => {
 				let srcUrl = data.tree.find(t => t.path === 'src').url;
-				console.log('2: ' + srcUrl);
 				return fetch(srcUrl);
 			})
 			.then(response => response.json())
 			.then(data => {
 				let yamlUrl = data.tree[0].url;
-				console.log(yamlUrl);
 				return fetch(yamlUrl);
 			})
 			.then(response => response.json())
@@ -175,8 +173,8 @@ async function LoadFromGithub(srcElem, channel) {
 	}
 
 	/**
-	 * Return the text content of a file from a Github url.
-	 * @param {any} url Github folder URL
+	 * Return the text content of a file from a GitHub url.
+	 * @param {any} url GitHub folder URL
 	 * @param {any} fileName Filename to fetch content in
 	 */
 	function GetContent(url, fileName) {
@@ -194,12 +192,11 @@ async function LoadFromGithub(srcElem, channel) {
 
 	function DecodeBase64Unicode(base64) {
 		const binaryString = atob(base64);
-		const unicodeString = decodeURIComponent(
+		return decodeURIComponent(
 			binaryString
 				.split('')
 				.map(char => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`)
 				.join('')
 		);
-		return unicodeString;
 	}
 }

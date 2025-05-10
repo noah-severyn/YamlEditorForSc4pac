@@ -44,18 +44,18 @@ document.getElementById('LoadFromFile').addEventListener('click', () => {
 });
 document.getElementById('LoadFromGitDefault').addEventListener('click', event => {
 	ClearAll();
-	LoadFromGithub(event.target, 'default');
+	void LoadFromGithub(event.target, 'default');
 });
 document.getElementById('LoadFromGitSimtrop').addEventListener('click', event => {
 	ClearAll();
-	LoadFromGithub(event.target, 'simtropolis');
+	void LoadFromGithub(event.target, 'simtropolis');
 });
 document.getElementById('LoadFromGitZasco').addEventListener('click', event => {
 	ClearAll();
-	LoadFromGithub(event.target, 'zasco');
+	void LoadFromGithub(event.target, 'zasco');
 });
 document.getElementById('CopyToClipButton').addEventListener('click', () => {
-	navigator.clipboard.writeText(cm.getValue());
+	void navigator.clipboard.writeText(cm.getValue());
 });
 document.getElementById('SaveAsButton').addEventListener('click', () => {
 	SaveAs();
@@ -92,7 +92,7 @@ for (const input of document.querySelectorAll('#PackagePropertiesForm .form-cont
 		ValidateInput(event.target.id);
 		UpdatePackageData();
 	});
-};
+}
 document.getElementById('ResetIncludedAssetButton').addEventListener('click', () => {
 	ResetIncludedAssetForm();
 });
@@ -109,12 +109,12 @@ for (const input of document.querySelectorAll('#VariantDependencies, #VariantAss
 	input.addEventListener('input', event => {
 		UpdateVariantData(event.target);
 	});
-};
+}
 for (const input of document.querySelectorAll('#VariantName, #VariantValue')) {
 	input.addEventListener('input', event => {
 		ValidateInput(event.target.id);
 	});
-};
+}
 document.getElementById('IsLocalVariant').addEventListener('click', () => {
 	ToggleLocalVariant();
 });
@@ -147,9 +147,9 @@ for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
 	input.addEventListener('input', event => {
 		if (event.target.id === 'AssetLastModifiedText') {
 			// Convert UTC text pasted into the input box for to a valid datetime to populate the datetime picker.
-			var inputValue = document.getElementById('AssetLastModifiedText').value.replaceAll('"', '');
+			const inputValue = document.getElementById('AssetLastModifiedText').value.replaceAll('"', '');
 			try {
-				var newDate = new Date(inputValue).toISOString().slice(0, 19);
+				const newDate = new Date(inputValue).toISOString().slice(0, 19);
 				document.getElementById('AssetLastModified').value = newDate;
 			} catch (e) {
 				console.log(e);

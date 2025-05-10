@@ -13,15 +13,15 @@ function CodeMirrorOnChange(instance, changeObj) {
 	yamlData = YAML.parseAllDocuments(cm.getValue());
 
 	//Figure which document we're editing within the code so it can be set as the selected document
-	var tabName = 'PackagePropertiesTab';
-	var line = cm.getCursor().line;
-	var lineContent = cm.getLine(line).trim();
-	var baseNode = lineContent.slice(0, lineContent.indexOf(':'));
+	let tabName = 'PackagePropertiesTab';
+	let line = cm.getCursor().line;
+	let lineContent = cm.getLine(line).trim();
+	let baseNode = lineContent.slice(0, lineContent.indexOf(':'));
 	if (lineContent === undefined || yamlData.length === 0) {
 		return;
 	}
 
-	var startLine = line;
+	let startLine = line;
 	while (startLine > 0) {
 		baseNode = lineContent.slice(0, lineContent.indexOf(':'));
 		if (baseNode === 'info') {
@@ -43,7 +43,7 @@ function CodeMirrorOnChange(instance, changeObj) {
 		lineContent = cm.getLine(startLine).trim();
 	}
 
-	var endLine = line;
+	let endLine = line;
 	while (endLine < cm.lineCount() - 1) {
 		if (lineContent === '---') {
 			break;
@@ -53,7 +53,7 @@ function CodeMirrorOnChange(instance, changeObj) {
 	}
 
 	//TODO - fix the automatic tab activating when editing a part of the code pane. It currently always defaults to the 'PackageProperties' tab because when dumping the data the cursor is set to 0,0
-	var currDoc = YAML.parseDocument(cm.getRange({ line: startLine, ch: 0 }, { line: endLine, ch: 0 }));
+	const currDoc = YAML.parseDocument(cm.getRange({ line: startLine, ch: 0 }, { line: endLine, ch: 0 }));
 	if (IsPackage(currDoc)) {
 		currDocIdx = yamlData.findIndex(item => item.group === currDoc.group && item.name === currDoc.name);
 		//SelectTab(tabName);
@@ -72,39 +72,39 @@ function CodeMirrorOnChange(instance, changeObj) {
 /**
  * Array of packages and assets in this YAML file. The primary data object.
  */
-var yamlData = [];
+let yamlData = [];
 /**
  * Index of the currently selected document within `yamlData`. If this is null, then the `selectedDoc` is new and has not yet been added to `yamlData` OR there are no documents to be selected.
  */
-var currDocIdx = null;
+let currDocIdx = null;
 /**
  * The currently selected ("active") document being edited - may be a package or an asset.
  */
-var selectedDoc = null;
+let selectedDoc = null;
 /**
  * Index of the currently selected included asset ("package asset") within this package.
  */
-var selectedPkgAssetIdx = null;
+let selectedPkgAssetIdx = null;
 /**
  * Index of the currently selected variant within this package.
  */
-var selectedVariantIdx = null;
+let selectedVariantIdx = null;
 /**
  * Index of the currently selected asset within the currently selected variant.
  */
-var selectedVariantAssetIdx = null;
+let selectedVariantAssetIdx = null;
 /**
  * Main Tree View element
  */
-var mtv;
+let mtv;
 /**
  * Asset Tree View element
  */
-var atv;
+let atv;
 /**
  * Variant Tree View element
  */
-var vtv;
+let vtv;
 /**
  * Variant Asset Tree View element
  */
@@ -158,9 +158,6 @@ const pkgDependencySelect = new TomSelect("#PackageDependencies", {
 	valueField: 'value',
 	labelField: 'id',
 	searchField: ['id'],
-	//optgroups: ChannelInfo,
-	//optgroupValueField: 'name',
-	//optgroupField: 'channel',
 
 	render: {
 		option: function (item, escape) {
@@ -190,9 +187,6 @@ const pkgAssetSelect = new TomSelect("#PackageAssetId", {
 	labelField: 'id',
 	maxItems: 1,
 	searchField: ['id'],
-	//optgroups: ChannelInfo,
-	//optgroupValueField: 'name',
-	//optgroupField: 'channel',
 
 	render: {
 		option: function (item, escape) {
@@ -221,9 +215,6 @@ const variantDependencySelect = new TomSelect("#VariantDependencies", {
 	valueField: 'value',
 	labelField: 'id',
 	searchField: ['id'],
-	//optgroups: ChannelInfo,
-	//optgroupValueField: 'name',
-	//optgroupField: 'channel',
 
 	render: {
 		option: function (item, escape) {
@@ -241,9 +232,6 @@ const variantAssetSelect = new TomSelect("#VariantAssetId", {
 	valueField: 'value',
 	labelField: 'id',
 	searchField: ['id'],
-	//optgroups: ChannelInfo,
-	//optgroupValueField: 'name',
-	//optgroupField: 'channel',
 
 	render: {
 		option: function (item, escape) {
@@ -304,8 +292,8 @@ function UpdateData(dumpData = true) {
 	//codemirror.onchange() { metadata.update() }
 	//metadata.update() { treeview.update(); form.update(); codemirror.update() }
 
-	var countOfAssets = 0;
-	var countOfPackages = 0;
+	let countOfAssets = 0;
+	let countOfPackages = 0;
 	localAssets.length = 0;
 	localPackages.length = 0;
 
@@ -323,30 +311,30 @@ function UpdateData(dumpData = true) {
 
 	SetTabState();
 
-	//Update the Tomselect dropdowns with the local packages and assets.Only remove a local package or asset from the TomSelects if it is not included in the local lists. If it's removed from the TomSelect while still present in the file as a local package or asset, the field in the currently selected node referencing this local package or asset will be set to a blank string. Example, editing an asset include/exclude field would otherwise cause the parent `assetId` field to be cleared if that asset is local. However, this is desired behavior if the parent node references a pkg/asset that has actually been removed from the local file.
-	[pkgDependencySelect, variantDependencySelect].forEach(tscontrol => {
-		let allOpts = tscontrol.options
+	//Update the TomSelect dropdowns with the local packages and assets.Only remove a local package or asset from the TomSelects if it is not included in the local lists. If it's removed from the TomSelect while still present in the file as a local package or asset, the field in the currently selected node referencing this local package or asset will be set to a blank string. Example, editing an asset include/exclude field would otherwise cause the parent `assetId` field to be cleared if that asset is local. However, this is desired behavior if the parent node references a pkg/asset that has actually been removed from the local file.
+	[pkgDependencySelect, variantDependencySelect].forEach(tsControl => {
+		let allOpts = tsControl.options
 		for (const key in allOpts) {
 			if (allOpts[key].channel === 'local' && !localPackages.includes(allOpts[key].id)) {
-				tscontrol.removeOption(key);
+				tsControl.removeOption(key);
 			}
 		}
 		localPackages.forEach(pkg => {
 			if (!Object.hasOwn(allOpts, pkg)) {
-				tscontrol.addOption({ value: pkg, id: pkg, channel: 'local' });
+				tsControl.addOption({ value: pkg, id: pkg, channel: 'local' });
 			}
 		});
 	});
-	[pkgAssetSelect, variantAssetSelect].forEach(tscontrol => {
-		let allOpts = tscontrol.options
+	[pkgAssetSelect, variantAssetSelect].forEach(tsControl => {
+		let allOpts = tsControl.options
 		for (const key in allOpts) {
 			if (allOpts[key].channel === 'local' && !localAssets.includes(allOpts[key].id)) {
-				tscontrol.removeOption(key);
+				tsControl.removeOption(key);
 			}
 		}
 		localAssets.forEach(asset => {
 			if (!Object.hasOwn(allOpts, asset)) {
-				tscontrol.addOption({ value: asset, id: asset, channel: 'local' });
+				tsControl.addOption({ value: asset, id: asset, channel: 'local' });
 			}
 		});
 	});
@@ -370,9 +358,9 @@ function UpdateData(dumpData = true) {
 		if (yamlData.length === 0) {
 			return '';
 		} else {
-			var newYaml = '';
-			var docu = '';
-			for (var idx = 0; idx < yamlData.length; idx++) {
+			let newYaml = '';
+			let docu = '';
+			for (let idx = 0; idx < yamlData.length; idx++) {
 				if (yamlData[idx] === null) {
 					continue;
 				}
@@ -394,26 +382,26 @@ function UpdateData(dumpData = true) {
 
 //https://github.com/justinchmura/js-treeview
 function UpdateMainTree() {
-	var idx = 1;
-	var astList = [];
+	let idx = 1;
+	let astList = [];
 	localAssets.forEach((asset) => {
 		astList.push({ name: CreateAssetTreeName(idx, asset), children: [] });
 		idx++;
 	});
 
 	idx = 1;
-	var pkgList = [];
+	let pkgList = [];
 	localPackages.forEach((pkg) => {
 		pkgList.push({ name: CreatePackageTreeName(idx, pkg), children: [] });
 		idx++;
 	});
 
-	var mainTreeData = [
+	const mainTreeData = [
 		{ name: 'Packages (' + pkgList.length + ')', expanded: true, children: pkgList },
 		{ name: 'Assets (' + astList.length + ')', expanded: true, children: astList }
 	];
 	mtv = new TreeView(mainTreeData, document.getElementById('MainTreeView'));
-	leaves = mtv.node.querySelectorAll('.tree-leaf');
+	const leaves = mtv.node.querySelectorAll('.tree-leaf');
 	if (selectedDoc) {
 		leaves.forEach(function (leaf) {
 			let selectedDocTreeName;
@@ -433,8 +421,8 @@ function UpdateMainTree() {
 		return id + ' - ' + asset;
 	}
 
-	function CreatePackageTreeName(id, package) {
-		return id + ' - ' + package;
+	function CreatePackageTreeName(id, pkg) {
+		return id + ' - ' + pkg;
 	}
 
 	mtv.on("select", function (t) {
@@ -444,11 +432,12 @@ function UpdateMainTree() {
 		})
 		leaf = t.target.target.closest('.tree-leaf');
 		leaf.classList.add('selected');
-		
+
+		let selectedIdx;
 		if (t.data.name.indexOf('(') > 0) { //A heading category was selected
 			return;
 		} else if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
-			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+			selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			if (document.querySelector(".nav-link.active").id === 'AssetPropertiesTab') {
 				SelectTab('PackagePropertiesTab');
 			}
@@ -458,7 +447,7 @@ function UpdateMainTree() {
 			UpdateIncludedAssetTree();
 			UpdateVariantTree();
 		} else {
-			var selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
+			selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			SelectTab('AssetPropertiesTab');
 
 			SetSelectedDoc(selectedIdx - 1, 'a');
@@ -469,12 +458,12 @@ function UpdateMainTree() {
 }
 
 function UpdateIncludedAssetTree() {
-	var pkgAssets = [];
+	let pkgAssets = [];
 	if (selectedDoc !== null && selectedDoc.get('assets') !== undefined) {
 		pkgAssets = selectedDoc.get('assets').toJSON().map((i) => ({ name: i.assetId, children: [] }));
 	}
 
-	var pkgAssetData = [{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }]
+	const pkgAssetData = [{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }]
 	atv = new TreeView(pkgAssetData, 'AssetTreeView');
 	atv.on("select", function (t) {
 		FillIncludedAssetForm(t.data.name);
@@ -493,21 +482,21 @@ function UpdateVariantTree() {
 		}
 
 		if (selectedVariantIdx !== null) {
-			let kvSets = variants[selectedVariantIdx].get('variant').items
+			let kvSets = variants[selectedVariantIdx].get('variant').items;
 			let kvTitle = kvSets.map(kv => kv.key.value + ': ' + kv.value.value).join(', ');
 			document.getElementById('CurrentVariantId').innerHTML = kvTitle;
 			document.getElementById('CurrentVariantId2').innerHTML = kvTitle;
 		}
 	}
 
-	var pkgVariantsData = [{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }]
+	const pkgVariantsData = [{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }]
 	vtv = new TreeView(pkgVariantsData, 'VariantTreeView');
 	vtv.on("select", function (t) {
 		ResetVariantForm();
 		let selectedItem = t.data.name;
 		selectedVariantIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
 
-		let kvSets = variants[selectedVariantIdx].get('variant').items 
+		let kvSets = variants[selectedVariantIdx].get('variant').items;
 		let kvTitle = kvSets.map(kv => kv.key.value + ': ' + kv.value.value).join(', ');
 		document.getElementById('CurrentVariantId').innerHTML = kvTitle;
 		document.getElementById('CurrentVariantId2').innerHTML = kvTitle;
@@ -529,8 +518,6 @@ function UpdateVariantAssetTree() {
 			for (let idx = 0; idx < assets.length; idx++) {
 				let asset = assets[idx];
 				let assetId = asset.get('assetId');
-				let include = asset.get('include'); //the include/exclude may be undefined, so check before accessing their .items property
-				let exclude = asset.get('exclude');
 
 				variantAssets.push({ name: idx + ' - ' + assetId, expanded: false, children: [] })
 			}
@@ -562,30 +549,6 @@ function validate() {
 }
 
 
-/**
- * Returns a variant object in the document with the specified key/value set.
- * @param {Object} doc The document (package) containing the desired variant
- * @param {string} key Variant key (name). If the key is for a local package variant and is not found, a global variant with the same key will be returned if found.
- * @param {string} value Variant value
- * @returns The specified variant if found; undefined if not found
- */
-function GetVariant(key, value) {
-	//Variants can be defined globally for the entire Plugins folder (e.g. nightmode, driveside, roadstyle, CAM), or locally on a per-package basis (e.g. group:package:variant)
-	var localVariant = selectedDoc.variants.filter((i) =>
-		(Object.keys(i.variant)[0] === key) &&
-		(Object.values(i.variant)[0] === value)
-	)[0];
-
-	if (localVariant === undefined) {
-		var globalKey = key.substring(key.lastIndexOf(':') + 1);
-		return selectedDoc.variants.filter((i) =>
-			(Object.keys(i.variant)[0] === globalKey) &&
-			(Object.values(i.variant)[0] === value)
-		)[0];
-	} else {
-		return localVariant;
-	}
-}
 
 /**
  * Returns the specified package or asset
@@ -604,10 +567,10 @@ function GetDocument(type, index) {
 /**
  * Sets `selectedDoc` and `currDocIdx` to the document at the specified index. Omit the type to return the nth document within the entire dataset
  * @param {number} index The nth document to return, or -1 to clear the selected doc.
- * @param {string} type [Optional] Specify 'p' for package, 'a' for asset, or omit to return either type.
+ * @param {string} [type] Specify 'p' for package, 'a' for asset, or omit to return either type. Set to null to clear the currently selected doc.
  */
 function SetSelectedDoc(index, type) {
-	var docs;
+	let docs;
 	if (index === undefined) {
 		index = 0;
 	}
@@ -635,7 +598,6 @@ function SetSelectedDoc(index, type) {
 		if (index > docs.length) {
 			selectedDoc = null;
 			currDocIdx = null;
-			return;
 		} else if (type.toLowerCase() === 'p') {
 			selectedDoc = docs[index];
 			currDocIdx = yamlData.findIndex(i => i.get('group') === selectedDoc.get('group') && i.get('name') === selectedDoc.get('name'));

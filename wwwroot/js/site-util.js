@@ -16,7 +16,7 @@ function IsAsset(obj) {
 	}
 }
 /**
- * Determine whether the specified item contains the properties of a sc4pac Package. A unique package is determined by it's `group` and `name` property combination.
+ * Determine whether the specified item contains the properties of a sc4pac Package. A unique package is determined by its `group` and `name` property combination.
  * @param {Object} obj A YAML.Document or Object to analyze
  * @returns TRUE if the document represents a Package; FALSE otherwise
  */

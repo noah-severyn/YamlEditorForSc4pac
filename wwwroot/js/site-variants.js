@@ -1,19 +1,6 @@
-//one varaint is selectedDoc.get('variants').items[0]
-//variant key is selectedDoc.get('variants').items[0].get('variant').items[0].key.value
-//variant val is selectedDoc.get('variants').items[0].get('variant').items[0].value.value
-
-
-
-
-
-
-
-
-
 //// --------------------------------------------------------------------------------------------------------------------
 //// ---------------------------------------------------   Variants   ---------------------------------------------------
 //// --------------------------------------------------------------------------------------------------------------------
-
 
 function UpdateVariantData(element) {
 	let variantItem = selectedDoc.get('variants').items[selectedVariantIdx];
@@ -34,8 +21,6 @@ function UpdateVariantData(element) {
 	}
 
 	if (element.id.startsWith('VariantName')) {
-		let idx = element.id.substring(element.id.length - 1);
-
 		//Note that this event is triggered after the input has changed, so we no longer know what the original key is. Find the one that most closely matches this and use it.
 		let keys = variantItem.get('variant').items.map(k => k.key.value);
 		let maxSS = 0;
@@ -339,7 +324,7 @@ function FillVariantForm() {
 	let variant = selectedDoc.get('variants').items[selectedVariantIdx];
 	let variantKVsets = variant.get('variant').items; // a variant can have one or more key-value pairs
 
-	for (var idx = 0; idx < variantKVsets.length; idx++) {
+	for (let idx = 0; idx < variantKVsets.length; idx++) {
 		let kvset = variantKVsets[idx];
 		CreateVariantKeyValueElements(idx, kvset.key.value, kvset.value.value);
 	}
