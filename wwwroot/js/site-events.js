@@ -103,7 +103,7 @@ document.getElementById('ResetIncludedAssetButton').addEventListener('click', ()
 	ResetIncludedAssetForm();
 });
 document.getElementById('NewPackageAssetButton').addEventListener('click', () => {
-	ResetIncludedAssetForm();
+	ResetPackageAssetForm();
 });
 
 

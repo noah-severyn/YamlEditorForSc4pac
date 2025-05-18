@@ -13,6 +13,8 @@ function EnableAssetTab() {
 	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle');
 	document.getElementById('VariantsTab').classList.add('disabled');
 	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle');
+	document.getElementById('VariantAssetsTab').classList.add('disabled');
+	document.getElementById('VariantAssetsTab').removeAttribute('data-bs-toggle');
 
 	document.getElementById('AssetPropertiesTab').classList.remove('disabled');
 	document.getElementById('AssetPropertiesTab').setAttribute('data-bs-toggle', 'tab');
@@ -29,6 +31,8 @@ function EnablePackageTabs() {
 	document.getElementById('PackageAssetsTab').setAttribute('data-bs-toggle', 'tab');
 	document.getElementById('VariantsTab').classList.remove('disabled');
 	document.getElementById('VariantsTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('VariantAssetsTab').classList.remove('disabled');
+	document.getElementById('VariantAssetsTab').setAttribute('data-bs-toggle', 'tab');
 
 	document.getElementById('AssetPropertiesTab').classList.add('disabled');
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
@@ -88,10 +92,10 @@ function SelectTab(elementId, triggerEvent = true) {
  * Clears all input form fields and resets the code pane.
  */
 function ClearAll() {
-	ResetIncludedAssetForm();
+	ResetPackageAssetForm();
 	ResetVariantForm();
 	ResetVariantAssetForm();
-	ResetIncludedAssetForm();
+	ResetPackageAssetForm();
 	ResetAssetInputs();
 	ResetPackageInputs(); //Reset package inputs last to the heading and the selected tab are aligned
 
@@ -350,7 +354,7 @@ function UpdatePackageData() {
 /**
  * Resets the Included Asset input form fields.
  */
-function ResetIncludedAssetForm() {
+function ResetPackageAssetForm() {
 	selectedPkgAssetIdx = null;
 	pkgAssetSelect.clear(true);
 	pkgAssetIncSelect.clear(true);
@@ -361,7 +365,7 @@ function ResetIncludedAssetForm() {
 /**
  * Fill the Package Asset input form fields with the values from the currently selected package and asset index.
  */
-function FillIncludedAssetForm(assetName) {
+function FillPackageAssetForm(assetName) {
 	const pkgAsset = selectedDoc.get('assets').toJSON().find((i) => i.assetId === assetName);
 	selectedPkgAssetIdx = selectedDoc.get('assets').toJSON().findIndex((i) => i.assetId === assetName);
 	pkgAssetSelect.addItem(assetName, true);
