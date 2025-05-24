@@ -321,11 +321,6 @@ function UpdatePackageData() {
 	let newAssetInc = pkgAssetIncSelect.getValue().split(',');
 	let newAssetExc = pkgAssetExcSelect.getValue().split(',');
 
-	//if () {
-		
-	//} else if (document.getElementById('PackageAssetId').value === '' && selectedDoc.hasIn(['info', 'description'])) {
-		
-	//}
 	if (document.getElementById('PackageAssetId').value !== '' && selectedDoc.get('assets') === undefined) {
 		const newSeq = selectedDoc.createNode([{ assetId: document.getElementById('PackageAssetId').value }]);
 		newSeq.type = 'SEQ';
@@ -388,17 +383,23 @@ function ResetPackageAssetForm() {
  * Fill the Package Asset input form fields with the values from the currently selected package and asset index.
  */
 function FillPackageAssetForm(assetName) {
-	const pkgAsset = selectedDoc.get('assets').toJSON().find((i) => i.assetId === assetName);
-	selectedPkgAssetIdx = selectedDoc.get('assets').toJSON().findIndex((i) => i.assetId === assetName);
+	const pkgAsset = selectedDoc.get('assets').items.find((i) => i.get('assetId') === assetName);
+	selectedPkgAssetIdx = selectedDoc.get('assets').items.findIndex((i) => i.get('assetId') === assetName);
 	pkgAssetSelect.addItem(assetName, true);
-	pkgAsset.include.forEach(item => {
-		pkgAssetIncSelect.addOption({ value: item, text: item });
-		pkgAssetIncSelect.addItem(item, true);
-	});
-	pkgAsset.exclude.forEach(item => {
-		pkgAssetExcSelect.addOption({ value: item, text: item });
-		pkgAssetExcSelect.addItem(item, true);
-	});
+
+	if (pkgAsset.has('include')) {
+		pkgAsset.get('include').items.forEach(item => {
+			pkgAssetIncSelect.addOption({ value: item.value, text: item.value });
+			pkgAssetIncSelect.addItem(item.value, true);
+		});
+	}
+
+	if (pkgAsset.has('exclude')) {
+		pkgAsset.get('exclude').items.forEach(item => {
+			pkgAssetExcSelect.addOption({ value: item.value, text: item.value });
+			pkgAssetExcSelect.addItem(item.value, true);
+		});
+	}
 }
 
 

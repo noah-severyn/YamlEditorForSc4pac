@@ -342,10 +342,6 @@ function UpdateData(dumpData = true) {
 			}
 		});
 	});
-	//pkgDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
-	//variantDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
-	//pkgAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
-	//variantAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
 
 	if (dumpData) {
 		cm.off('change', CodeMirrorOnChange);
