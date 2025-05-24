@@ -377,7 +377,13 @@ function UpdateData(dumpData = true) {
 					indentSeq: false
 				});
 
-				newYaml = newYaml + docu + '\n';
+				newYaml = newYaml + docu;
+				if (idx < yamlData.length - 1) {
+					newYaml = newYaml + '\n---\n';
+				} else {
+					newYaml = newYaml + '\n';
+				}
+				 
 			}
 			return newYaml;
 		}
