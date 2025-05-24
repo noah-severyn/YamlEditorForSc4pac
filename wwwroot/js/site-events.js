@@ -99,9 +99,6 @@ for (const input of document.querySelectorAll('#PackagePropertiesForm .form-cont
 		UpdatePackageData();
 	});
 }
-document.getElementById('ResetIncludedAssetButton').addEventListener('click', () => {
-	ResetIncludedAssetForm();
-});
 document.getElementById('NewPackageAssetButton').addEventListener('click', () => {
 	ResetPackageAssetForm();
 });
@@ -153,7 +150,7 @@ for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
 	input.addEventListener('input', event => {
 		if (event.target.id === 'AssetLastModifiedText') {
 			// Convert UTC text pasted into the input box for to a valid datetime to populate the datetime picker.
-			const inputValue = document.getElementById('AssetLastModifiedText').value.replaceAll('"', '');
+			const inputValue = document.getElementById('AssetLastModifiedText').value.replaceAll('"', '').trim();
 			try {
 				const newDate = new Date(inputValue).toISOString().slice(0, 19);
 				document.getElementById('AssetLastModified').value = newDate;
