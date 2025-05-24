@@ -342,6 +342,7 @@ function UpdatePackageData() {
 		} else if (document.getElementById('PackageAssetInclude').value === '' && assetItem.has('include')) {
 			assetItem.delete('include');
 		}
+
 		if (document.getElementById('PackageAssetExclude').value !== '') {
 			if (assetItem.get('exclude') === undefined) {
 				const newSeq = selectedDoc.createNode([document.getElementById('PackageAssetExclude').value]);
@@ -349,7 +350,7 @@ function UpdatePackageData() {
 				assetItem.set('exclude', newSeq);
 			} else {
 				assetItem.get('exclude').items = [];
-				pkgAssetIncSelect.getValue().split(',').forEach(asset => {
+				pkgAssetExcSelect.getValue().split(',').forEach(asset => {
 					assetItem.get('exclude').add(asset);
 				});
 			}
