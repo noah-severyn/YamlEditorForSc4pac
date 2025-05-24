@@ -342,10 +342,6 @@ function UpdateData(dumpData = true) {
 			}
 		});
 	});
-	//pkgDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
-	//variantDependencySelect.addOptions(localPackages.map(p => ({ value: p, id: p, channel: 'local' })));
-	//pkgAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
-	//variantAssetSelect.addOptions(localAssets.map(a => ({ value: a, id: a, channel: 'local' })));
 
 	if (dumpData) {
 		cm.off('change', CodeMirrorOnChange);
@@ -355,6 +351,7 @@ function UpdateData(dumpData = true) {
 	
 	SetSelectedDoc(currDocIdx);
 	UpdateMainTree();
+	UpdatePackageAssetTree();
 	UpdateVariantTree();
 	UpdateVariantAssetTree();
 
@@ -376,7 +373,13 @@ function UpdateData(dumpData = true) {
 					indentSeq: false
 				});
 
-				newYaml = newYaml + docu + '\n';
+				newYaml = newYaml + docu;
+				if (idx < yamlData.length - 1) {
+					newYaml = newYaml + '\n---\n';
+				} else {
+					newYaml = newYaml + '\n';
+				}
+				 
 			}
 			return newYaml;
 		}
@@ -389,58 +392,48 @@ function UpdateMainTree() {
 	let idx = 1;
 	let astList = [];
 	localAssets.forEach((asset) => {
-		astList.push({ name: CreateAssetTreeName(idx, asset), children: [] });
+		astList.push({ name: idx + ' - ' + asset, children: [] });
 		idx++;
 	});
 
 	idx = 1;
 	let pkgList = [];
 	localPackages.forEach((pkg) => {
-		pkgList.push({ name: CreatePackageTreeName(idx, pkg), children: [] });
+		pkgList.push({ name: idx + ' - ' + pkg, children: [] });
 		idx++;
 	});
 
-	const mainTreeData = [
+	const data = [
 		{ name: 'Packages (' + pkgList.length + ')', expanded: true, children: pkgList },
 		{ name: 'Assets (' + astList.length + ')', expanded: true, children: astList }
 	];
-	mtv = new TreeView(mainTreeData, document.getElementById('MainTreeView'));
-	const leaves = mtv.node.querySelectorAll('.tree-leaf');
-	if (selectedDoc) {
-		leaves.forEach(function (leaf) {
-			let selectedDocTreeName;
-			if (IsPackage(selectedDoc)) {
-				selectedDocTreeName = CreatePackageTreeName('', selectedDoc);
-			}
-			else if (IsAsset(selectedDoc)) {
-				selectedDocTreeName = CreateAssetTreeName('', selectedDoc);
-			}
-			else {
-				return;
-			}
-			if (leaf.querySelectorAll('.tree-leaf-text')[0].innerHTML.includes(selectedDocTreeName)) leaf.classList.add('selected');
-		})
-	}
-	function CreateAssetTreeName(id, asset) {
-		return id + ' - ' + asset;
-	}
-
-	function CreatePackageTreeName(id, pkg) {
-		return id + ' - ' + pkg;
-	}
+	mtv = new TreeView(data, document.getElementById('MainTreeView'));
+	//if (selectedDoc) {
+	//	mtv.node.querySelectorAll('.tree-leaf').forEach(function (leaf) {
+	//		let selectedDocTreeName;
+	//		if (IsPackage(selectedDoc)) {
+	//			selectedDocTreeName = ' - ' + selectedDoc;
+	//		}
+	//		else if (IsAsset(selectedDoc)) {
+	//			selectedDocTreeName = ' - ' + selectedDoc;
+	//		}
+	//		else {
+	//			return;
+	//		}
+	//		if (leaf.querySelectorAll('.tree-leaf-text')[0].innerHTML.includes(selectedDocTreeName)) leaf.classList.add('selected');
+	//	})
+	//}
 
 	mtv.on("select", function (t) {
-		leaves.forEach(function (leaf) {
-			if (!(leaf instanceof HTMLElement)) return;
+		mtv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
 			leaf.classList.remove('selected');
-		})
-		leaf = t.target.target.closest('.tree-leaf');
-		leaf.classList.add('selected');
+		});
+		t.target.target.closest('.tree-leaf').classList.add('selected');
 
 		let selectedIdx;
-		if (t.data.name.indexOf('(') > 0) { //A heading category was selected
+		if (t.data.name.indexOf('(') > 0) { //A heading category was selected. Do nothing
 			return;
-		} else if (t.data.name.indexOf(':') > 0) { //Packages have a colon in their name - assets do not
+		} else if (t.data.name.indexOf(':') > 0) { //A package was selected. Packages have a colon in their name; assets do not
 			selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			if (document.querySelector(".nav-link.active").id === 'AssetPropertiesTab') {
 				SelectTab('PackagePropertiesTab');
@@ -448,9 +441,9 @@ function UpdateMainTree() {
 
 			SetSelectedDoc(selectedIdx - 1, 'p');
 			FillPackageForm();
-			UpdateIncludedAssetTree();
+			UpdatePackageAssetTree();
 			UpdateVariantTree();
-		} else {
+		} else { //An asset was selected
 			selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			SelectTab('AssetPropertiesTab');
 
@@ -461,16 +454,24 @@ function UpdateMainTree() {
 	});
 }
 
-function UpdateIncludedAssetTree() {
+function UpdatePackageAssetTree() {
 	let pkgAssets = [];
 	if (selectedDoc !== null && selectedDoc.get('assets') !== undefined) {
 		pkgAssets = selectedDoc.get('assets').toJSON().map((i) => ({ name: i.assetId, children: [] }));
 	}
 
-	const pkgAssetData = [{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }]
-	atv = new TreeView(pkgAssetData, 'AssetTreeView');
+	const data = [
+		{ name: 'Assets (' + pkgAssets.length + ')', expanded: true, children: pkgAssets }
+	];
+	atv = new TreeView(data, document.getElementById('AssetTreeView'));
+
 	atv.on("select", function (t) {
-		FillIncludedAssetForm(t.data.name);
+		atv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
+			leaf.classList.remove('selected');
+		});
+		t.target.target.closest('.tree-leaf').classList.add('selected');
+
+		FillPackageAssetForm(t.data.name);
 	});
 }
 
@@ -493,9 +494,18 @@ function UpdateVariantTree() {
 		}
 	}
 
-	const pkgVariantsData = [{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }]
-	vtv = new TreeView(pkgVariantsData, 'VariantTreeView');
+	const data = [
+		{ name: 'Variants (' + pkgVariants.length + ')', expanded: true, children: pkgVariants }
+	];
+	vtv = new TreeView(data, document.getElementById('VariantTreeView'));
+
 	vtv.on("select", function (t) {
+		vtv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
+			leaf.classList.remove('selected');
+		});
+		t.target.target.closest('.tree-leaf').classList.add('selected');
+
+
 		ResetVariantForm();
 		let selectedItem = t.data.name;
 		selectedVariantIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
@@ -528,9 +538,17 @@ function UpdateVariantAssetTree() {
 		}
 	}
 
-	let variantAssetData = [{ name: 'Assets (' + variantAssets.length + ')', expanded: true, children: variantAssets }]
-	vatv = new TreeView(variantAssetData, 'VariantAssetTreeView');
+	const data = [
+		{ name: 'Assets (' + variantAssets.length + ')', expanded: true, children: variantAssets }
+	];
+	vatv = new TreeView(data, document.getElementById('VariantAssetTreeView'));
+
 	vatv.on("select", function (t) {
+		vatv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
+			leaf.classList.remove('selected');
+		});
+		t.target.target.closest('.tree-leaf').classList.add('selected');
+
 		ResetVariantAssetForm();
 		let selectedItem = t.data.name;
 		selectedVariantAssetIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));

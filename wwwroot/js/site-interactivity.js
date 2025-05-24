@@ -13,6 +13,8 @@ function EnableAssetTab() {
 	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle');
 	document.getElementById('VariantsTab').classList.add('disabled');
 	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle');
+	document.getElementById('VariantAssetsTab').classList.add('disabled');
+	document.getElementById('VariantAssetsTab').removeAttribute('data-bs-toggle');
 
 	document.getElementById('AssetPropertiesTab').classList.remove('disabled');
 	document.getElementById('AssetPropertiesTab').setAttribute('data-bs-toggle', 'tab');
@@ -29,6 +31,8 @@ function EnablePackageTabs() {
 	document.getElementById('PackageAssetsTab').setAttribute('data-bs-toggle', 'tab');
 	document.getElementById('VariantsTab').classList.remove('disabled');
 	document.getElementById('VariantsTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('VariantAssetsTab').classList.remove('disabled');
+	document.getElementById('VariantAssetsTab').setAttribute('data-bs-toggle', 'tab');
 
 	document.getElementById('AssetPropertiesTab').classList.add('disabled');
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
@@ -88,10 +92,10 @@ function SelectTab(elementId, triggerEvent = true) {
  * Clears all input form fields and resets the code pane.
  */
 function ClearAll() {
-	ResetIncludedAssetForm();
+	ResetPackageAssetForm();
 	ResetVariantForm();
 	ResetVariantAssetForm();
-	ResetIncludedAssetForm();
+	ResetPackageAssetForm();
 	ResetAssetInputs();
 	ResetPackageInputs(); //Reset package inputs last to the heading and the selected tab are aligned
 
@@ -313,44 +317,61 @@ function UpdatePackageData() {
 
 
 	//#region Included Assets
-	//let newAssetId = pkgAssetSelect.getValue().split('|')[1];
 	let newAssetId = pkgAssetSelect.getValue();
 	let newAssetInc = pkgAssetIncSelect.getValue().split(',');
 	let newAssetExc = pkgAssetExcSelect.getValue().split(',');
 
-	if (selectedPkgAssetIdx === null) {
-		let newAsset = {
-			assetId: newAssetId
-		}
+	if (document.getElementById('PackageAssetId').value !== '' && selectedDoc.get('assets') === undefined) {
+		const newSeq = selectedDoc.createNode([{ assetId: document.getElementById('PackageAssetId').value }]);
+		newSeq.type = 'SEQ';
+		selectedDoc.set('assets', newSeq);
+		selectedPkgAssetIdx = 0;
+	} else if (selectedDoc.get('assets') !== undefined) {
+		let assetItem = selectedDoc.get('assets').items[selectedPkgAssetIdx];
 		if (document.getElementById('PackageAssetInclude').value !== '') {
-			newAsset.include = newAssetInc
+			if (assetItem.get('include') === undefined) {
+				const newSeq = selectedDoc.createNode([document.getElementById('PackageAssetInclude').value]);
+				newSeq.type = 'SEQ';
+				assetItem.set('include', newSeq);
+			} else {
+				assetItem.get('include').items = [];
+				pkgAssetIncSelect.getValue().split(',').forEach(asset => {
+					assetItem.get('include').add(asset);
+				});
+			}
+		} else if (document.getElementById('PackageAssetInclude').value === '' && assetItem.has('include')) {
+			assetItem.delete('include');
 		}
 		if (document.getElementById('PackageAssetExclude').value !== '') {
-			newAsset.exclude = newAssetExc
+			if (assetItem.get('exclude') === undefined) {
+				const newSeq = selectedDoc.createNode([document.getElementById('PackageAssetExclude').value]);
+				newSeq.type = 'SEQ';
+				assetItem.set('exclude', newSeq);
+			} else {
+				assetItem.get('exclude').items = [];
+				pkgAssetIncSelect.getValue().split(',').forEach(asset => {
+					assetItem.get('exclude').add(asset);
+				});
+			}
+		} else if (document.getElementById('PackageAssetExclude').value === '' && assetItem.has('exclude')) {
+			assetItem.delete('exclude');
 		}
-	} else {
-		selectedDoc.get('assets').items[selectedPkgAssetIdx].set('assetId', newAssetId);
-		selectedDoc.get('assets').items[selectedPkgAssetIdx].set('include', newAssetInc);
-		selectedDoc.get('assets').items[selectedPkgAssetIdx].set('exclude', newAssetExc);
 	}
 	//#endregion
 
 
-	//To push the package to the list it at minimum must have a group and name so the cm.OnChange can pick it up
+	//To push the package to the list, at a minimum it must have a group and name so the cm.OnChange can pick it up
 	if (currDocIdx === null && selectedDoc.has('group') && selectedDoc.has('name')) {
 		yamlData.push(selectedDoc);
 		SetSelectedDoc(yamlData.filter((doc) => IsPackage(doc)).length - 1, 'p');
+		document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.get('group') + ':' + selectedDoc.get('name');
 	}
 	UpdateData();
-	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.get('group') + ':' + selectedDoc.get('name');
-
-
-	
 }
 /**
  * Resets the Included Asset input form fields.
  */
-function ResetIncludedAssetForm() {
+function ResetPackageAssetForm() {
 	selectedPkgAssetIdx = null;
 	pkgAssetSelect.clear(true);
 	pkgAssetIncSelect.clear(true);
@@ -361,18 +382,24 @@ function ResetIncludedAssetForm() {
 /**
  * Fill the Package Asset input form fields with the values from the currently selected package and asset index.
  */
-function FillIncludedAssetForm(assetName) {
-	const pkgAsset = selectedDoc.get('assets').toJSON().find((i) => i.assetId === assetName);
-	selectedPkgAssetIdx = selectedDoc.get('assets').toJSON().findIndex((i) => i.assetId === assetName);
+function FillPackageAssetForm(assetName) {
+	const pkgAsset = selectedDoc.get('assets').items.find((i) => i.get('assetId') === assetName);
+	selectedPkgAssetIdx = selectedDoc.get('assets').items.findIndex((i) => i.get('assetId') === assetName);
 	pkgAssetSelect.addItem(assetName, true);
-	pkgAsset.include.forEach(item => {
-		pkgAssetIncSelect.addOption({ value: item, text: item });
-		pkgAssetIncSelect.addItem(item, true);
-	});
-	pkgAsset.exclude.forEach(item => {
-		pkgAssetExcSelect.addOption({ value: item, text: item });
-		pkgAssetExcSelect.addItem(item, true);
-	});
+
+	if (pkgAsset.has('include')) {
+		pkgAsset.get('include').items.forEach(item => {
+			pkgAssetIncSelect.addOption({ value: item.value, text: item.value });
+			pkgAssetIncSelect.addItem(item.value, true);
+		});
+	}
+
+	if (pkgAsset.has('exclude')) {
+		pkgAsset.get('exclude').items.forEach(item => {
+			pkgAssetExcSelect.addOption({ value: item.value, text: item.value });
+			pkgAssetExcSelect.addItem(item.value, true);
+		});
+	}
 }
 
 

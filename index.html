@@ -146,15 +146,16 @@
 
 					<!-- Package Assets tab -->
 					<fieldset id="PackageAssetsContent" class="tab-pane m-3" tabindex="0">
+						<h4>Editing asset: <span id="CurrentAsset" style="font-style: italic">[new asset]</span></h4>
 						<div style="display:flex" class="row">
 							<div class="col-sm-12 col-md-3">
-								<div class="mb-2 btn-group">
-									<button id="NewPackageAssetButton" type="button" class="btn btn-primary btn-sm">New Included Asset</button>
-								</div>
 								<div id="AssetTreeView"></div>
 							</div>
 
 							<div class="col-sm-12 col-md-9">
+								<div class="mb-2 btn-group">
+									<button id="NewPackageAssetButton" type="button" class="btn btn-primary btn-sm">New Package Asset</button>
+								</div>
 								<p>These assets will always be installed, regardless of the chosen variant or option.</p>
 								<form id="PackageAssetsForm">
 									<div class="mb-2 input-group">
@@ -168,9 +169,6 @@
 									<div class="mb-2 input-group">
 										<label class="input-group-text w1" for="PackageAssetExclude">Exclude</label>
 										<input id="PackageAssetExclude" class="form-control" />
-									</div>
-									<div class="mb-2 btn-group">
-										<button id="ResetIncludedAssetButton" class="btn btn-outline-primary btn-sm" type="button">Reset Form</button>
 									</div>
 								</form>
 							</div>
@@ -192,7 +190,7 @@
 								</div>
 								
 								<form id="VariantsFormHeader">
-									<p>A variant has one or more <b>Key-Value</b> sets uniquely identifying it.</p>
+									<p>A variant is a choice a user must make during installation. It can consist of a single option or a unique combination of options as <b>Key</b>-<b>Value</b> sets.</p>
 									<div id="VariantKeyValuesContainer">
 
 										<div class="form-check mt-2 me-2">
@@ -201,7 +199,6 @@
 										</div>
 
 										<div id="VariantKeyValueInputForm" class="mb-2 input-group">
-
 											<label class="input-group-text required-label w1" for="VariantName">Name</label>
 											<input id="VariantName" class="form-control" type="text" />
 											<label class="input-group-text required-label w1" for="VariantValue">Value</label>
