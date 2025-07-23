@@ -35,7 +35,18 @@ function IsPackage(obj) {
  * @returns The name of the object's constructor as a string
  */
 function TypeOf(obj) {
+	if (obj === undefined) {
+		return 'undefined';
+	}
 	return obj.__proto__.constructor.name
+}
+/**
+ * Determine whether the specified item is an Object.
+ * @param {any} obj An item to analyze
+ * @returns TRUE if the item is an object; FALSE otherwise.
+ */
+function IsObject(obj) {
+	return (typeof obj === "object" && !Array.isArray(obj) && obj !== null);
 }
 /**
  * Calculate similarity between two strings

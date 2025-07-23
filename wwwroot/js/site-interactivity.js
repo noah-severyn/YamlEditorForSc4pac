@@ -230,68 +230,68 @@ function FillPackageForm() {
 	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.get('group') + ':' + selectedDoc.get('name');
 }
 /**
+ * Updates, adds, or removes a property to the selected document at the specified index within the document.
+ * @param {Array} keys Property name(s); one or more strings.
+ * @param {any} values Property value(s) to set, either a string or an array of strings, or a eemeli/yaml object like a scalar
+ * @param {number} position Index in the document to insert this property to. Passing The index ensures serialization in the correct order resulting in a clean text representation with all the properties in the order we're expecting.
+ */
+function UpdateProperty(keys, values, position) {
+	if (selectedDoc === null) {
+		selectedDoc = new YAML.Document(new Object());
+	}
+	let current = selectedDoc.contents;
+
+	for (var idx = 0; idx < keys.length; idx++) {
+		const key = keys[idx];
+
+		if (idx === keys.length - 1) {
+			if (!values || values[0] === '' || (IsObject(values) && !values.value)) { //if '', null, undefined, empty array, array with one blank string, object with a blank value property
+				current.delete(key, values);
+				if (selectedDoc.has(keys[0])) {
+					if (selectedDoc.get(keys[0]).items.length === 0) {
+						selectedDoc.delete(keys[0]);
+					}
+				}
+				return;
+			}
+			else {
+				current.set(key, values);
+			}
+			break;
+		}
+
+		let next = current.get(key);
+		if (TypeOf(next) !== 'YAMLMap') {
+			next = new YAML.YAMLMap();
+			current.set(key, next);
+		}
+
+		current = next;
+	}
+}
+
+/**
  * Updates the selectedDoc with the current state of the Package Properties and Package Info tabs.
  */
 function UpdatePackageData() {
 	//TODO rename this function to metadata, also the asset function too
-	if (selectedDoc === null) {
-		selectedDoc = new YAML.Document(new Object());
-	}
+	
+	UpdateProperty(['group'], document.getElementById('PackageGroup').value, 0);
+	UpdateProperty(['name'], document.getElementById('PackageName').value, 1);
+	UpdateProperty(['version'], document.getElementById('PackageVersion').value, 2);
+	UpdateProperty(['subfolder'], document.getElementById('PackageSubfolder').value, 3);
+	UpdateProperty(['dependencies'], pkgDependencySelect.getValue().split(','), 4);
 
+	UpdateProperty(['info', 'summary'], document.getElementById('PackageSummary').value, 5);
+	UpdateProperty(['info', 'warning'], document.getElementById('PackageWarning').value, 5);
+	UpdateProperty(['info', 'conflicts'], document.getElementById('PackageConflicts').value, 5);
+	UpdateProperty(['info', 'author'], document.getElementById('PackageAuthor').value, 5);
+	UpdateProperty(['info', 'images'], pkgImageSelect.getValue().split(','), 5);
 
-	//#region Package Properties
-	if (document.getElementById('PackageGroup').value !== '') {
-		selectedDoc.setIn(['group'], document.getElementById('PackageGroup').value);
-	}
-	if (document.getElementById('PackageName').value !== '') {
-		selectedDoc.setIn(['name'], document.getElementById('PackageName').value);
-	}
-	if (document.getElementById('PackageVersion').value !== '') {
-		selectedDoc.setIn(['version'], document.getElementById('PackageVersion').value);
-	}
-	if (document.getElementById('PackageSubfolder').value !== '') {
-		selectedDoc.setIn(['subfolder'], document.getElementById('PackageSubfolder').value);
-	}
-	if (document.getElementById('PackageDependencies').value !== '') {
-		if (selectedDoc.get('dependencies') === undefined) {
-			const newSeq = selectedDoc.createNode([document.getElementById('PackageDependencies').value]);
-			newSeq.type = 'SEQ';
-			selectedDoc.set('dependencies', newSeq);
-		} else {
-			selectedDoc.get('dependencies').items = [];
-			pkgDependencySelect.getValue().split(',').forEach(dep => {
-				selectedDoc.get('dependencies').add(dep);
-			});
-		}
-	} else if (document.getElementById('PackageDependencies').value === '' && selectedDoc.has('dependencies')) {
-		selectedDoc.delete('dependencies');
-	}
-	//#endregion
+	let desc = new YAML.Scalar(document.getElementById('PackageDescription').value.replaceAll('"', "'"));
+	desc.type = 'BLOCK_LITERAL'; // Ensures the "|-" style is used
+	UpdateProperty(['info', 'description'], desc, 5);
 
-
-	//#region Package Info
-	if (document.getElementById('PackageSummary').value !== '') {
-		selectedDoc.setIn(['info', 'summary'], document.getElementById('PackageSummary').value);
-	}
-	if (document.getElementById('PackageWarning').value !== '') {
-		selectedDoc.setIn(['info', 'warning'], document.getElementById('PackageWarning').value);
-	}
-	if (document.getElementById('PackageConflicts').value !== '') {
-		selectedDoc.setIn(['info', 'conflicts'], document.getElementById('PackageConflicts').value);
-	}
-	if (document.getElementById('PackageDescription').value !== '') {
-		let scl = new YAML.Scalar(document.getElementById('PackageDescription').value.replaceAll('"', "'"));
-		scl.type = 'BLOCK_LITERAL'; // Ensures the "|-" style is used
-		selectedDoc.setIn(['info', 'description'], scl);
-	} else if (document.getElementById('PackageDescription').value === '' && selectedDoc.hasIn(['info', 'description'])) {
-		selectedDoc.deleteIn(['info', 'description']);
-	}
-	if (document.getElementById('PackageAuthor').value !== '') {
-		selectedDoc.setIn(['info', 'author'], document.getElementById('PackageAuthor').value);
-	}
-	if (document.getElementById('PackageImages').value !== '') {
-		selectedDoc.setIn(['info', 'images'], pkgImageSelect.getValue().split(','));
-	}
 	if (document.getElementById('PackageWebsite').value !== '') {
 		let sites = pkgWebsitesSelect.getValue().split(',');
 		if (sites.length > 1) {
@@ -313,7 +313,6 @@ function UpdatePackageData() {
 	} else if (selectedDoc.hasIn(['info', 'websites'])) {
 		selectedDoc.deleteIn(['info', 'websites']);
 	}
-	//#endregion
 
 
 	//#region Included Assets
@@ -326,7 +325,7 @@ function UpdatePackageData() {
 		newSeq.type = 'SEQ';
 		selectedDoc.set('assets', newSeq);
 		selectedPkgAssetIdx = 0;
-	} else if (selectedDoc.get('assets') !== undefined) {
+	} else if (selectedDoc.has('assets') && selectedPkgAssetIdx != null) {
 		let assetItem = selectedDoc.get('assets').items[selectedPkgAssetIdx];
 		if (document.getElementById('PackageAssetInclude').value !== '') {
 			if (assetItem.get('include') === undefined) {
@@ -451,41 +450,14 @@ function FillAssetForm() {
  * Updates the selectedDoc with the current state of the Asset Properties tab inputs.
  */
 function UpdateAssetData() {
-	if (selectedDoc === null) {
-		selectedDoc = new YAML.Document(new Object());
-	}
-
-	if (document.getElementById('AssetUrl').value !== '') {
-		selectedDoc.setIn(['url'], document.getElementById('AssetUrl').value);
-	}
-	if (document.getElementById('AssetId').value !== '') {
-		selectedDoc.setIn(['assetId'], document.getElementById('AssetId').value);
-	}
-	if (document.getElementById('AssetVersion').value !== '') {
-		selectedDoc.setIn(['version'], document.getElementById('AssetVersion').value);
-	}
-	if (document.getElementById('AssetLastModified').value !== '') {
-		selectedDoc.setIn(['lastModified'], document.getElementById('AssetLastModified').value + 'Z');
-	}
-	if (document.getElementById('AssetArchiveVersion').value !== '0') {
-		selectedDoc.setIn(['archiveType', 'format'], document.getElementById('AssetArchiveFormat').value);
-		selectedDoc.setIn(['archiveType', 'version'], document.getElementById('AssetArchiveVersion').value);
-	} else {
-		selectedDoc.deleteIn(['archiveType']);
-	}
-	if (document.getElementById('AssetChecksum').value !== '') {
-		if (!selectedDoc.has('checksum')) {
-			selectedDoc.checksum = new Object();
-		}
-		selectedDoc.setIn(['checksum', 'sha256'], document.getElementById('AssetChecksum').value);
-	} else {
-		selectedDoc.deleteIn(['checksum']);
-	}
-	if (document.getElementById('AssetNonPersistentUrl').value !== '') {
-		selectedDoc.setIn(['nonPersistentUrl'], document.getElementById('AssetNonPersistentUrl').value);
-	} else {
-		selectedDoc.deleteIn(['nonPersistentUrl']);
-	}
+	UpdateProperty(['assetId'], document.getElementById('AssetId').value, 0);
+	UpdateProperty(['url'], document.getElementById('AssetUrl').value, 1);
+	UpdateProperty(['version'], document.getElementById('AssetVersion').value, 2);
+	UpdateProperty(['lastModified'], (document.getElementById('AssetLastModified').value === '' ? '' : document.getElementById('AssetLastModified').value + 'Z'), 3);
+	UpdateProperty(['nonPersistentUrl'], document.getElementById('AssetNonPersistentUrl').value, 6);
+	UpdateProperty(['checksum', 'sha256'], document.getElementById('AssetChecksum').value, 7);
+	UpdateProperty(['archiveType', 'format'], document.getElementById('AssetArchiveVersion').value === '0' ? '' : document.getElementById('AssetArchiveFormat').value, 8);
+	UpdateProperty(['archiveType', 'version'], document.getElementById('AssetArchiveVersion').value === '0' ? '' : document.getElementById('AssetArchiveVersion').value, 8);
 
 	//To push the package to the list it at minimum must have an assetId
 	if (currDocIdx === null && selectedDoc.has('assetId')) {
