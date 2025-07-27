@@ -167,6 +167,7 @@ function ResetPackageInputs() {
 	document.getElementById('PackageSubfolder').value = '';
 	pkgSubfolderSelect.clear(true);
 	pkgDependencySelect.clear(true);
+	pkgConflictingSelect.clear(true);
 	document.getElementById('PackageSummary').value = '';
 	document.getElementById('PackageConflicts').value = '';
 	document.getElementById('PackageWarning').value = '';
@@ -196,6 +197,16 @@ function FillPackageForm() {
 		} else {
 			deps.forEach((item) => {
 				pkgDependencySelect.addItem(item.value, true);
+			});
+		}
+	}
+	if (selectedDoc.has('conflicting')) {
+		let deps = (Array.isArray(selectedDoc.get('conflicting')) ? selectedDoc.get('conflicting') : selectedDoc.get('conflicting').items);
+		if (typeof (deps) === 'string') {
+			pkgConflictingSelect.addItem(deps, true);
+		} else {
+			deps.forEach((item) => {
+				pkgConflictingSelect.addItem(item.value, true);
 			});
 		}
 	}
@@ -326,6 +337,7 @@ function UpdatePackageData() {
 	UpdateProperty(['version'], document.getElementById('PackageVersion').value);
 	UpdateProperty(['subfolder'], document.getElementById('PackageSubfolder').value);
 	UpdateProperty(['dependencies'], pkgDependencySelect.getValue().split(','));
+	UpdateProperty(['conflicting'], pkgConflictingSelect.getValue().split(','));
 
 	UpdateProperty(['info', 'summary'], document.getElementById('PackageSummary').value);
 	UpdateProperty(['info', 'warning'], document.getElementById('PackageWarning').value);
