@@ -233,9 +233,52 @@ function FillPackageForm() {
  * Updates, adds, or removes a property to the selected document at the specified index within the document.
  * @param {Array} keys Property name(s); one or more strings.
  * @param {any} values Property value(s) to set, either a string or an array of strings, or a eemeli/yaml object like a scalar
- * @param {number} position Index in the document to insert this property to. Passing The index ensures serialization in the correct order resulting in a clean text representation with all the properties in the order we're expecting.
  */
 function UpdateProperty(keys, values, position) {
+	/** Index in the document to insert this property to. Passing The index ensures serialization in the correct order resulting in a clean text representation with all the properties in the order we're expecting. This index is scoped to only each item's parent property. */
+	const nodePositions = {
+		//Package properties
+		group: 0
+		, name: 1
+		, version: 2
+		, subfolder: 3
+		, dependencies: 4
+		, conflicting: 5
+		, info: 6
+		, assets: 7
+		, variants: 8
+		, variantInfo: 9
+
+		//Package.Info properties
+		, summary: 0
+		, warning: 1
+		, conflicts: 2
+		, description: 3
+		, author: 4
+		, images: 5
+		, website: 6
+		, websites: 6
+
+		//Package.Varaints properties
+		, variant: 0
+		//`dependencies` is already 4
+		//`assets` is already 7
+
+		//Package.Variants.Variant properties
+		//`assetId` is already 0
+		, include: 1
+		, exclude: 2
+
+		//Asset properties
+		, assetId: 0
+		, url: 1
+		//`version` is already 2
+		, lastModified: 3
+		, checksum: 4
+		, nonPersistentUrl: 5
+		, archiveType: 6
+	}
+
 	if (selectedDoc === null) {
 		selectedDoc = new YAML.Document(new Object());
 	}
@@ -252,10 +295,14 @@ function UpdateProperty(keys, values, position) {
 						selectedDoc.delete(keys[0]);
 					}
 				}
-				return;
+				break;
 			}
 			else {
-				current.set(key, values);
+				if (selectedDoc.hasIn(keys)) {
+					current.set(key, values);
+				} else {
+					current.items.splice(nodePositions[key] ?? 0, 0, new YAML.Pair(key, values)); // `?? 0` returns 0 in case the lookup is undefined (key is not in nodePositions)
+				}
 			}
 			break;
 		}
@@ -263,7 +310,7 @@ function UpdateProperty(keys, values, position) {
 		let next = current.get(key);
 		if (TypeOf(next) !== 'YAMLMap') {
 			next = new YAML.YAMLMap();
-			current.set(key, next);
+			current.items.splice(nodePositions[key] ?? 0, 0, new YAML.Pair(key, next));
 		}
 
 		current = next;
@@ -271,47 +318,32 @@ function UpdateProperty(keys, values, position) {
 }
 
 /**
- * Updates the selectedDoc with the current state of the Package Properties and Package Info tabs.
+ * Updates the selectedDoc with the current state of the Package Properties, Package Info, and Package Asset tabs.
  */
 function UpdatePackageData() {
-	//TODO rename this function to metadata, also the asset function too
-	
-	UpdateProperty(['group'], document.getElementById('PackageGroup').value, 0);
-	UpdateProperty(['name'], document.getElementById('PackageName').value, 1);
-	UpdateProperty(['version'], document.getElementById('PackageVersion').value, 2);
-	UpdateProperty(['subfolder'], document.getElementById('PackageSubfolder').value, 3);
-	UpdateProperty(['dependencies'], pkgDependencySelect.getValue().split(','), 4);
+	UpdateProperty(['group'], document.getElementById('PackageGroup').value);
+	UpdateProperty(['name'], document.getElementById('PackageName').value);
+	UpdateProperty(['version'], document.getElementById('PackageVersion').value);
+	UpdateProperty(['subfolder'], document.getElementById('PackageSubfolder').value);
+	UpdateProperty(['dependencies'], pkgDependencySelect.getValue().split(','));
 
-	UpdateProperty(['info', 'summary'], document.getElementById('PackageSummary').value, 5);
-	UpdateProperty(['info', 'warning'], document.getElementById('PackageWarning').value, 5);
-	UpdateProperty(['info', 'conflicts'], document.getElementById('PackageConflicts').value, 5);
-	UpdateProperty(['info', 'author'], document.getElementById('PackageAuthor').value, 5);
-	UpdateProperty(['info', 'images'], pkgImageSelect.getValue().split(','), 5);
+	UpdateProperty(['info', 'summary'], document.getElementById('PackageSummary').value);
+	UpdateProperty(['info', 'warning'], document.getElementById('PackageWarning').value);
+	UpdateProperty(['info', 'conflicts'], document.getElementById('PackageConflicts').value);
+	UpdateProperty(['info', 'author'], document.getElementById('PackageAuthor').value);
+	UpdateProperty(['info', 'images'], pkgImageSelect.getValue().split(','));
 
 	let desc = new YAML.Scalar(document.getElementById('PackageDescription').value.replaceAll('"', "'"));
 	desc.type = 'BLOCK_LITERAL'; // Ensures the "|-" style is used
-	UpdateProperty(['info', 'description'], desc, 5);
+	UpdateProperty(['info', 'description'], desc);
 
-	if (document.getElementById('PackageWebsite').value !== '') {
-		let sites = pkgWebsitesSelect.getValue().split(',');
-		if (sites.length > 1) {
-			if (selectedDoc.hasIn(['info', 'websites'])) {
-				selectedDoc.getIn(['info', 'websites']).items = [];
-			} else {
-				selectedDoc.addIn(['info', 'websites'], []);
-			}
-			sites.forEach(site => {
-				selectedDoc.getIn(['info', 'websites']).add(site);
-			});
-			selectedDoc.deleteIn(['info', 'website']);
-		} else {
-			selectedDoc.setIn(['info', 'website'], sites[0]);
-			selectedDoc.deleteIn(['info', 'websites']);
-		}
-	} else if (selectedDoc.hasIn(['info', 'website'])) {
-		selectedDoc.deleteIn(['info', 'website']);
-	} else if (selectedDoc.hasIn(['info', 'websites'])) {
-		selectedDoc.deleteIn(['info', 'websites']);
+	const sites = pkgWebsitesSelect.getValue().split(',');
+	if (sites.length > 1) {
+		UpdateProperty(['info', 'websites'], sites);
+		UpdateProperty(['info', 'website'], '');
+	} else {
+		UpdateProperty(['info', 'website'], sites);
+		UpdateProperty(['info', 'websites'], '');
 	}
 
 
@@ -450,14 +482,14 @@ function FillAssetForm() {
  * Updates the selectedDoc with the current state of the Asset Properties tab inputs.
  */
 function UpdateAssetData() {
-	UpdateProperty(['assetId'], document.getElementById('AssetId').value, 0);
-	UpdateProperty(['url'], document.getElementById('AssetUrl').value, 1);
-	UpdateProperty(['version'], document.getElementById('AssetVersion').value, 2);
-	UpdateProperty(['lastModified'], (document.getElementById('AssetLastModified').value === '' ? '' : document.getElementById('AssetLastModified').value + 'Z'), 3);
-	UpdateProperty(['nonPersistentUrl'], document.getElementById('AssetNonPersistentUrl').value, 6);
-	UpdateProperty(['checksum', 'sha256'], document.getElementById('AssetChecksum').value, 7);
-	UpdateProperty(['archiveType', 'format'], document.getElementById('AssetArchiveVersion').value === '0' ? '' : document.getElementById('AssetArchiveFormat').value, 8);
-	UpdateProperty(['archiveType', 'version'], document.getElementById('AssetArchiveVersion').value === '0' ? '' : document.getElementById('AssetArchiveVersion').value, 8);
+	UpdateProperty(['assetId'], document.getElementById('AssetId').value);
+	UpdateProperty(['url'], document.getElementById('AssetUrl').value);
+	UpdateProperty(['version'], document.getElementById('AssetVersion').value);
+	UpdateProperty(['lastModified'], (document.getElementById('AssetLastModified').value === '' ? '' : document.getElementById('AssetLastModified').value + 'Z'));
+	UpdateProperty(['nonPersistentUrl'], document.getElementById('AssetNonPersistentUrl').value);
+	UpdateProperty(['checksum', 'sha256'], document.getElementById('AssetChecksum').value);
+	UpdateProperty(['archiveType', 'format'], document.getElementById('AssetArchiveVersion').value === '0' ? '' : document.getElementById('AssetArchiveFormat').value);
+	UpdateProperty(['archiveType', 'version'], document.getElementById('AssetArchiveVersion').value === '0' ? '' : document.getElementById('AssetArchiveVersion').value);
 
 	//To push the package to the list it at minimum must have an assetId
 	if (currDocIdx === null && selectedDoc.has('assetId')) {
