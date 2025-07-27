@@ -166,9 +166,19 @@ const pkgDependencySelect = new TomSelect("#PackageDependencies", {
 	render: {
 		option: function (item, escape) {
 			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		},
-		optgroup_header: function (data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
+		}
+	}
+});
+
+const pkgConflictingSelect = new TomSelect("#PackageConflicting", {
+	create: false,
+	valueField: 'value',
+	labelField: 'id',
+	searchField: ['id'],
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
 		}
 	}
 });

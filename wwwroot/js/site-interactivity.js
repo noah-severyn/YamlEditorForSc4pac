@@ -167,6 +167,7 @@ function ResetPackageInputs() {
 	document.getElementById('PackageSubfolder').value = '';
 	pkgSubfolderSelect.clear(true);
 	pkgDependencySelect.clear(true);
+	pkgConflictingSelect.clear(true);
 	document.getElementById('PackageSummary').value = '';
 	document.getElementById('PackageConflicts').value = '';
 	document.getElementById('PackageWarning').value = '';
@@ -196,6 +197,16 @@ function FillPackageForm() {
 		} else {
 			deps.forEach((item) => {
 				pkgDependencySelect.addItem(item.value, true);
+			});
+		}
+	}
+	if (selectedDoc.has('conflicting')) {
+		let deps = (Array.isArray(selectedDoc.get('conflicting')) ? selectedDoc.get('conflicting') : selectedDoc.get('conflicting').items);
+		if (typeof (deps) === 'string') {
+			pkgConflictingSelect.addItem(deps, true);
+		} else {
+			deps.forEach((item) => {
+				pkgConflictingSelect.addItem(item.value, true);
 			});
 		}
 	}
@@ -230,90 +241,122 @@ function FillPackageForm() {
 	document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.get('group') + ':' + selectedDoc.get('name');
 }
 /**
- * Updates the selectedDoc with the current state of the Package Properties and Package Info tabs.
+ * Updates, adds, or removes a property to the selected document at the specified index within the document.
+ * @param {Array} keys Property name(s); one or more strings.
+ * @param {any} values Property value(s) to set, either a string or an array of strings, or a eemeli/yaml object like a scalar
  */
-function UpdatePackageData() {
-	//TODO rename this function to metadata, also the asset function too
+function UpdateProperty(keys, values, position) {
+	/** Index in the document to insert this property to. Passing The index ensures serialization in the correct order resulting in a clean text representation with all the properties in the order we're expecting. This index is scoped to only each item's parent property. */
+	const nodePositions = {
+		//Package properties
+		group: 0
+		, name: 1
+		, version: 2
+		, subfolder: 3
+		, dependencies: 4
+		, conflicting: 5
+		, info: 6
+		, assets: 7
+		, variants: 8
+		, variantInfo: 9
+
+		//Package.Info properties
+		, summary: 0
+		, warning: 1
+		, conflicts: 2
+		, description: 3
+		, author: 4
+		, images: 5
+		, website: 6
+		, websites: 6
+
+		//Package.Varaints properties
+		, variant: 0
+		//`dependencies` is already 4
+		//`assets` is already 7
+
+		//Package.Variants.Variant properties
+		//`assetId` is already 0
+		, include: 1
+		, exclude: 2
+
+		//Asset properties
+		, assetId: 0
+		, url: 1
+		//`version` is already 2
+		, lastModified: 3
+		, checksum: 4
+		, nonPersistentUrl: 5
+		, archiveType: 6
+	}
+
 	if (selectedDoc === null) {
 		selectedDoc = new YAML.Document(new Object());
 	}
+	let current = selectedDoc.contents;
 
+	for (var idx = 0; idx < keys.length; idx++) {
+		const key = keys[idx];
 
-	//#region Package Properties
-	if (document.getElementById('PackageGroup').value !== '') {
-		selectedDoc.setIn(['group'], document.getElementById('PackageGroup').value);
-	}
-	if (document.getElementById('PackageName').value !== '') {
-		selectedDoc.setIn(['name'], document.getElementById('PackageName').value);
-	}
-	if (document.getElementById('PackageVersion').value !== '') {
-		selectedDoc.setIn(['version'], document.getElementById('PackageVersion').value);
-	}
-	if (document.getElementById('PackageSubfolder').value !== '') {
-		selectedDoc.setIn(['subfolder'], document.getElementById('PackageSubfolder').value);
-	}
-	if (document.getElementById('PackageDependencies').value !== '') {
-		if (selectedDoc.get('dependencies') === undefined) {
-			const newSeq = selectedDoc.createNode([document.getElementById('PackageDependencies').value]);
-			newSeq.type = 'SEQ';
-			selectedDoc.set('dependencies', newSeq);
-		} else {
-			selectedDoc.get('dependencies').items = [];
-			pkgDependencySelect.getValue().split(',').forEach(dep => {
-				selectedDoc.get('dependencies').add(dep);
-			});
-		}
-	} else if (document.getElementById('PackageDependencies').value === '' && selectedDoc.has('dependencies')) {
-		selectedDoc.delete('dependencies');
-	}
-	//#endregion
-
-
-	//#region Package Info
-	if (document.getElementById('PackageSummary').value !== '') {
-		selectedDoc.setIn(['info', 'summary'], document.getElementById('PackageSummary').value);
-	}
-	if (document.getElementById('PackageWarning').value !== '') {
-		selectedDoc.setIn(['info', 'warning'], document.getElementById('PackageWarning').value);
-	}
-	if (document.getElementById('PackageConflicts').value !== '') {
-		selectedDoc.setIn(['info', 'conflicts'], document.getElementById('PackageConflicts').value);
-	}
-	if (document.getElementById('PackageDescription').value !== '') {
-		let scl = new YAML.Scalar(document.getElementById('PackageDescription').value.replaceAll('"', "'"));
-		scl.type = 'BLOCK_LITERAL'; // Ensures the "|-" style is used
-		selectedDoc.setIn(['info', 'description'], scl);
-	} else if (document.getElementById('PackageDescription').value === '' && selectedDoc.hasIn(['info', 'description'])) {
-		selectedDoc.deleteIn(['info', 'description']);
-	}
-	if (document.getElementById('PackageAuthor').value !== '') {
-		selectedDoc.setIn(['info', 'author'], document.getElementById('PackageAuthor').value);
-	}
-	if (document.getElementById('PackageImages').value !== '') {
-		selectedDoc.setIn(['info', 'images'], pkgImageSelect.getValue().split(','));
-	}
-	if (document.getElementById('PackageWebsite').value !== '') {
-		let sites = pkgWebsitesSelect.getValue().split(',');
-		if (sites.length > 1) {
-			if (selectedDoc.hasIn(['info', 'websites'])) {
-				selectedDoc.getIn(['info', 'websites']).items = [];
-			} else {
-				selectedDoc.addIn(['info', 'websites'], []);
+		if (idx === keys.length - 1) {
+			if (!values || values[0] === '' || (IsObject(values) && !values.value)) { //if '', null, undefined, empty array, array with one blank string, object with a blank value property
+				current.delete(key, values);
+				if (selectedDoc.has(keys[0])) {
+					if (selectedDoc.get(keys[0]).items.length === 0) {
+						selectedDoc.delete(keys[0]);
+					}
+				}
+				break;
 			}
-			sites.forEach(site => {
-				selectedDoc.getIn(['info', 'websites']).add(site);
-			});
-			selectedDoc.deleteIn(['info', 'website']);
-		} else {
-			selectedDoc.setIn(['info', 'website'], sites[0]);
-			selectedDoc.deleteIn(['info', 'websites']);
+			else {
+				if (selectedDoc.hasIn(keys)) {
+					current.set(key, values);
+				} else {
+					current.items.splice(nodePositions[key] ?? 0, 0, new YAML.Pair(key, values)); // `?? 0` returns 0 in case the lookup is undefined (key is not in nodePositions)
+				}
+			}
+			break;
 		}
-	} else if (selectedDoc.hasIn(['info', 'website'])) {
-		selectedDoc.deleteIn(['info', 'website']);
-	} else if (selectedDoc.hasIn(['info', 'websites'])) {
-		selectedDoc.deleteIn(['info', 'websites']);
+
+		let next = current.get(key);
+		if (TypeOf(next) !== 'YAMLMap') {
+			next = new YAML.YAMLMap();
+			current.items.splice(nodePositions[key] ?? 0, 0, new YAML.Pair(key, next));
+		}
+
+		current = next;
 	}
-	//#endregion
+}
+
+/**
+ * Updates the selectedDoc with the current state of the Package Properties, Package Info, and Package Asset tabs.
+ */
+function UpdatePackageData() {
+	UpdateProperty(['group'], document.getElementById('PackageGroup').value);
+	UpdateProperty(['name'], document.getElementById('PackageName').value);
+	UpdateProperty(['version'], document.getElementById('PackageVersion').value);
+	UpdateProperty(['subfolder'], document.getElementById('PackageSubfolder').value);
+	UpdateProperty(['dependencies'], pkgDependencySelect.getValue().split(','));
+	UpdateProperty(['conflicting'], pkgConflictingSelect.getValue().split(','));
+
+	UpdateProperty(['info', 'summary'], document.getElementById('PackageSummary').value);
+	UpdateProperty(['info', 'warning'], document.getElementById('PackageWarning').value);
+	UpdateProperty(['info', 'conflicts'], document.getElementById('PackageConflicts').value);
+	UpdateProperty(['info', 'author'], document.getElementById('PackageAuthor').value);
+	UpdateProperty(['info', 'images'], pkgImageSelect.getValue().split(','));
+
+	let desc = new YAML.Scalar(document.getElementById('PackageDescription').value.replaceAll('"', "'"));
+	desc.type = 'BLOCK_LITERAL'; // Ensures the "|-" style is used
+	UpdateProperty(['info', 'description'], desc);
+
+	const sites = pkgWebsitesSelect.getValue().split(',');
+	if (sites.length > 1) {
+		UpdateProperty(['info', 'websites'], sites);
+		UpdateProperty(['info', 'website'], '');
+	} else {
+		UpdateProperty(['info', 'website'], sites);
+		UpdateProperty(['info', 'websites'], '');
+	}
 
 
 	//#region Included Assets
@@ -326,7 +369,7 @@ function UpdatePackageData() {
 		newSeq.type = 'SEQ';
 		selectedDoc.set('assets', newSeq);
 		selectedPkgAssetIdx = 0;
-	} else if (selectedDoc.get('assets') !== undefined) {
+	} else if (selectedDoc.has('assets') && selectedPkgAssetIdx != null) {
 		let assetItem = selectedDoc.get('assets').items[selectedPkgAssetIdx];
 		if (document.getElementById('PackageAssetInclude').value !== '') {
 			if (assetItem.get('include') === undefined) {
@@ -451,41 +494,14 @@ function FillAssetForm() {
  * Updates the selectedDoc with the current state of the Asset Properties tab inputs.
  */
 function UpdateAssetData() {
-	if (selectedDoc === null) {
-		selectedDoc = new YAML.Document(new Object());
-	}
-
-	if (document.getElementById('AssetUrl').value !== '') {
-		selectedDoc.setIn(['url'], document.getElementById('AssetUrl').value);
-	}
-	if (document.getElementById('AssetId').value !== '') {
-		selectedDoc.setIn(['assetId'], document.getElementById('AssetId').value);
-	}
-	if (document.getElementById('AssetVersion').value !== '') {
-		selectedDoc.setIn(['version'], document.getElementById('AssetVersion').value);
-	}
-	if (document.getElementById('AssetLastModified').value !== '') {
-		selectedDoc.setIn(['lastModified'], document.getElementById('AssetLastModified').value + 'Z');
-	}
-	if (document.getElementById('AssetArchiveVersion').value !== '0') {
-		selectedDoc.setIn(['archiveType', 'format'], document.getElementById('AssetArchiveFormat').value);
-		selectedDoc.setIn(['archiveType', 'version'], document.getElementById('AssetArchiveVersion').value);
-	} else {
-		selectedDoc.deleteIn(['archiveType']);
-	}
-	if (document.getElementById('AssetChecksum').value !== '') {
-		if (!selectedDoc.has('checksum')) {
-			selectedDoc.checksum = new Object();
-		}
-		selectedDoc.setIn(['checksum', 'sha256'], document.getElementById('AssetChecksum').value);
-	} else {
-		selectedDoc.deleteIn(['checksum']);
-	}
-	if (document.getElementById('AssetNonPersistentUrl').value !== '') {
-		selectedDoc.setIn(['nonPersistentUrl'], document.getElementById('AssetNonPersistentUrl').value);
-	} else {
-		selectedDoc.deleteIn(['nonPersistentUrl']);
-	}
+	UpdateProperty(['assetId'], document.getElementById('AssetId').value);
+	UpdateProperty(['url'], document.getElementById('AssetUrl').value);
+	UpdateProperty(['version'], document.getElementById('AssetVersion').value);
+	UpdateProperty(['lastModified'], (document.getElementById('AssetLastModified').value === '' ? '' : document.getElementById('AssetLastModified').value + 'Z'));
+	UpdateProperty(['nonPersistentUrl'], document.getElementById('AssetNonPersistentUrl').value);
+	UpdateProperty(['checksum', 'sha256'], document.getElementById('AssetChecksum').value);
+	UpdateProperty(['archiveType', 'format'], document.getElementById('AssetArchiveVersion').value === '0' ? '' : document.getElementById('AssetArchiveFormat').value);
+	UpdateProperty(['archiveType', 'version'], document.getElementById('AssetArchiveVersion').value === '0' ? '' : document.getElementById('AssetArchiveVersion').value);
 
 	//To push the package to the list it at minimum must have an assetId
 	if (currDocIdx === null && selectedDoc.has('assetId')) {
