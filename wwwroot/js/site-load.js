@@ -23,7 +23,8 @@ const ChannelInfo = [
 	{ name: 'local', url: null, label: 'This file' },
 	{ name: 'default', url: 'https://memo33.github.io/sc4pac/channel/sc4pac-channel-contents.json', label: 'Default channel' },
 	{ name: 'simtrop', url: 'https://sc4pac.simtropolis.com/sc4pac-channel-contents.json', label: 'Simtropolis channel' },
-    { name: 'zasco', url: 'https://zasco.github.io/sc4pac-channel/channel/sc4pac-channel-contents.json', label: 'Zasco\'s channel' },
+    //{ name: 'zasco', url: 'https://zasco.github.io/sc4pac-channel/channel/sc4pac-channel-contents.json', label: 'Zasco\'s channel' },
+    { name: 'sc4ever', url: 'https://sc4evermore.github.io/sc4pac-channel/channel/sc4pac-channel-contents.json', label: 'SC4Evermore channel'},
 ];
 void LoadData();
 
