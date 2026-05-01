@@ -172,6 +172,8 @@ function ResetPackageInputs() {
 	pkgSummaryEditor.codemirror.on("change", UpdatePackageData);
 	document.getElementById('PackageAuthor').value = '';
 	document.getElementById('PackageImages').value = '';
+	pkgImageSelect.clear(true);
+	pkgImageSelect.clearOptions();
 	pkgWebsitesSelect.clear(true);
 	pkgWebsitesSelect.clearOptions();
 
