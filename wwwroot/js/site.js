@@ -129,6 +129,7 @@ const pkgSummaryEditor = new EasyMDE({
 	forceSync: true,
 	previewImagesInEditor: true,
 	status: false //hide the status bar
+	, minHeight: "250px"
 });
 pkgSummaryEditor.codemirror.on("change", UpdatePackageData);
 
@@ -240,6 +241,22 @@ const variantDependencySelect = new TomSelect("#VariantDependencies", {
 	}
 });
 
+const variantConflictingSelect = new TomSelect("#VariantConflicting", {
+	create: false,
+	valueField: 'value',
+	labelField: 'id',
+	searchField: ['id'],
+
+	render: {
+		option: function (item, escape) {
+			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
+		},
+		optgroup_header: function (data, escape) {
+			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
+		}
+	}
+});
+
 const variantAssetSelect = new TomSelect("#VariantAssetId", {
 	maxItems: 1,
 	create: false,
@@ -326,7 +343,7 @@ function UpdateData(dumpData = true) {
 	SetTabState();
 
 	//Update the TomSelect dropdowns with the local packages and assets.Only remove a local package or asset from the TomSelects if it is not included in the local lists. If it's removed from the TomSelect while still present in the file as a local package or asset, the field in the currently selected node referencing this local package or asset will be set to a blank string. Example, editing an asset include/exclude field would otherwise cause the parent `assetId` field to be cleared if that asset is local. However, this is desired behavior if the parent node references a pkg/asset that has actually been removed from the local file.
-	[pkgDependencySelect, variantDependencySelect].forEach(tsControl => {
+	[pkgDependencySelect, variantDependencySelect, variantConflictingSelect].forEach(tsControl => {
 		let allOpts = tsControl.options
 		for (const key in allOpts) {
 			if (allOpts[key].channel === 'local' && !localPackages.includes(allOpts[key].id)) {
@@ -492,15 +509,14 @@ function UpdateVariantTree() {
 		variants = selectedDoc.get('variants').items;
 		for (let idx = 0; idx < variants.length; idx++) {
 			let variant = variants[idx].get('variant').items; // a variant can have one or more key-value pairs
-			let title = idx + ' - ' + variant.map(v => v.value.value).join(' - '); //▸
-			pkgVariants.push({ name: title, expanded: false, children: [] })
+			const title = idx + ' • ' + variant.map(cond => cond.key.value.split(':').slice(-1)[0] + ':' + cond.value.value).join(', ');
+			pkgVariants.push({ name: title, expanded: false, children: [] });
 		}
 
 		if (selectedVariantIdx !== null) {
 			let kvSets = variants[selectedVariantIdx].get('variant').items;
-			let kvTitle = kvSets.map(kv => kv.key.value + ': ' + kv.value.value).join(', ');
+			const kvTitle = kvSets.map(kv => kv.key.value + ':"' + kv.value.value + '"').join(', ');
 			document.getElementById('CurrentVariantId').innerHTML = kvTitle;
-			document.getElementById('CurrentVariantId2').innerHTML = kvTitle;
 		}
 	}
 
@@ -521,10 +537,8 @@ function UpdateVariantTree() {
 		selectedVariantIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
 
 		let kvSets = variants[selectedVariantIdx].get('variant').items;
-		let kvTitle = kvSets.map(kv => kv.key.value + ': ' + kv.value.value).join(', ');
+		const kvTitle = kvSets.map(kv => kv.key.value + ':"' + kv.value.value + '"').join(', ');
 		document.getElementById('CurrentVariantId').innerHTML = kvTitle;
-		document.getElementById('CurrentVariantId2').innerHTML = kvTitle;
-
 		FillVariantForm();
 		ResetVariantAssetForm();
 		UpdateVariantAssetTree();

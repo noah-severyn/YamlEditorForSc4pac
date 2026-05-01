@@ -66,7 +66,6 @@
 			<div id="Column1" class="col-sm-12 col-md-5">
 
 				<h2>Editing <span id="CurrentDocumentType">package</span>: <span id="CurrentDocumentName" style="font-style:italic">[new package]</span></h2>
-				<p>For Dependencies, Image, Include, and Exclude fields add multiple items separated by a semicolon.</p>
 				<p>Fields with an asterisk (*) are required.</p>
 
 				<nav class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -74,7 +73,6 @@
 					<button id="PackageInfoTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageInfoContent" type="button" role="tab">Package Info</button>
 					<button id="PackageAssetsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageAssetsContent" type="button" role="tab">Package Assets</button>
 					<button id="VariantsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#VariantsContent" type="button" role="tab">Variants</button>
-					<button id="VariantAssetsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#VariantAssetsContent" type="button" role="tab">Variant Assets</button>
 					<button id="AssetPropertiesTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#AssetPropertiesContent" type="button" role="tab">Asset Properties</button>
 				</nav>
 
@@ -113,10 +111,6 @@
 					<fieldset id="PackageInfoContent" class="tab-pane m-3" tabindex="0">
 						<form id="PackageInfoForm">
 							<div class="input-group mb-2">
-								<label id="PackageWebsiteLabel" class="input-group-text w2" for="PackageWebsite">Website(s)</label>
-								<input id="PackageWebsite" class="form-control" />
-							</div>
-							<div class="input-group mb-2">
 								<label class="input-group-text required-label w2" for="PackageSummary">Summary</label>
 								<input id="PackageSummary" class="form-control required" type="text" />
 							</div>
@@ -138,11 +132,15 @@
 									<input id="ToggleImagePreview" class="form-check-input" type="checkbox" role="switch" checked>
 									<label class="form-check-label" for="ToggleImagePreview">Preview Images</label>
 								</div>-->
-								<textarea id="PackageDescription" class="form-control" rows="9"></textarea>
+								<textarea id="PackageDescription" class="form-control"></textarea>
 							</div>
 							<div class="input-group mb-2">
 								<label class="input-group-text w2" for="PackageImages">Images</label>
 								<input id="PackageImages" class="form-control required" autocomplete="off">
+							</div>
+							<div class="input-group mb-2">
+								<label id="PackageWebsiteLabel" class="input-group-text w2" for="PackageWebsite">Website(s)</label>
+								<input id="PackageWebsite" class="form-control" />
 							</div>
 						</form>
 					</fieldset>
@@ -180,86 +178,86 @@
 
 					<!-- Variants tab -->
 					<fieldset id="VariantsContent" class="tab-pane m-3" tabindex="0">
-						<h4>Editing variant: <span id="CurrentVariantId" style="font-style: italic">[new variant]</span></h4>
 						<div style="display:flex" class="row">
-							<div class="col-sm-12 col-md-4">
-								<div id="VariantTreeView"></div>
-							</div>
 
-							<div class="col-sm-12 col-md-8">
+							<!-- Left: variant list -->
+							<div class="col-sm-12 col-md-3">
 								<div class="mb-2 btn-group">
 									<button id="ResetUpperVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">New Variant</button>
 									<button id="RemoveVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Variant</button>
 								</div>
-								
-								<form id="VariantsFormHeader">
-									<p>A variant is a choice a user must make during installation. It can consist of a single option or a unique combination of options as <b>Key</b>-<b>Value</b> sets.</p>
-									<div id="VariantKeyValuesContainer">
-
-										<div class="form-check mt-2 me-2">
-											<input id="IsLocalVariant" class="form-check-input" type="checkbox" checked>
-											<label class="form-check-label" for="IsLocalVariant" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" data-bs-title="Variants can be defined globally for the entire Plugins folder (e.g. <code>nightmode</code>, <code>driveside</code>, <code>roadstyle</code>, <code>CAM</code>), or locally on a per-package basis (e.g. <code>kodlovag:uniform-street-lighting-mod:light-color</code>).">Local variant</label>
-										</div>
-
-										<div id="VariantKeyValueInputForm" class="mb-2 input-group">
-											<label class="input-group-text required-label w1" for="VariantName">Name</label>
-											<input id="VariantName" class="form-control" type="text" />
-											<label class="input-group-text required-label w1" for="VariantValue">Value</label>
-											<input id="VariantValue" class="form-control" type="text" />
-											<button id="VariantAddKeyValueBtn" class="btn btn-outline-primary" type="button">Add</button>
-										</div>
-									</div>
-
-									<div class="mb-2 input-group">
-										<label class="input-group-text w2" for="VariantDependencies">Dependencies</label>
-										<input id="VariantDependencies" class="form-control" />
-									</div>
-									<div class="mb-2 input-group">
-										<label class="input-group-text" for="VariantDescription">Variant Description</label>
-										<textarea id="VariantDescription" class="form-control"></textarea>
-									</div>
-									<div class="mb-2 input-group">
-										<label class="input-group-text" for="VariantValueDescription" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Explain this option in the variant">Value Description</label>
-										<textarea id="VariantValueDescription" class="form-control"></textarea>
-									</div>
-								</form>
-							</div>
-							
-						</div>
-
-					</fieldset>
-
-					<!-- Variant Assets tab -->
-					<fieldset id="VariantAssetsContent" class="tab-pane m-3">
-						<h4>Editing variant: <span id="CurrentVariantId2" style="font-style: italic">[new variant]</span></h4>
-						<h4> ⤷  Editing asset: <span id="CurrentVariantAssetId" style="font-style: italic">[new asset]</span></h4>
-						<div style="display:flex" class="row">
-							<div class="col-sm-12 col-md-4">
-								<div id="VariantAssetTreeView"></div>
+								<div id="VariantTreeView"></div>
 							</div>
 
-							<div class="col-sm-12 col-md-8">
-								<div class="mb-2 btn-group">
-									<button id="ResetLowerVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">New Asset</button>
-									<button id="RemoveAssetFromVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Asset from Variant</button>
+							<!-- Right: edit panels -->
+							<div class="col-sm-12 col-md-9">
+								<h5 class="mb-3">Editing: <span id="CurrentVariantId" style="font-style: italic">[new variant]</span></h5>
+
+								<!-- Condition card -->
+								<div class="card mb-3">
+									<div class="card-header fw-semibold">Conditions</div>
+									<div class="card-body">
+										<p class="card-text small text-muted mb-2">A variant has one or more <code>key:value</code> pairs that identify which content should be installed. Variants should be defined locally for this package (e.g. <code>group:name:variant-name</code>), with the exception of a limited number of global variants (e.g. <code>nightmode</code>, <code>driveside</code>).</p>
+										<table class="table table-sm mb-2" id="VariantKVTable">
+											<tbody id="VariantKVTableBody"></tbody>
+										</table>
+										<div class="input-group input-group-sm">
+											<input id="VariantName" class="form-control font-monospace" type="text" placeholder="key" />
+											<input id="VariantValue" class="form-control font-monospace" type="text" placeholder="value" />
+											<button id="VariantAddKeyValueBtn" class="btn btn-outline-primary" type="button">Add condition</button>
+										</div>
+									</div>
 								</div>
-								<p>A variant has one or more <b>Assets</b>, each with it's own Include/Exclude rules.</p>
-								<form id="PackageVariantsFormLower">
-									<div class="mb-2 input-group">
-										<label class="input-group-text w1" for="VariantAssetId">Asset Id</label>
-										<input id="VariantAssetId" class="form-control" />
-									</div>
 
-									<div class="mb-2 input-group">
-										<label class="input-group-text w1" for="VariantAssetInclude">Include</label>
-										<input id="VariantAssetInclude" class="form-control" />
+								<!-- Dependencies & Conflicting card -->
+								<div class="card mb-3">
+									<div class="card-header fw-semibold">Dependencies &amp; Conflicting</div>
+									<div class="card-body">
+										<div class="mb-2 input-group">
+											<label class="input-group-text w2" for="VariantDependencies">Dependencies</label>
+											<input id="VariantDependencies" class="form-control" />
+										</div>
+										<div class="mb-0 input-group">
+											<label class="input-group-text w2" for="VariantConflicting">Conflicting</label>
+											<input id="VariantConflicting" class="form-control" />
+										</div>
 									</div>
-
-									<div class="input-group mb-2">
-										<label class="input-group-text w1" for="VariantAssetExclude">Exclude</label>
-										<input id="VariantAssetExclude" class="form-control" />
+								</div>
+									
+								<!-- Assets card -->
+								<div class="card mb-3">
+									<div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+										<span>Assets</span>
+										<button id="ResetLowerVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">Add Asset</button>
 									</div>
-								</form>
+									<div class="card-body">
+										<div style="display:flex" class="row">
+											<div class="col-sm-12 col-md-4">
+												<div id="VariantAssetTreeView"></div>
+											</div>
+											<div class="col-sm-12 col-md-8">
+												<p class="small mb-1">Editing asset: <span id="CurrentVariantAssetId" style="font-style:italic">[new asset]</span></p>
+												<form id="PackageVariantsFormLower">
+													<div class="mb-2 input-group">
+														<label class="input-group-text w1" for="VariantAssetId">Asset Id</label>
+														<input id="VariantAssetId" class="form-control" />
+													</div>
+													<div class="mb-2 input-group">
+														<label class="input-group-text w1" for="VariantAssetInclude">Include</label>
+														<input id="VariantAssetInclude" class="form-control" />
+													</div>
+													<div class="input-group mb-2">
+														<label class="input-group-text w1" for="VariantAssetExclude">Exclude</label>
+														<input id="VariantAssetExclude" class="form-control" />
+													</div>
+												</form>
+												<div class="btn-group">
+													<button id="RemoveAssetFromVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Asset</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</fieldset>
@@ -441,7 +439,7 @@
 
 
 	<footer class="footer mt-auto py-3 bg-light">
-		<span class="container text-muted">&copy; 2025 - YAML editor for sc4pac</span>
+		<span class="container text-muted">&copy; 2026 - YAML editor for sc4pac</span>
 	</footer>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

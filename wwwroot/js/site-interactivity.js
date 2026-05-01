@@ -13,8 +13,6 @@ function EnableAssetTab() {
 	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle');
 	document.getElementById('VariantsTab').classList.add('disabled');
 	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle');
-	document.getElementById('VariantAssetsTab').classList.add('disabled');
-	document.getElementById('VariantAssetsTab').removeAttribute('data-bs-toggle');
 
 	document.getElementById('AssetPropertiesTab').classList.remove('disabled');
 	document.getElementById('AssetPropertiesTab').setAttribute('data-bs-toggle', 'tab');
@@ -31,8 +29,6 @@ function EnablePackageTabs() {
 	document.getElementById('PackageAssetsTab').setAttribute('data-bs-toggle', 'tab');
 	document.getElementById('VariantsTab').classList.remove('disabled');
 	document.getElementById('VariantsTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('VariantAssetsTab').classList.remove('disabled');
-	document.getElementById('VariantAssetsTab').setAttribute('data-bs-toggle', 'tab');
 
 	document.getElementById('AssetPropertiesTab').classList.add('disabled');
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
