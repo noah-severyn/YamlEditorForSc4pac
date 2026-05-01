@@ -402,6 +402,7 @@ function UpdatePackageData() {
 
 	//To push the package to the list, at a minimum it must have a group and name so the cm.OnChange can pick it up
 	if (currDocIdx === null && selectedDoc.has('group') && selectedDoc.has('name')) {
+		selectedDoc.directives.docStart = false;
 		yamlData.push(selectedDoc);
 		SetSelectedDoc(yamlData.filter((doc) => IsPackage(doc)).length - 1, 'p');
 		document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.get('group') + ':' + selectedDoc.get('name');
@@ -501,6 +502,7 @@ function UpdateAssetData() {
 
 	//To push the package to the list it at minimum must have an assetId
 	if (currDocIdx === null && selectedDoc.has('assetId')) {
+		selectedDoc.directives.docStart = false;
 		yamlData.push(selectedDoc);
 		SetSelectedDoc(yamlData.filter((doc) => IsAsset(doc)).length - 1, 'a');
 	}

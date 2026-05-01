@@ -11,6 +11,7 @@ cm.on('change', CodeMirrorOnChange);
 
 function CodeMirrorOnChange(instance, changeObj) {
 	yamlData = YAML.parseAllDocuments(cm.getValue());
+	yamlData.forEach(doc => { doc.directives.docStart = false; });
 
 	//Figure which document we're editing within the code so it can be set as the selected document
 	let tabName = 'PackagePropertiesTab';
@@ -400,11 +401,15 @@ function UpdateData(dumpData = true) {
 					indentSeq: false
 				});
 
-				newYaml = newYaml + docu;
-				if (idx < yamlData.length - 1) {
-					newYaml = newYaml + '\n---\n';
+				// Strip the doc separator to fix bug where a double separator can be added 
+				if (docu.startsWith('---\n')) {
+					docu = docu.slice(4);
+				}
+
+				if (idx === 0) {
+					newYaml = docu;
 				} else {
-					newYaml = newYaml + '\n';
+					newYaml = newYaml + '---\n' + docu;
 				}
 				 
 			}
