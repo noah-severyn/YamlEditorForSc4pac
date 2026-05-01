@@ -409,7 +409,7 @@ function UpdateData(dumpData = true) {
 				if (idx === 0) {
 					newYaml = docu;
 				} else {
-					newYaml = newYaml + '---\n' + docu;
+					newYaml = newYaml + '\n---\n' + docu;
 				}
 				 
 			}
