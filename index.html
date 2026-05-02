@@ -149,31 +149,43 @@
 
 					<!-- Package Assets tab -->
 					<fieldset id="PackageAssetsContent" class="tab-pane m-3" tabindex="0">
-						<h4>Editing asset: <span id="CurrentAsset" style="font-style: italic">[new asset]</span></h4>
 						<div style="display:flex" class="row">
 							<div class="col-sm-12 col-md-3">
 								<div id="AssetTreeView"></div>
 							</div>
 
 							<div class="col-sm-12 col-md-9">
-								<div class="mb-2 btn-group">
-									<button id="NewPackageAssetButton" type="button" class="btn btn-primary btn-sm">New Package Asset</button>
+								<h5 class="mb-3">Editing asset: <span id="CurrentAsset" style="font-style: italic">[new asset]</span></h5>
+								<div class="accordion" id="PackageAssetsAccordion">
+									<div class="accordion-item">
+										<h2 class="accordion-header">
+											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#PackageAssetsExpander" aria-expanded="true" aria-controls="PackageAssetsExpander">
+												Assets
+											</button>
+										</h2>
+										<div id="PackageAssetsExpander" class="accordion-collapse collapse show">
+											<div class="accordion-body">
+												<div class="mb-2">
+													<button id="NewPackageAssetButton" type="button" class="btn btn-outline-primary btn-sm">Add Asset</button>
+												</div>
+												<form id="PackageAssetsForm">
+													<div class="mb-2 input-group">
+														<label class="input-group-text w1" for="PackageAssetId">Asset Id</label>
+														<input id="PackageAssetId" class="form-control" />
+													</div>
+													<div class="mb-2 input-group">
+														<label class="input-group-text w1" for="PackageAssetInclude">Include</label>
+														<input id="PackageAssetInclude" class="form-control" />
+													</div>
+													<div class="mb-2 input-group">
+														<label class="input-group-text w1" for="PackageAssetExclude">Exclude</label>
+														<input id="PackageAssetExclude" class="form-control" />
+													</div>
+												</form>
+											</div>
+										</div>
+									</div>
 								</div>
-								<p>These assets will always be installed, regardless of the chosen variant or option.</p>
-								<form id="PackageAssetsForm">
-									<div class="mb-2 input-group">
-										<label class="input-group-text w1" for="PackageAssetId">Asset Id</label>
-										<input id="PackageAssetId" class="form-control" />
-									</div>
-									<div class="mb-2 input-group">
-										<label class="input-group-text w1" for="PackageAssetInclude">Include</label>
-										<input id="PackageAssetInclude" class="form-control" />
-									</div>
-									<div class="mb-2 input-group">
-										<label class="input-group-text w1" for="PackageAssetExclude">Exclude</label>
-										<input id="PackageAssetExclude" class="form-control" />
-									</div>
-								</form>
 							</div>
 						</div>
 					</fieldset>

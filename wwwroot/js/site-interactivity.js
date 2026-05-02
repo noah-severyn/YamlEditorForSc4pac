@@ -427,6 +427,7 @@ function UpdatePackageData() {
  */
 function ResetPackageAssetForm() {
 	selectedPkgAssetIdx = null;
+	document.getElementById('CurrentAsset').innerHTML = '[new asset]';
 	pkgAssetSelect.clear(true);
 	pkgAssetIncSelect.clear(true);
 	pkgAssetIncSelect.clearOptions();
@@ -439,6 +440,7 @@ function ResetPackageAssetForm() {
 function FillPackageAssetForm(assetName) {
 	const pkgAsset = selectedDoc.get('assets').items.find((i) => i.get('assetId') === assetName);
 	selectedPkgAssetIdx = selectedDoc.get('assets').items.findIndex((i) => i.get('assetId') === assetName);
+	document.getElementById('CurrentAsset').innerHTML = assetName;
 	pkgAssetSelect.addItem(assetName, true);
 
 	if (pkgAsset.has('include')) {
