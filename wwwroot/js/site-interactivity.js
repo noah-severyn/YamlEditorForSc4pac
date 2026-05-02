@@ -356,7 +356,7 @@ function UpdatePackageData() {
 		UpdateProperty(['info', 'websites'], sites);
 		UpdateProperty(['info', 'website'], '');
 	} else {
-		UpdateProperty(['info', 'website'], sites);
+		UpdateProperty(['info', 'website'], sites[0]);
 		UpdateProperty(['info', 'websites'], '');
 	}
 
