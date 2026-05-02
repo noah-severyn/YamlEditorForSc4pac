@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="h-100">
+
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -37,6 +38,7 @@
 	<!--HTML → Markdown-->
 	<script src="https://unpkg.com/turndown/dist/turndown.js"></script>
 </head>
+
 <body class="d-flex flex-column h-100 mb-0">
 	<header>
 		<nav class="navbar navbar-light border-bottom box-shadow bg-light mb-3">
@@ -192,67 +194,87 @@
 							<!-- Right: edit panels -->
 							<div class="col-sm-12 col-md-9">
 								<h5 class="mb-3">Editing: <span id="CurrentVariantId" style="font-style: italic">[new variant]</span></h5>
+								<div class="accordion" id="VariantAccordion">
 
-								<!-- Condition card -->
-								<div class="card mb-3">
-									<div class="card-header fw-semibold">Conditions</div>
-									<div class="card-body">
-										<p class="card-text small text-muted mb-2">A variant has one or more <code>key:value</code> pairs that identify which content should be installed. Variants should be defined locally for this package (e.g. <code>group:name:variant-name</code>), with the exception of a limited number of global variants (e.g. <code>nightmode</code>, <code>driveside</code>).</p>
-										<table class="table table-sm mb-2" id="VariantKVTable">
-											<tbody id="VariantKVTableBody"></tbody>
-										</table>
-										<div class="input-group input-group-sm">
-											<input id="VariantName" class="form-control font-monospace" type="text" placeholder="key" />
-											<input id="VariantValue" class="form-control font-monospace" type="text" placeholder="value" />
-											<button id="VariantAddKeyValueBtn" class="btn btn-outline-primary" type="button">Add condition</button>
-										</div>
-									</div>
-								</div>
-
-								<!-- Dependencies & Conflicting card -->
-								<div class="card mb-3">
-									<div class="card-header fw-semibold">Dependencies &amp; Conflicting</div>
-									<div class="card-body">
-										<div class="mb-2 input-group">
-											<label class="input-group-text w2" for="VariantDependencies">Dependencies</label>
-											<input id="VariantDependencies" class="form-control" />
-										</div>
-										<div class="mb-0 input-group">
-											<label class="input-group-text w2" for="VariantConflicting">Conflicting</label>
-											<input id="VariantConflicting" class="form-control" />
-										</div>
-									</div>
-								</div>
-									
-								<!-- Assets card -->
-								<div class="card mb-3">
-									<div class="card-header fw-semibold d-flex justify-content-between align-items-center">
-										<span>Assets</span>
-										<button id="ResetLowerVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">Add Asset</button>
-									</div>
-									<div class="card-body">
-										<div style="display:flex" class="row">
-											<div class="col-sm-12 col-md-4">
-												<div id="VariantAssetTreeView"></div>
+									<!-- Condition expander -->
+									<div class="accordion-item">
+										<h2 class="accordion-header">
+											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#VariantConditionExpander" aria-expanded="true" aria-controls="VariantConditionExpander">
+												Conditions
+											</button>
+										</h2>
+										<div id="VariantConditionExpander" class="accordion-collapse collapse show">
+											<div class="accordion-body">
+												<p class="small text-muted mb-2">A variant has one or more <code>key:value</code> pairs that identify which content should be installed. Variants should be defined locally for this package (e.g. <code>group:name:variant-name</code>), with the exception of a limited number of global variants (e.g. <code>nightmode</code>, <code>driveside</code>).</p>
+												<table class="table table-sm mb-2" id="VariantKVTable">
+													<tbody id="VariantKVTableBody"></tbody>
+												</table>
+												<div class="input-group input-group-sm">
+													<input id="VariantName" class="form-control font-monospace" type="text" placeholder="key" />
+													<input id="VariantValue" class="form-control font-monospace" type="text" placeholder="value" />
+													<button id="VariantAddKeyValueBtn" class="btn btn-outline-primary" type="button">Add condition</button>
+												</div>
 											</div>
-											<div class="col-sm-12 col-md-8">
-												<p class="small mb-1">Editing asset: <span id="CurrentVariantAssetId" style="font-style:italic">[new asset]</span></p>
-												<form id="PackageVariantsFormLower">
-													<div class="mb-2 input-group">
-														<label class="input-group-text w1" for="VariantAssetId">Asset Id</label>
-														<input id="VariantAssetId" class="form-control" />
+										</div>
+									</div>
+
+									<!-- Dependencies & Conflicting expander -->
+									<div class="accordion-item">
+										<h2 class="accordion-header">
+											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#VariantDepsExpander" aria-expanded="true" aria-controls="VariantDepsExpander">
+												Dependencies &amp; Conflicting
+											</button>
+										</h2>
+										<div id="VariantDepsExpander" class="accordion-collapse collapse show">
+											<div class="accordion-body">
+												<div class="mb-2 input-group">
+													<label class="input-group-text w2" for="VariantDependencies">Dependencies</label>
+													<input id="VariantDependencies" class="form-control" />
+												</div>
+												<div class="mb-0 input-group">
+													<label class="input-group-text w2" for="VariantConflicting">Conflicting</label>
+													<input id="VariantConflicting" class="form-control" />
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- Assets expander -->
+									<div class="accordion-item">
+										<h2 class="accordion-header">
+											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#VariantAssetsExpander" aria-expanded="true" aria-controls="VariantAssetsExpander">
+												Assets
+											</button>
+										</h2>
+										<div id="VariantAssetsExpander" class="accordion-collapse collapse show">
+											<div class="accordion-body">
+												<div class="mb-2">
+													<button id="ResetLowerVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">Add Asset</button>
+												</div>
+												<div style="display:flex" class="row">
+													<div class="col-sm-12 col-md-4">
+														<div id="VariantAssetTreeView"></div>
 													</div>
-													<div class="mb-2 input-group">
-														<label class="input-group-text w1" for="VariantAssetInclude">Include</label>
-														<input id="VariantAssetInclude" class="form-control" />
+													<div class="col-sm-12 col-md-8">
+														<p class="small mb-1">Editing asset: <span id="CurrentVariantAssetId" style="font-style:italic">[new asset]</span></p>
+														<form id="PackageVariantsFormLower">
+															<div class="mb-2 input-group">
+																<label class="input-group-text w1" for="VariantAssetId">Asset Id</label>
+																<input id="VariantAssetId" class="form-control" />
+															</div>
+															<div class="mb-2 input-group">
+																<label class="input-group-text w1" for="VariantAssetInclude">Include</label>
+																<input id="VariantAssetInclude" class="form-control" />
+															</div>
+															<div class="input-group mb-2">
+																<label class="input-group-text w1" for="VariantAssetExclude">Exclude</label>
+																<input id="VariantAssetExclude" class="form-control" />
+															</div>
+														</form>
+														<div class="btn-group">
+															<button id="RemoveAssetFromVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Asset</button>
+														</div>
 													</div>
-													<div class="input-group mb-2">
-														<label class="input-group-text w1" for="VariantAssetExclude">Exclude</label>
-														<input id="VariantAssetExclude" class="form-control" />
-													</div>
-												</form>
-												<div class="btn-group">
-													<button id="RemoveAssetFromVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Asset</button>
 												</div>
 											</div>
 										</div>
@@ -451,4 +473,5 @@
 	<script type="text/javascript" src="wwwroot/js/site-variants.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site.js"></script>
 </body>
+
 </html>
