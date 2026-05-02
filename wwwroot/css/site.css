@@ -93,3 +93,10 @@ body {
 .desc {
     padding-left: 1em;
 }
+
+/* Accordion header background */
+.accordion-button:not(.collapsed) {
+    background-color: var(--bs-tertiary-bg);
+    color: inherit;
+    box-shadow: none;
+}
