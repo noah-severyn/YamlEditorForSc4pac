@@ -56,11 +56,15 @@ function EnablePartialPackageTabs() {
 function SetTabState() {
 	if (localStorage.getItem('allow-partial-packages') === 'true') {
 		EnablePartialPackageTabs();
-	} 
+	}
+	if (IsPackage(selectedDoc)) {
+		EnablePackageTabs();
+	}
 	else if (IsAsset(selectedDoc)) {
 		EnableAssetTab();
 	}
-	else {
+	else if (selectedDoc === null) {
+		EnableAssetTab();
 		EnablePackageTabs();
 	}
 }
