@@ -13,6 +13,8 @@ function EnableAssetTab() {
 	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle');
 	document.getElementById('VariantsTab').classList.add('disabled');
 	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle');
+	document.getElementById('VariantInfoTab').classList.add('disabled');
+	document.getElementById('VariantInfoTab').removeAttribute('data-bs-toggle');
 
 	document.getElementById('AssetPropertiesTab').classList.remove('disabled');
 	document.getElementById('AssetPropertiesTab').setAttribute('data-bs-toggle', 'tab');
@@ -29,6 +31,8 @@ function EnablePackageTabs() {
 	document.getElementById('PackageAssetsTab').setAttribute('data-bs-toggle', 'tab');
 	document.getElementById('VariantsTab').classList.remove('disabled');
 	document.getElementById('VariantsTab').setAttribute('data-bs-toggle', 'tab');
+	document.getElementById('VariantInfoTab').classList.remove('disabled');
+	document.getElementById('VariantInfoTab').setAttribute('data-bs-toggle', 'tab');
 
 	document.getElementById('AssetPropertiesTab').classList.add('disabled');
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
@@ -45,6 +49,8 @@ function EnablePartialPackageTabs() {
 	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle', 'tab');
 	document.getElementById('VariantsTab').classList.add('disabled');
 	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle', 'tab');
+	document.getElementById('VariantInfoTab').classList.add('disabled');
+	document.getElementById('VariantInfoTab').removeAttribute('data-bs-toggle');
 
 	document.getElementById('AssetPropertiesTab').classList.add('disabled');
 	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
@@ -183,6 +189,7 @@ function ResetPackageInputs() {
 
 	document.getElementById('CurrentDocumentType').innerHTML = 'package';
 	document.getElementById('CurrentDocumentName').innerHTML = '[new package]';
+	document.getElementById('VariantInfoContainer').innerHTML = '<p class="text-muted fst-italic">No variants defined. Add variants in the Variants tab first.</p>';
 }
 /**
  * Fill the Package input form fields with the values from the currently selected package number.

@@ -475,6 +475,7 @@ function UpdateMainTree() {
 			FillPackageForm();
 			UpdatePackageAssetTree();
 			UpdateVariantTree();
+			FillVariantInfoTab();
 		} else { //An asset was selected
 			selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			SelectTab('AssetPropertiesTab');
