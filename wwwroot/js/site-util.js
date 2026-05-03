@@ -49,6 +49,49 @@ function IsObject(obj) {
 	return (typeof obj === "object" && !Array.isArray(obj) && obj !== null);
 }
 /**
+ * Update (or delete) a YAML sequence field on `yamlItem` using the current value of a TomSelect control. Handles creating the sequence if it doesn't exist, repopulating it if it does, and deleting it when empty.
+ * @param {Object} yamlItem The YAML map item that owns `fieldName`
+ * @param {string} fieldName Field name of the sequence to update in `yamlItem`
+ * @param {string} value Value to set
+ */
+function UpdateYamlSeqField(yamlItem, fieldName, value) {
+	if (value !== '') {
+		if (yamlItem.get(fieldName) === undefined) {
+			const seq = selectedDoc.createNode([value]);
+			seq.type = 'SEQ';
+			yamlItem.set(fieldName, seq);
+		} else {
+			yamlItem.get(fieldName).items = [];
+			value.split(',').forEach(v => yamlItem.get(fieldName).add(v));
+		}
+	} else if (yamlItem.has(fieldName)) {
+		yamlItem.delete(fieldName);
+	}
+}
+/**
+ * Populate a creatable TomSelect control from a YAML sequence field. Adds both the option and the selected item for each entry in the sequence.
+ * @param {Object} yamlItem The YAML map item that owns `fieldName`
+ * @param {string} fieldName The key of the sequence field on `yamlItem`
+ * @param {TomSelect} selectControl The TomSelect control to populate
+ */
+function FillTomSelectFromYamlSeq(yamlItem, fieldName, selectControl) {
+	if (yamlItem.has(fieldName)) {
+		yamlItem.get(fieldName).items.forEach(item => {
+			selectControl.addOption({ value: item.value, text: item.value });
+			selectControl.addItem(item.value, true);
+		});
+	}
+}
+/**
+ * Mark the clicked leaf in the indicated `treeView` as selected. Called at the start of every tree-view `select` event handler.
+ * @param {TreeView} treeView The tree view instance
+ * @param {Object} t The event object passed to the `select` callback
+ */
+function SelectTreeLeaf(treeView, t) {
+	treeView.node.querySelectorAll('.tree-leaf').forEach(leaf => leaf.classList.remove('selected'));
+	t.target.target.closest('.tree-leaf').classList.add('selected');
+}
+/**
  * Calculate similarity between two strings
  * @license https://github.com/stephenjjbrown/string-similarity-js (MIT)
  * @param {string} str1 First string to match

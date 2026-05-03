@@ -35,36 +35,10 @@ function UpdateVariantData(element) {
 		variantItem.setIn(['variant', key], element.value);
 	}
 	else if (element.id === 'VariantDependencies') {
-		if (element.value !== '') {
-			if (variantItem.get('dependencies') === undefined) {
-				const newSeq = selectedDoc.createNode([element.value]);
-				newSeq.type = 'SEQ';
-				variantItem.set('dependencies', newSeq);
-			} else {
-				variantItem.get('dependencies').items = [];
-				variantDependencySelect.getValue().split(',').forEach(dep => {
-					variantItem.get('dependencies').add(dep);
-				});
-			}
-		} else if (element.value === '' && variantItem.has('dependencies')) {
-			variantItem.delete('dependencies');
-		}
+		UpdateYamlSeqField(variantItem, 'dependencies', variantDependencySelect.getValue());
 	}
 	else if (element.id === 'VariantConflicting') {
-		if (element.value !== '') {
-			if (variantItem.get('conflicting') === undefined) {
-				const newSeq = selectedDoc.createNode([element.value]);
-				newSeq.type = 'SEQ';
-				variantItem.set('conflicting', newSeq);
-			} else {
-				variantItem.get('conflicting').items = [];
-				variantConflictingSelect.getValue().split(',').forEach(c => {
-					variantItem.get('conflicting').add(c);
-				});
-			}
-		} else if (element.value === '' && variantItem.has('conflicting')) {
-			variantItem.delete('conflicting');
-		}
+		UpdateYamlSeqField(variantItem, 'conflicting', variantConflictingSelect.getValue());
 	}
 	else if (element.id === 'VariantAssetId') {
 		if (selectedVariantAssetIdx === null) {
@@ -82,36 +56,10 @@ function UpdateVariantData(element) {
 		}
 	}
 	else if (element.id === 'VariantAssetInclude') {
-		if (element.value !== '') {
-			if (assetItem.get('include') === undefined) {
-				const newSeq = selectedDoc.createNode([element.value]);
-				newSeq.type = 'SEQ';
-				assetItem.set('include', newSeq);
-			} else {
-				assetItem.get('include').items = [];
-				variantIncludeSelect.getValue().split(',').forEach(item => {
-					assetItem.get('include').add(item);
-				});
-			}
-		} else if (element.value === '' && assetItem.has('include')) {
-			assetItem.delete('include');
-		}
+		UpdateYamlSeqField(assetItem, 'include', variantIncludeSelect.getValue());
 	}
 	else if (element.id === 'VariantAssetExclude') {
-		if (element.value !== '') {
-			if (assetItem.get('exclude') === undefined) {
-				const newSeq = selectedDoc.createNode([element.value]);
-				newSeq.type = 'SEQ';
-				assetItem.set('exclude', newSeq);
-			} else {
-				assetItem.get('exclude').items = [];
-				variantExcludeSelect.getValue().split(',').forEach(item => {
-					assetItem.get('exclude').add(item);
-				});
-			}
-		} else if (element.value === '' && assetItem.has('exclude')) {
-			assetItem.delete('exclude');
-		}
+		UpdateYamlSeqField(assetItem, 'exclude', variantExcludeSelect.getValue());
 	}
 	UpdateData();
 }
@@ -293,17 +241,6 @@ function FillVariantAssetForm() {
 	let asset = variant.get('assets').items[selectedVariantAssetIdx];
 
 	variantAssetSelect.addItem(asset.get('assetId'), true);
-
-	if (asset.has('include')) {
-		asset.get('include').items.forEach(incl => {
-			variantIncludeSelect.addOption({ value: incl.value, text: incl.value });
-			variantIncludeSelect.addItem(incl.value, true);
-		});
-	}
-	if (asset.has('exclude')) {
-		asset.get('exclude').items.forEach(excl => {
-			variantExcludeSelect.addOption({ value: excl.value, text: excl.value });
-			variantExcludeSelect.addItem(excl.value, true);
-		});
-	}
+	FillTomSelectFromYamlSeq(asset, 'include', variantIncludeSelect);
+	FillTomSelectFromYamlSeq(asset, 'exclude', variantExcludeSelect);
 }

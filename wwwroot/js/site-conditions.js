@@ -11,36 +11,10 @@ function UpdateConditionData(element) {
 	let condItem = selectedDoc.get('assets').items[selectedPkgAssetIdx].get('withConditions').items[selectedConditionIdx];
 
 	if (element.id === 'ConditionInclude') {
-		if (element.value !== '') {
-			if (condItem.get('include') === undefined) {
-				const newSeq = selectedDoc.createNode([element.value]);
-				newSeq.type = 'SEQ';
-				condItem.set('include', newSeq);
-			} else {
-				condItem.get('include').items = [];
-				conditionIncludeSelect.getValue().split(',').forEach(item => {
-					condItem.get('include').add(item);
-				});
-			}
-		} else if (condItem.has('include')) {
-			condItem.delete('include');
-		}
+		UpdateYamlSeqField(condItem, 'include', conditionIncludeSelect.getValue());
 	}
 	else if (element.id === 'ConditionExclude') {
-		if (element.value !== '') {
-			if (condItem.get('exclude') === undefined) {
-				const newSeq = selectedDoc.createNode([element.value]);
-				newSeq.type = 'SEQ';
-				condItem.set('exclude', newSeq);
-			} else {
-				condItem.get('exclude').items = [];
-				conditionExcludeSelect.getValue().split(',').forEach(item => {
-					condItem.get('exclude').add(item);
-				});
-			}
-		} else if (condItem.has('exclude')) {
-			condItem.delete('exclude');
-		}
+		UpdateYamlSeqField(condItem, 'exclude', conditionExcludeSelect.getValue());
 	}
 	UpdateData();
 }
@@ -205,18 +179,8 @@ function FillConditionForm() {
 		CreateConditionKVElement(i, kvPairs[i].key.value, kvPairs[i].value.value);
 	}
 
-	if (condItem.has('include')) {
-		condItem.get('include').items.forEach(item => {
-			conditionIncludeSelect.addOption({ value: item.value, text: item.value });
-			conditionIncludeSelect.addItem(item.value, true);
-		});
-	}
-	if (condItem.has('exclude')) {
-		condItem.get('exclude').items.forEach(item => {
-			conditionExcludeSelect.addOption({ value: item.value, text: item.value });
-			conditionExcludeSelect.addItem(item.value, true);
-		});
-	}
+	FillTomSelectFromYamlSeq(condItem, 'include', conditionIncludeSelect);
+	FillTomSelectFromYamlSeq(condItem, 'exclude', conditionExcludeSelect);
 
 	let kvLabel = kvPairs.map(kv => kv.key.value.split(':').slice(-1)[0] + ':' + kv.value.value).join(', ');
 	document.getElementById('CurrentConditionId').innerHTML = kvLabel || '[condition ' + selectedConditionIdx + ']';

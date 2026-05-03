@@ -380,35 +380,8 @@ function UpdatePackageData() {
 		selectedPkgAssetIdx = 0;
 	} else if (selectedDoc.has('assets') && selectedPkgAssetIdx != null) {
 		let assetItem = selectedDoc.get('assets').items[selectedPkgAssetIdx];
-		if (document.getElementById('PackageAssetInclude').value !== '') {
-			if (assetItem.get('include') === undefined) {
-				const newSeq = selectedDoc.createNode([document.getElementById('PackageAssetInclude').value]);
-				newSeq.type = 'SEQ';
-				assetItem.set('include', newSeq);
-			} else {
-				assetItem.get('include').items = [];
-				pkgAssetIncSelect.getValue().split(',').forEach(asset => {
-					assetItem.get('include').add(asset);
-				});
-			}
-		} else if (document.getElementById('PackageAssetInclude').value === '' && assetItem.has('include')) {
-			assetItem.delete('include');
-		}
-
-		if (document.getElementById('PackageAssetExclude').value !== '') {
-			if (assetItem.get('exclude') === undefined) {
-				const newSeq = selectedDoc.createNode([document.getElementById('PackageAssetExclude').value]);
-				newSeq.type = 'SEQ';
-				assetItem.set('exclude', newSeq);
-			} else {
-				assetItem.get('exclude').items = [];
-				pkgAssetExcSelect.getValue().split(',').forEach(asset => {
-					assetItem.get('exclude').add(asset);
-				});
-			}
-		} else if (document.getElementById('PackageAssetExclude').value === '' && assetItem.has('exclude')) {
-			assetItem.delete('exclude');
-		}
+		UpdateYamlSeqField(assetItem, 'include', pkgAssetIncSelect.getValue());
+		UpdateYamlSeqField(assetItem, 'exclude', pkgAssetExcSelect.getValue());
 	}
 	//#endregion
 
@@ -444,19 +417,8 @@ function FillPackageAssetForm(assetName) {
 	document.getElementById('CurrentAsset').innerHTML = assetName;
 	pkgAssetSelect.addItem(assetName, true);
 
-	if (pkgAsset.has('include')) {
-		pkgAsset.get('include').items.forEach(item => {
-			pkgAssetIncSelect.addOption({ value: item.value, text: item.value });
-			pkgAssetIncSelect.addItem(item.value, true);
-		});
-	}
-
-	if (pkgAsset.has('exclude')) {
-		pkgAsset.get('exclude').items.forEach(item => {
-			pkgAssetExcSelect.addOption({ value: item.value, text: item.value });
-			pkgAssetExcSelect.addItem(item.value, true);
-		});
-	}
+	FillTomSelectFromYamlSeq(pkgAsset, 'include', pkgAssetIncSelect);
+	FillTomSelectFromYamlSeq(pkgAsset, 'exclude', pkgAssetExcSelect);
 }
 
 
