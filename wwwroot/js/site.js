@@ -143,6 +143,40 @@ const pkgSummaryEditor = new EasyMDE({
 pkgSummaryEditor.codemirror.on("change", UpdatePackageData);
 
 
+/**
+ * Create a TomSelect for searching pre-loaded id/value items (packages or assets).
+ * @param {string} elementId CSS selector for the underlying element
+ * @param {Object} [extra={}] Additional TomSelect options to merge in
+ */
+function CreateSearchableTomSelect(elementId, extra = {}) {
+	return new TomSelect(elementId, {
+		create: false,
+		valueField: 'value',
+		labelField: 'id',
+		searchField: ['id'],
+		render: {
+			option: (item, escape) => `<div class="py-2 d-flex">${escape(item.id)}</div>`,
+			optgroup_header: (data, escape) => `<div class="optgroup-label">${escape(data.label)}</div>`
+		},
+		...extra
+	});
+}
+
+/**
+ * Create a TomSelect for a freeform tag/list input.
+ * @param {string} elementId CSS selector for the underlying element
+ * @param {Object} [extra={}] Additional TomSelect options to merge in
+ */
+function CreateTagTomSelect(elementId, extra = {}) {
+	return new TomSelect(elementId, {
+		persist: false,
+		createOnBlur: true,
+		create: true,
+		...extra
+	});
+}
+
+
 const pkgGroupSelect = new TomSelect('#PackageGroup', {
 	maxItems: 1,
 	create: true,
@@ -167,152 +201,37 @@ const pkgSubfolderSelect = new TomSelect('#PackageSubfolder', {
 	},
 });
 
-const pkgDependencySelect = new TomSelect("#PackageDependencies", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	searchField: ['id'],
+const pkgDependencySelect = CreateSearchableTomSelect("#PackageDependencies");
+const pkgConflictingSelect = CreateSearchableTomSelect("#PackageConflicting");
 
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		}
-	}
-});
+const pkgWebsitesSelect = CreateTagTomSelect("#PackageWebsite");
+const pkgImageSelect = CreateTagTomSelect("#PackageImages");
 
-const pkgConflictingSelect = new TomSelect("#PackageConflicting", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	searchField: ['id'],
+const pkgAssetSelect = CreateSearchableTomSelect("#PackageAssetId", { maxItems: 1 });
+const pkgAssetIncSelect = CreateTagTomSelect("#PackageAssetInclude");
+const pkgAssetExcSelect = CreateTagTomSelect("#PackageAssetExclude");
 
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		}
-	}
-});
-
-const pkgWebsitesSelect = new TomSelect("#PackageWebsite", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
-
-const pkgImageSelect = new TomSelect("#PackageImages", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
-
-const pkgAssetSelect = new TomSelect("#PackageAssetId", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	maxItems: 1,
-	searchField: ['id'],
-
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		},
-		optgroup_header: function (data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	}
-});
-
-const pkgAssetIncSelect = new TomSelect("#PackageAssetInclude", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
-
-const pkgAssetExcSelect = new TomSelect("#PackageAssetExclude", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
-
-const variantDependencySelect = new TomSelect("#VariantDependencies", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	searchField: ['id'],
-
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		},
-		optgroup_header: function (data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	}
-});
-
-const variantConflictingSelect = new TomSelect("#VariantConflicting", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	searchField: ['id'],
-
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		},
-		optgroup_header: function (data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	}
-});
-
-const variantAssetSelect = new TomSelect("#VariantAssetId", {
-	maxItems: 1,
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	searchField: ['id'],
-
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		},
-		optgroup_header: function (data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	}
-});
+const variantDependencySelect = CreateSearchableTomSelect("#VariantDependencies");
+const variantConflictingSelect = CreateSearchableTomSelect("#VariantConflicting");
+const variantAssetSelect = CreateSearchableTomSelect("#VariantAssetId", { maxItems: 1 });
 /**
  * Variant Asset Include TomSelect element
  */
-const variantIncludeSelect = new TomSelect("#VariantAssetInclude", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
+const variantIncludeSelect = CreateTagTomSelect("#VariantAssetInclude");
 /**
  * Variant Asset Exclude TomSelect element
  */
-const variantExcludeSelect = new TomSelect("#VariantAssetExclude", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});/**
+const variantExcludeSelect = CreateTagTomSelect("#VariantAssetExclude");
+/**
  * Condition Include TomSelect element
  */
-const conditionIncludeSelect = new TomSelect("#ConditionInclude", {
-	persist: false,
-	createOnBlur: true,
-	create: true,
+const conditionIncludeSelect = CreateTagTomSelect("#ConditionInclude", {
 	onChange: function() { UpdateConditionData(document.getElementById('ConditionInclude')); }
 });
 /**
  * Condition Exclude TomSelect element
  */
-const conditionExcludeSelect = new TomSelect("#ConditionExclude", {
-	persist: false,
-	createOnBlur: true,
-	create: true,
+const conditionExcludeSelect = CreateTagTomSelect("#ConditionExclude", {
 	onChange: function() { UpdateConditionData(document.getElementById('ConditionExclude')); }
 });
 
