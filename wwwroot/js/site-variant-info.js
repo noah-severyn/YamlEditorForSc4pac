@@ -12,13 +12,7 @@ function FillVariantInfoTab() {
 	const container = document.getElementById('VariantInfoContainer');
 	container.innerHTML = '';
 
-	if (!selectedDoc || !selectedDoc.has('variants')) {
-		container.innerHTML = noVariantsText;
-		return;
-	}
-
-	const variants = selectedDoc.get('variants').items;
-	if (!variants || variants.length === 0) {
+	if (!selectedDoc) {
 		container.innerHTML = noVariantsText;
 		return;
 	}
@@ -26,22 +20,43 @@ function FillVariantInfoTab() {
 	// Collect unique local variant keys and their values (preserving insertion order).
     // Local variants use the format `group:package-name:variant-name` (2+ colons), as opposed to global variants with no colons.
 	const variantMap = new Map(); // key -> string[]
-	variants.forEach(variantItem => {
-		const kvPairs = variantItem.get('variant').items;
-		kvPairs.forEach(pair => {
-			const key = pair.key.value;
-			if ((key.match(/:/g) || []).length < 2) {
-                return; // skip global variants
-            }
-			const value = pair.value.value;
-			if (!variantMap.has(key)) {
-				variantMap.set(key, []);
-			}
-			if (!variantMap.get(key).includes(value)) {
-				variantMap.get(key).push(value);
-			}
+
+	function CollectVariantKeyValues(key, value) {
+		if ((key.match(/:/g) || []).length < 2) {
+			return; // skip global variants
+		} 
+		if (!variantMap.has(key)) {
+			variantMap.set(key, []);
+		}
+		if (!variantMap.get(key).includes(value)) {
+			variantMap.get(key).push(value);
+		}
+	}
+
+	if (selectedDoc.has('variants')) {
+		const variants = selectedDoc.get('variants').items;
+		if (variants) {
+			variants.forEach(variantItem => {
+				const kvPairs = variantItem.get('variant').items;
+				kvPairs.forEach(pair => {
+					CollectVariantKeyValues(pair.key.value, pair.value.value);
+				});
+			});
+		}
+	}
+
+	// Also collect variants referenced in withConditions:ifVariant blocks
+	if (selectedDoc.has('assets')) {
+		selectedDoc.get('assets').items.forEach(assetItem => {
+			if (!assetItem.has('withConditions')) return;
+			assetItem.get('withConditions').items.forEach(condItem => {
+				if (!condItem.has('ifVariant')) return;
+				condItem.get('ifVariant').items.forEach(pair => {
+					CollectVariantKeyValues(pair.key.value, pair.value.value);
+				});
+			});
 		});
-	});
+	}
 
 	if (variantMap.size === 0) {
 		container.innerHTML = noLocalVariantsText;
