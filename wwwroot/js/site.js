@@ -95,6 +95,10 @@ let selectedVariantIdx = null;
  */
 let selectedVariantAssetIdx = null;
 /**
+ * Index of the currently selected condition (withConditions entry) within the currently selected package asset.
+ */
+let selectedConditionIdx = null;
+/**
  * Main Tree View element
  */
 let mtv;
@@ -110,6 +114,10 @@ let vtv;
  * Variant Asset Tree View element
  */
 let vatv;
+/**
+ * Condition Tree View element
+ */
+let ctv;
 /**
  * Load From ... dialog element
  */
@@ -289,6 +297,23 @@ const variantExcludeSelect = new TomSelect("#VariantAssetExclude", {
 	persist: false,
 	createOnBlur: true,
 	create: true
+});/**
+ * Condition Include TomSelect element
+ */
+const conditionIncludeSelect = new TomSelect("#ConditionInclude", {
+	persist: false,
+	createOnBlur: true,
+	create: true,
+	onChange: function() { UpdateConditionData(document.getElementById('ConditionInclude')); }
+});
+/**
+ * Condition Exclude TomSelect element
+ */
+const conditionExcludeSelect = new TomSelect("#ConditionExclude", {
+	persist: false,
+	createOnBlur: true,
+	create: true,
+	onChange: function() { UpdateConditionData(document.getElementById('ConditionExclude')); }
 });
 
 /**
@@ -380,6 +405,7 @@ function UpdateData(dumpData = true) {
 	SetSelectedDoc(currDocIdx);
 	UpdateMainTree();
 	UpdatePackageAssetTree();
+	UpdateConditionTree();
 	UpdateVariantTree();
 	UpdateVariantAssetTree();
 
@@ -504,7 +530,9 @@ function UpdatePackageAssetTree() {
 		});
 		t.target.target.closest('.tree-leaf').classList.add('selected');
 
+		ResetConditionForm();
 		FillPackageAssetForm(t.data.name);
+		UpdateConditionTree();
 	});
 }
 
@@ -590,7 +618,37 @@ function UpdateVariantAssetTree() {
 	});
 }
 
+function UpdateConditionTree() {
+	let conditions = [];
+	if (selectedDoc !== null && selectedPkgAssetIdx !== null) {
+		let assetItem = selectedDoc.get('assets')?.items[selectedPkgAssetIdx];
+		if (assetItem !== undefined && assetItem.has('withConditions')) {
+			let conds = assetItem.get('withConditions').items;
+			for (let idx = 0; idx < conds.length; idx++) {
+				let kvPairs = conds[idx].get('ifVariant').items;
+				const title = idx + ' • ' + kvPairs.map(kv => kv.key.value.split(':').slice(-1)[0] + ':' + kv.value.value).join(', ');
+				conditions.push({ name: title, expanded: false, children: [] });
+			}
+		}
+	}
 
+	const data = [
+		{ name: 'Conditions (' + conditions.length + ')', expanded: true, children: conditions }
+	];
+	ctv = new TreeView(data, document.getElementById('ConditionTreeView'));
+
+	ctv.on('select', function (t) {
+		ctv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
+			leaf.classList.remove('selected');
+		});
+		t.target.target.closest('.tree-leaf').classList.add('selected');
+
+		ResetConditionForm();
+		let selectedItem = t.data.name;
+		selectedConditionIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
+		FillConditionForm();
+	});
+}
 
 
 

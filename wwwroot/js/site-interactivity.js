@@ -433,6 +433,7 @@ function ResetPackageAssetForm() {
 	pkgAssetIncSelect.clearOptions();
 	pkgAssetExcSelect.clear(true);
 	pkgAssetExcSelect.clearOptions();
+	ResetConditionForm();
 }
 /**
  * Fill the Package Asset input form fields with the values from the currently selected package and asset index.

@@ -157,6 +157,7 @@
 							<div class="col-sm-12 col-md-9">
 								<h5 class="mb-3">Editing asset: <span id="CurrentAsset" style="font-style: italic">[new asset]</span></h5>
 								<div class="accordion" id="PackageAssetsAccordion">
+									<!-- asset accordion -->
 									<div class="accordion-item">
 										<h2 class="accordion-header">
 											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#PackageAssetsExpander" aria-expanded="true" aria-controls="PackageAssetsExpander">
@@ -182,6 +183,51 @@
 														<input id="PackageAssetExclude" class="form-control" />
 													</div>
 												</form>
+											</div>
+										</div>
+									</div>
+
+									<!-- withConditions accordion -->
+									<div class="accordion-item">
+										<h2 class="accordion-header">
+											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#WithConditionsExpander" aria-expanded="true" aria-controls="WithConditionsExpander">
+												With Conditions
+											</button>
+										</h2>
+										<div id="WithConditionsExpander" class="accordion-collapse collapse show">
+											<div class="accordion-body">
+												<p class="small text-muted mb-2">An alternative format for specifying multiple variants that may be much less verbose in case of complex packages with many different variant IDs.</p>
+												<div style="display:flex" class="row">
+													<div class="col-sm-12 col-md-4">
+														<div class="mb-2 btn-group">
+															<button id="NewConditionButton" class="btn btn-outline-primary btn-sm" type="button">Add Condition</button>
+															<button id="RemoveConditionButton" class="btn btn-outline-danger btn-sm" type="button">Remove</button>
+														</div>
+														<div id="ConditionTreeView"></div>
+													</div>
+													<div class="col-sm-12 col-md-8">
+														<p class="small mb-1">Editing condition: <span id="CurrentConditionId" style="font-style:italic">[new condition]</span></p>
+														<form id="ConditionForm">
+															<p class="small text-muted mb-1">Variant conditions (<code>ifVariant</code>)</p>
+															<table class="table table-sm mb-2" id="ConditionKVTable">
+																<tbody id="ConditionKVTableBody"></tbody>
+															</table>
+															<div class="input-group input-group-sm mb-3">
+																<input id="ConditionVariantKey" class="form-control font-monospace" type="text" placeholder="key" />
+																<input id="ConditionVariantValue" class="form-control font-monospace" type="text" placeholder="value" />
+																<button id="ConditionAddKeyValueBtn" class="btn btn-outline-primary" type="button">Add</button>
+															</div>
+															<div class="mb-2 input-group">
+																<label class="input-group-text w1" for="ConditionInclude">Include</label>
+																<input id="ConditionInclude" class="form-control" />
+															</div>
+															<div class="mb-2 input-group">
+																<label class="input-group-text w1" for="ConditionExclude">Exclude</label>
+																<input id="ConditionExclude" class="form-control" />
+															</div>
+														</form>
+													</div>
+												</div>
 											</div>
 										</div>
 									</div>
@@ -492,6 +538,7 @@
 	<script type="text/javascript" src="wwwroot/js/site-file-io.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site-variants.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site-variant-info.js"></script>
+	<script type="text/javascript" src="wwwroot/js/site-conditions.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site.js"></script>
 </body>
 

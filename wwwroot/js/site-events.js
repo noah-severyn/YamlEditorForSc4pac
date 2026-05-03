@@ -158,6 +158,25 @@ document.getElementById('VariantInfoTab').addEventListener('click', () => {
 
 
 // --------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------   Condition tab events   ------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+document.getElementById('NewConditionButton').addEventListener('click', () => {
+	ResetConditionForm();
+});
+document.getElementById('RemoveConditionButton').addEventListener('click', () => {
+	RemoveCondition();
+});
+document.getElementById('ConditionAddKeyValueBtn').addEventListener('click', () => {
+	const key = document.getElementById('ConditionVariantKey').value.trim();
+	const value = document.getElementById('ConditionVariantValue').value.trim();
+	if (!key) { return; }
+	const idx = document.getElementById('ConditionKVTableBody').childElementCount;
+	CreateConditionKVElement(idx, key, value);
+	AddConditionKeyValuePair(key, value);
+});
+
+
+
 // ------------------------------------------   Asset Properties tab events   -----------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
