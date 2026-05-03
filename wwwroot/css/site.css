@@ -65,6 +65,17 @@ body {
   padding: 3px 0.75rem;
 }
 
+/* Make TomSelect fill its parent cell/container with no extra border */
+.ts-wrapper {
+    padding: 0;
+}
+.ts-wrapper .ts-control {
+    border: none;
+    border-radius: inherit;
+    box-shadow: none;
+    min-height: 100%;
+}
+
 .tooltip-inner {
     max-width: 100% !important;
 }
