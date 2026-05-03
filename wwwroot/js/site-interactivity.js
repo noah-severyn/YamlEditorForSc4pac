@@ -1,77 +1,44 @@
+const PACKAGE_TABS = ['PackagePropertiesTab', 'PackageInfoTab', 'PackageAssetsTab', 'VariantsTab', 'VariantInfoTab'];
+const ASSET_TABS = ['AssetPropertiesTab'];
 
-
-
-/**
-* Disables the package tabs and enables the asset tab.
-*/
-function EnableAssetTab() {
-	document.getElementById('PackagePropertiesTab').classList.add('disabled');
-	document.getElementById('PackagePropertiesTab').removeAttribute('data-bs-toggle');
-	document.getElementById('PackageInfoTab').classList.add('disabled');
-	document.getElementById('PackageInfoTab').removeAttribute('data-bs-toggle');
-	document.getElementById('PackageAssetsTab').classList.add('disabled');
-	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle');
-	document.getElementById('VariantsTab').classList.add('disabled');
-	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle');
-	document.getElementById('VariantInfoTab').classList.add('disabled');
-	document.getElementById('VariantInfoTab').removeAttribute('data-bs-toggle');
-
-	document.getElementById('AssetPropertiesTab').classList.remove('disabled');
-	document.getElementById('AssetPropertiesTab').setAttribute('data-bs-toggle', 'tab');
-}
-/**
-* Enables the package tabs and disables the asset tab.
-*/
-function EnablePackageTabs() {
-	document.getElementById('PackagePropertiesTab').classList.remove('disabled');
-	document.getElementById('PackagePropertiesTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageInfoTab').classList.remove('disabled');
-	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageAssetsTab').classList.remove('disabled');
-	document.getElementById('PackageAssetsTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('VariantsTab').classList.remove('disabled');
-	document.getElementById('VariantsTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('VariantInfoTab').classList.remove('disabled');
-	document.getElementById('VariantInfoTab').setAttribute('data-bs-toggle', 'tab');
-
-	document.getElementById('AssetPropertiesTab').classList.add('disabled');
-	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
-}
-/**
-* Enables the only first two package tabs (Properties and Info), for when partial package metadata is being created.
-*/
-function EnablePartialPackageTabs() {
-	document.getElementById('PackagePropertiesTab').classList.remove('disabled');
-	document.getElementById('PackagePropertiesTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageInfoTab').classList.remove('disabled');
-	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageAssetsTab').classList.add('disabled');
-	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle', 'tab');
-	document.getElementById('VariantsTab').classList.add('disabled');
-	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle', 'tab');
-	document.getElementById('VariantInfoTab').classList.add('disabled');
-	document.getElementById('VariantInfoTab').removeAttribute('data-bs-toggle');
-
-	document.getElementById('AssetPropertiesTab').classList.add('disabled');
-	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
-}
 
 /**
 * Sets the state of the package tabs and asset tab to enabled or disabled based on the type of `selectedDoc`.
 */
 function SetTabState() {
 	if (localStorage.getItem('allow-partial-packages') === 'true') {
-		EnablePartialPackageTabs();
+		//Enable the only first two package tabs (Properties and Info), for when partial package metadata is being created.
+		SetTabsEnabled(['PackagePropertiesTab', 'PackageInfoTab'], true);
+		SetTabsEnabled(['PackageAssetsTab', 'VariantsTab', 'VariantInfoTab', 'AssetPropertiesTab'], false);
 	}
-	if (IsPackage(selectedDoc)) {
-		EnablePackageTabs();
+	else if (IsPackage(selectedDoc)) {
+		SetTabsEnabled(PACKAGE_TABS, true);
+		SetTabsEnabled(ASSET_TABS, false);
 	}
 	else if (IsAsset(selectedDoc)) {
-		EnableAssetTab();
+		SetTabsEnabled(PACKAGE_TABS, false);
+		SetTabsEnabled(ASSET_TABS, true);
 	}
 	else if (selectedDoc === null) {
-		EnableAssetTab();
-		EnablePackageTabs();
+		SetTabsEnabled(PACKAGE_TABS, true);
+		SetTabsEnabled(ASSET_TABS, true);
+	}
+	/**
+	* Enable or disable a list of tab elements.
+	* @param {string[]} tabIds Array of tab element ids
+	* @param {boolean} enabled Set to `TRUE` to enable, `FALSE` to disable
+	*/
+	function SetTabsEnabled(tabIds, enabled) {
+		tabIds.forEach(id => {
+			const el = document.getElementById(id);
+			if (enabled) {
+				el.classList.remove('disabled');
+				el.setAttribute('data-bs-toggle', 'tab');
+			} else {
+				el.classList.add('disabled');
+				el.removeAttribute('data-bs-toggle');
+			}
+		});
 	}
 }
 /**
