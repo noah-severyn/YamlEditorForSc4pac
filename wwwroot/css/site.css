@@ -16,7 +16,7 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+  margin-bottom: 0;
 }
 
 .EasyMDEContainer {
@@ -25,17 +25,12 @@ body {
 .box {
     display: flex;
     flex-flow: column;
-    height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 .CodeMirror {
     border: 1px solid lightgrey;
     /*flex: 1 1 auto;*/
-}
-.CodeMirror-scroll {
-}
-
-.required {
-    /*border-color:dodgerblue;*/
 }
 
 .required-label:after {
@@ -84,12 +79,18 @@ body {
         font-weight: bold;
     }
 
-#Column0, #Column1, #Column2 {
-    /*border: 1px solid black;*/
+/* Right column: fills remaining page height so CodeMirror never causes page scroll */
+#Column2 {
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 /* This is the code editor */
 .CodeMirror.cm-s-default {
-    height: 75%;
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
     font-size: .95em;
 }
 /* This is the markdown editor */
