@@ -402,10 +402,7 @@ function UpdateMainTree() {
 	//}
 
 	mtv.on("select", function (t) {
-		mtv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
-			leaf.classList.remove('selected');
-		});
-		t.target.target.closest('.tree-leaf').classList.add('selected');
+		SelectTreeLeaf(mtv, t);
 
 		let selectedIdx;
 		if (t.data.name.indexOf('(') > 0) { //A heading category was selected. Do nothing
@@ -444,10 +441,7 @@ function UpdatePackageAssetTree() {
 	atv = new TreeView(data, document.getElementById('AssetTreeView'));
 
 	atv.on("select", function (t) {
-		atv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
-			leaf.classList.remove('selected');
-		});
-		t.target.target.closest('.tree-leaf').classList.add('selected');
+		SelectTreeLeaf(atv, t);
 
 		ResetConditionForm();
 		FillPackageAssetForm(t.data.name);
@@ -479,10 +473,7 @@ function UpdateVariantTree() {
 	vtv = new TreeView(data, document.getElementById('VariantTreeView'));
 
 	vtv.on("select", function (t) {
-		vtv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
-			leaf.classList.remove('selected');
-		});
-		t.target.target.closest('.tree-leaf').classList.add('selected');
+		SelectTreeLeaf(vtv, t);
 
 
 		ResetVariantForm();
@@ -521,10 +512,7 @@ function UpdateVariantAssetTree() {
 	vatv = new TreeView(data, document.getElementById('VariantAssetTreeView'));
 
 	vatv.on("select", function (t) {
-		vatv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
-			leaf.classList.remove('selected');
-		});
-		t.target.target.closest('.tree-leaf').classList.add('selected');
+		SelectTreeLeaf(vatv, t);
 
 		ResetVariantAssetForm();
 		let selectedItem = t.data.name;
@@ -557,10 +545,7 @@ function UpdateConditionTree() {
 	ctv = new TreeView(data, document.getElementById('ConditionTreeView'));
 
 	ctv.on('select', function (t) {
-		ctv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
-			leaf.classList.remove('selected');
-		});
-		t.target.target.closest('.tree-leaf').classList.add('selected');
+		SelectTreeLeaf(ctv, t);
 
 		ResetConditionForm();
 		let selectedItem = t.data.name;
