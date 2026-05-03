@@ -70,7 +70,7 @@ function FillVariantInfoTab() {
 
 		const card = document.createElement('div');
 		card.className = 'card mb-3';
-		card.dataset.variantKey = key;
+		card.dataset.variantId = key;
 
 		const cardHdr = document.createElement('div');
 		cardHdr.className = 'card-header';
@@ -138,7 +138,7 @@ function FillVariantInfoTab() {
 				return function () {
 					// Uncheck all other default checkboxes in this card
 					if (this.checked) {
-						const card = capturedCheckbox.closest('[data-variant-key]');
+						const card = capturedCheckbox.closest('[data-variant-id]');
 						if (card) {
 							card.querySelectorAll('input[type="checkbox"]').forEach(cb => {
 								if (cb !== capturedCheckbox) cb.checked = false;
@@ -164,14 +164,14 @@ function FillVariantInfoTab() {
 
 /**
  * Reads the variantInfo section from selectedDoc and returns it as a plain JS object.
- * @returns {Object} Map of variantKey → { description, values: { value → { description, default } } }
+ * @returns {Object} Map of variantId → { description, values: { value → { description, default } } }
  */
 function ReadVariantInfoFromDoc() {
 	const result = {};
 	if (!selectedDoc || !selectedDoc.has('variantInfo')) return result;
 
 	selectedDoc.get('variantInfo').items.forEach(item => {
-		const vKey = item.get('variantKey');
+		const vKey = item.get('variantId');
 		if (!vKey) return;
 		result[vKey] = { description: item.get('description') ?? '', values: {} };
 		if (item.has('values')) {
@@ -191,10 +191,10 @@ function ReadVariantInfoFromDoc() {
 
 /**
  * Returns the variantInfo map item for the given key, creating it if necessary.
- * @param {string} variantKey
+ * @param {string} variantId
  * @returns The YAML map item for this key
  */
-function GetOrCreateVariantKeyItem(variantKey) {
+function GetOrCreateVariantKeyItem(variantId) {
 	if (!selectedDoc.has('variantInfo')) {
 		const newSeq = selectedDoc.createNode([]);
 		newSeq.type = 'SEQ';
@@ -202,9 +202,9 @@ function GetOrCreateVariantKeyItem(variantKey) {
 	}
     
 	const items = selectedDoc.get('variantInfo').items;
-	let item = items.find(i => i.get('variantKey') === variantKey);
+	let item = items.find(i => i.get('variantId') === variantId);
 	if (!item) {
-		item = selectedDoc.createNode({ variantKey });
+		item = selectedDoc.createNode({ variantId });
 		selectedDoc.get('variantInfo').add(item);
 	}
 	return item;
@@ -234,11 +234,11 @@ function GetOrCreateVariantValueItem(keyItem, value) {
 
 /**
  * Writes the description for a variant key to selectedDoc and updates data.
- * @param {string} variantKey
+ * @param {string} variantId
  * @param {string} description
  */
-function WriteVariantKeyDescription(variantKey, description) {
-	const item = GetOrCreateVariantKeyItem(variantKey);
+function WriteVariantKeyDescription(variantId, description) {
+	const item = GetOrCreateVariantKeyItem(variantId);
 	if (description) {
 		item.set('description', description);
 	} else {
@@ -249,12 +249,12 @@ function WriteVariantKeyDescription(variantKey, description) {
 
 /**
  * Writes the description for a specific variant value to selectedDoc and updates data.
- * @param {string} variantKey
+ * @param {string} variantId
  * @param {string} value
  * @param {string} description
  */
-function WriteVariantValueDescription(variantKey, value, description) {
-	const keyItem = GetOrCreateVariantKeyItem(variantKey);
+function WriteVariantValueDescription(variantId, value, description) {
+	const keyItem = GetOrCreateVariantKeyItem(variantId);
 	if (description) {
 		const valItem = GetOrCreateVariantValueItem(keyItem, value);
 		valItem.set('description', description);
@@ -276,12 +276,12 @@ function WriteVariantValueDescription(variantKey, value, description) {
 
 /**
  * Writes the default flag for a specific variant value to selectedDoc and updates data.
- * @param {string} variantKey
+ * @param {string} variantId
  * @param {string} value
  * @param {boolean} isDefault
  */
-function WriteVariantValueDefault(variantKey, value, isDefault) {
-	const keyItem = GetOrCreateVariantKeyItem(variantKey);
+function WriteVariantValueDefault(variantId, value, isDefault) {
+	const keyItem = GetOrCreateVariantKeyItem(variantId);
 	if (isDefault) {
 		// Clear the default flag from all other value entries for this key
 		if (keyItem.has('values')) {
