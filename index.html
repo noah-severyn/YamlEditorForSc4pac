@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="h-100">
+
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,7 +8,6 @@
 	<link rel="icon" type="image/png" sizes="16x16" href="wwwroot/img/favicon-16x16.png"> <!--https://lettericon.com/-->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 	<link rel="stylesheet" href="wwwroot/css/site.css" asp-append-version="true" />
-	<link rel="stylesheet" href="wwwroot/SC4PackMan.styles.css" asp-append-version="true" />
 
 	<script type="module">
 		import * as YAML from 'https://cdn.skypack.dev/yaml';
@@ -37,6 +37,7 @@
 	<!--HTML → Markdown-->
 	<script src="https://unpkg.com/turndown/dist/turndown.js"></script>
 </head>
+
 <body class="d-flex flex-column h-100 mb-0">
 	<header>
 		<nav class="navbar navbar-light border-bottom box-shadow bg-light mb-3">
@@ -66,7 +67,6 @@
 			<div id="Column1" class="col-sm-12 col-md-5">
 
 				<h2>Editing <span id="CurrentDocumentType">package</span>: <span id="CurrentDocumentName" style="font-style:italic">[new package]</span></h2>
-				<p>For Dependencies, Image, Include, and Exclude fields add multiple items separated by a semicolon.</p>
 				<p>Fields with an asterisk (*) are required.</p>
 
 				<nav class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -74,7 +74,7 @@
 					<button id="PackageInfoTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageInfoContent" type="button" role="tab">Package Info</button>
 					<button id="PackageAssetsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#PackageAssetsContent" type="button" role="tab">Package Assets</button>
 					<button id="VariantsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#VariantsContent" type="button" role="tab">Variants</button>
-					<button id="VariantAssetsTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#VariantAssetsContent" type="button" role="tab">Variant Assets</button>
+					<button id="VariantInfoTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#VariantInfoContent" type="button" role="tab">Variant Info</button>
 					<button id="AssetPropertiesTab" class="nav-link" data-bs-toggle="tab" data-bs-target="#AssetPropertiesContent" type="button" role="tab">Asset Properties</button>
 				</nav>
 
@@ -113,10 +113,6 @@
 					<fieldset id="PackageInfoContent" class="tab-pane m-3" tabindex="0">
 						<form id="PackageInfoForm">
 							<div class="input-group mb-2">
-								<label id="PackageWebsiteLabel" class="input-group-text w2" for="PackageWebsite">Website(s)</label>
-								<input id="PackageWebsite" class="form-control" />
-							</div>
-							<div class="input-group mb-2">
 								<label class="input-group-text required-label w2" for="PackageSummary">Summary</label>
 								<input id="PackageSummary" class="form-control required" type="text" />
 							</div>
@@ -138,129 +134,219 @@
 									<input id="ToggleImagePreview" class="form-check-input" type="checkbox" role="switch" checked>
 									<label class="form-check-label" for="ToggleImagePreview">Preview Images</label>
 								</div>-->
-								<textarea id="PackageDescription" class="form-control" rows="9"></textarea>
+								<textarea id="PackageDescription" class="form-control"></textarea>
 							</div>
 							<div class="input-group mb-2">
 								<label class="input-group-text w2" for="PackageImages">Images</label>
 								<input id="PackageImages" class="form-control required" autocomplete="off">
+							</div>
+							<div class="input-group mb-2">
+								<label id="PackageWebsiteLabel" class="input-group-text w2" for="PackageWebsite">Website(s)</label>
+								<input id="PackageWebsite" class="form-control" />
 							</div>
 						</form>
 					</fieldset>
 
 					<!-- Package Assets tab -->
 					<fieldset id="PackageAssetsContent" class="tab-pane m-3" tabindex="0">
-						<h4>Editing asset: <span id="CurrentAsset" style="font-style: italic">[new asset]</span></h4>
 						<div style="display:flex" class="row">
 							<div class="col-sm-12 col-md-3">
 								<div id="AssetTreeView"></div>
 							</div>
 
 							<div class="col-sm-12 col-md-9">
-								<div class="mb-2 btn-group">
-									<button id="NewPackageAssetButton" type="button" class="btn btn-primary btn-sm">New Package Asset</button>
+								<h5 class="mb-3">Editing asset: <span id="CurrentAsset" style="font-style: italic">[new asset]</span></h5>
+								<div class="accordion" id="PackageAssetsAccordion">
+									<!-- asset accordion -->
+									<div class="accordion-item">
+										<h2 class="accordion-header">
+											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#PackageAssetsExpander" aria-expanded="true" aria-controls="PackageAssetsExpander">
+												Assets
+											</button>
+										</h2>
+										<div id="PackageAssetsExpander" class="accordion-collapse collapse show">
+											<div class="accordion-body">
+												<div class="mb-2">
+													<button id="NewPackageAssetButton" type="button" class="btn btn-outline-primary btn-sm">Add Asset</button>
+												</div>
+												<form id="PackageAssetsForm">
+													<div class="mb-2 input-group">
+														<label class="input-group-text w1" for="PackageAssetId">Asset Id</label>
+														<input id="PackageAssetId" class="form-control" />
+													</div>
+													<div class="mb-2 input-group">
+														<label class="input-group-text w1" for="PackageAssetInclude">Include</label>
+														<input id="PackageAssetInclude" class="form-control" />
+													</div>
+													<div class="mb-2 input-group">
+														<label class="input-group-text w1" for="PackageAssetExclude">Exclude</label>
+														<input id="PackageAssetExclude" class="form-control" />
+													</div>
+												</form>
+											</div>
+										</div>
+									</div>
+
+									<!-- withConditions accordion -->
+									<div class="accordion-item">
+										<h2 class="accordion-header">
+											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#WithConditionsExpander" aria-expanded="true" aria-controls="WithConditionsExpander">
+												With Conditions
+											</button>
+										</h2>
+										<div id="WithConditionsExpander" class="accordion-collapse collapse show">
+											<div class="accordion-body">
+												<p class="small text-muted mb-2">An alternative format for specifying multiple variants that may be much less verbose in case of complex packages with many different variant IDs.</p>
+												<div style="display:flex" class="row">
+													<div class="col-sm-12 col-md-4">
+														<div class="mb-2 btn-group">
+															<button id="NewConditionButton" class="btn btn-outline-primary btn-sm" type="button">Add Condition</button>
+															<button id="RemoveConditionButton" class="btn btn-outline-danger btn-sm" type="button">Remove</button>
+														</div>
+														<div id="ConditionTreeView"></div>
+													</div>
+													<div class="col-sm-12 col-md-8">
+														<p class="small mb-1">Editing condition: <span id="CurrentConditionId" style="font-style:italic">[new condition]</span></p>
+														<form id="ConditionForm">
+															<p class="small text-muted mb-1">Variant conditions (<code>ifVariant</code>)</p>
+															<table class="table table-sm mb-2" id="ConditionKVTable">
+																<tbody id="ConditionKVTableBody"></tbody>
+															</table>
+															<div class="input-group input-group-sm mb-3">
+																<input id="ConditionVariantKey" class="form-control font-monospace" type="text" placeholder="key" />
+																<input id="ConditionVariantValue" class="form-control font-monospace" type="text" placeholder="value" />
+																<button id="ConditionAddKeyValueBtn" class="btn btn-outline-primary" type="button">Add</button>
+															</div>
+															<div class="mb-2 input-group">
+																<label class="input-group-text w1" for="ConditionInclude">Include</label>
+																<input id="ConditionInclude" class="form-control" />
+															</div>
+															<div class="mb-2 input-group">
+																<label class="input-group-text w1" for="ConditionExclude">Exclude</label>
+																<input id="ConditionExclude" class="form-control" />
+															</div>
+														</form>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
 								</div>
-								<p>These assets will always be installed, regardless of the chosen variant or option.</p>
-								<form id="PackageAssetsForm">
-									<div class="mb-2 input-group">
-										<label class="input-group-text w1" for="PackageAssetId">Asset Id</label>
-										<input id="PackageAssetId" class="form-control" />
-									</div>
-									<div class="mb-2 input-group">
-										<label class="input-group-text w1" for="PackageAssetInclude">Include</label>
-										<input id="PackageAssetInclude" class="form-control" />
-									</div>
-									<div class="mb-2 input-group">
-										<label class="input-group-text w1" for="PackageAssetExclude">Exclude</label>
-										<input id="PackageAssetExclude" class="form-control" />
-									</div>
-								</form>
 							</div>
 						</div>
 					</fieldset>
 
 					<!-- Variants tab -->
 					<fieldset id="VariantsContent" class="tab-pane m-3" tabindex="0">
-						<h4>Editing variant: <span id="CurrentVariantId" style="font-style: italic">[new variant]</span></h4>
 						<div style="display:flex" class="row">
-							<div class="col-sm-12 col-md-4">
-								<div id="VariantTreeView"></div>
-							</div>
 
-							<div class="col-sm-12 col-md-8">
+							<!-- Left: variant list -->
+							<div class="col-sm-12 col-md-3">
 								<div class="mb-2 btn-group">
 									<button id="ResetUpperVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">New Variant</button>
 									<button id="RemoveVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Variant</button>
 								</div>
-								
-								<form id="VariantsFormHeader">
-									<p>A variant is a choice a user must make during installation. It can consist of a single option or a unique combination of options as <b>Key</b>-<b>Value</b> sets.</p>
-									<div id="VariantKeyValuesContainer">
-
-										<div class="form-check mt-2 me-2">
-											<input id="IsLocalVariant" class="form-check-input" type="checkbox" checked>
-											<label class="form-check-label" for="IsLocalVariant" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" data-bs-title="Variants can be defined globally for the entire Plugins folder (e.g. <code>nightmode</code>, <code>driveside</code>, <code>roadstyle</code>, <code>CAM</code>), or locally on a per-package basis (e.g. <code>kodlovag:uniform-street-lighting-mod:light-color</code>).">Local variant</label>
-										</div>
-
-										<div id="VariantKeyValueInputForm" class="mb-2 input-group">
-											<label class="input-group-text required-label w1" for="VariantName">Name</label>
-											<input id="VariantName" class="form-control" type="text" />
-											<label class="input-group-text required-label w1" for="VariantValue">Value</label>
-											<input id="VariantValue" class="form-control" type="text" />
-											<button id="VariantAddKeyValueBtn" class="btn btn-outline-primary" type="button">Add</button>
-										</div>
-									</div>
-
-									<div class="mb-2 input-group">
-										<label class="input-group-text w2" for="VariantDependencies">Dependencies</label>
-										<input id="VariantDependencies" class="form-control" />
-									</div>
-									<div class="mb-2 input-group">
-										<label class="input-group-text" for="VariantDescription">Variant Description</label>
-										<textarea id="VariantDescription" class="form-control"></textarea>
-									</div>
-									<div class="mb-2 input-group">
-										<label class="input-group-text" for="VariantValueDescription" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Explain this option in the variant">Value Description</label>
-										<textarea id="VariantValueDescription" class="form-control"></textarea>
-									</div>
-								</form>
+								<div id="VariantTreeView"></div>
 							</div>
-							
-						</div>
 
+							<!-- Right: edit panels -->
+							<div class="col-sm-12 col-md-9">
+								<h5 class="mb-3">Editing: <span id="CurrentVariantId" style="font-style: italic">[new variant]</span></h5>
+								<div class="accordion" id="VariantAccordion">
+
+									<!-- Condition expander -->
+									<div class="accordion-item">
+										<h2 class="accordion-header">
+											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#VariantConditionExpander" aria-expanded="true" aria-controls="VariantConditionExpander">
+												Conditions
+											</button>
+										</h2>
+										<div id="VariantConditionExpander" class="accordion-collapse collapse show">
+											<div class="accordion-body">
+												<p class="small text-muted mb-2">A variant has one or more <code>key:value</code> pairs that identify which content should be installed. Variants should be defined locally for this package (e.g. <code>group:name:variant-name</code>), with the exception of a limited number of global variants (e.g. <code>nightmode</code>, <code>driveside</code>).</p>
+												<table class="table table-sm mb-2" id="VariantKVTable">
+													<tbody id="VariantKVTableBody"></tbody>
+												</table>
+												<div class="input-group input-group-sm">
+													<input id="VariantName" class="form-control font-monospace" type="text" placeholder="key" />
+													<input id="VariantValue" class="form-control font-monospace" type="text" placeholder="value" />
+													<button id="VariantAddKeyValueBtn" class="btn btn-outline-primary" type="button">Add condition</button>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- Dependencies & Conflicting expander -->
+									<div class="accordion-item">
+										<h2 class="accordion-header">
+											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#VariantDepsExpander" aria-expanded="true" aria-controls="VariantDepsExpander">
+												Dependencies &amp; Conflicting
+											</button>
+										</h2>
+										<div id="VariantDepsExpander" class="accordion-collapse collapse show">
+											<div class="accordion-body">
+												<div class="mb-2 input-group">
+													<label class="input-group-text w2" for="VariantDependencies">Dependencies</label>
+													<input id="VariantDependencies" class="form-control" />
+												</div>
+												<div class="mb-0 input-group">
+													<label class="input-group-text w2" for="VariantConflicting">Conflicting</label>
+													<input id="VariantConflicting" class="form-control" />
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- Assets expander -->
+									<div class="accordion-item">
+										<h2 class="accordion-header">
+											<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#VariantAssetsExpander" aria-expanded="true" aria-controls="VariantAssetsExpander">
+												Assets
+											</button>
+										</h2>
+										<div id="VariantAssetsExpander" class="accordion-collapse collapse show">
+											<div class="accordion-body">
+												<div class="mb-2">
+													<button id="ResetLowerVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">Add Asset</button>
+												</div>
+												<div style="display:flex" class="row">
+													<div class="col-sm-12 col-md-4">
+														<div id="VariantAssetTreeView"></div>
+													</div>
+													<div class="col-sm-12 col-md-8">
+														<p class="small mb-1">Editing asset: <span id="CurrentVariantAssetId" style="font-style:italic">[new asset]</span></p>
+														<form id="PackageVariantsFormLower">
+															<div class="mb-2 input-group">
+																<label class="input-group-text w1" for="VariantAssetId">Asset Id</label>
+																<input id="VariantAssetId" class="form-control" />
+															</div>
+															<div class="mb-2 input-group">
+																<label class="input-group-text w1" for="VariantAssetInclude">Include</label>
+																<input id="VariantAssetInclude" class="form-control" />
+															</div>
+															<div class="input-group mb-2">
+																<label class="input-group-text w1" for="VariantAssetExclude">Exclude</label>
+																<input id="VariantAssetExclude" class="form-control" />
+															</div>
+														</form>
+														<div class="btn-group">
+															<button id="RemoveAssetFromVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Asset</button>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 					</fieldset>
 
-					<!-- Variant Assets tab -->
-					<fieldset id="VariantAssetsContent" class="tab-pane m-3">
-						<h4>Editing variant: <span id="CurrentVariantId2" style="font-style: italic">[new variant]</span></h4>
-						<h4> ⤷  Editing asset: <span id="CurrentVariantAssetId" style="font-style: italic">[new asset]</span></h4>
-						<div style="display:flex" class="row">
-							<div class="col-sm-12 col-md-4">
-								<div id="VariantAssetTreeView"></div>
-							</div>
-
-							<div class="col-sm-12 col-md-8">
-								<div class="mb-2 btn-group">
-									<button id="ResetLowerVariantFormButton" class="btn btn-outline-primary btn-sm" type="button">New Asset</button>
-									<button id="RemoveAssetFromVariantButton" class="btn btn-outline-danger btn-sm" type="button">Remove Asset from Variant</button>
-								</div>
-								<p>A variant has one or more <b>Assets</b>, each with it's own Include/Exclude rules.</p>
-								<form id="PackageVariantsFormLower">
-									<div class="mb-2 input-group">
-										<label class="input-group-text w1" for="VariantAssetId">Asset Id</label>
-										<input id="VariantAssetId" class="form-control" />
-									</div>
-
-									<div class="mb-2 input-group">
-										<label class="input-group-text w1" for="VariantAssetInclude">Include</label>
-										<input id="VariantAssetInclude" class="form-control" />
-									</div>
-
-									<div class="input-group mb-2">
-										<label class="input-group-text w1" for="VariantAssetExclude">Exclude</label>
-										<input id="VariantAssetExclude" class="form-control" />
-									</div>
-								</form>
-							</div>
+					<!-- Variant Info tab -->
+					<fieldset id="VariantInfoContent" class="tab-pane m-3" tabindex="0">
+						<p class="small text-muted">Add descriptions that explain the different variant choices and help in choosing the right one. Define one description for the variant as a whole, and a description of what each option means.</p>
+						<div id="VariantInfoContainer">
+							<p class="text-muted fst-italic">No variants defined. Add variants in the Variants tab first.</p>
 						</div>
 					</fieldset>
 
@@ -441,7 +527,7 @@
 
 
 	<footer class="footer mt-auto py-3 bg-light">
-		<span class="container text-muted">&copy; 2025 - YAML editor for sc4pac</span>
+		<span class="container text-muted">&copy; 2026 - YAML editor for sc4pac</span>
 	</footer>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -451,6 +537,9 @@
 	<script type="text/javascript" src="wwwroot/js/site-events.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site-file-io.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site-variants.js"></script>
+	<script type="text/javascript" src="wwwroot/js/site-variant-info.js"></script>
+	<script type="text/javascript" src="wwwroot/js/site-conditions.js"></script>
 	<script type="text/javascript" src="wwwroot/js/site.js"></script>
 </body>
+
 </html>

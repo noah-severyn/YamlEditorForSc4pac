@@ -3,25 +3,16 @@
 //// --------------------------------------------------------------------------------------------------------------------
 
 function UpdateVariantData(element) {
+	if (selectedVariantIdx === null) { return; }
 	let variantItem = selectedDoc.get('variants').items[selectedVariantIdx];
-	let variantInfo = selectedDoc.get('variantInfo');
 	let assetItem;
-	let variantKey;
-	let variantValue;
-	let vInfoItem;
-	if (selectedVariantIdx !== null) {
-		variantKey = variantItem.get('variant').items[0].key.value;
-		variantValue = variantItem.get('variant').items[0].value.value
-	}
 	if (selectedVariantAssetIdx !== null) {
 		assetItem = variantItem.get('assets').items[selectedVariantAssetIdx];
 	}
-	if (variantInfo !== undefined) {
-		vInfoItem = variantInfo.items.find(i => i.get('variantId') === variantKey);
-	}
 
 	if (element.id.startsWith('VariantName')) {
-		//Note that this event is triggered after the input has changed, so we no longer know what the original key is. Find the one that most closely matches this and use it.
+		// Note that this event is triggered after the input has changed, so we no longer know what the original key is.
+		// Find the one that most closely matches this and use it.
 		let keys = variantItem.get('variant').items.map(k => k.key.value);
 		let maxSS = 0;
 		let maxIdx = 0;
@@ -32,11 +23,9 @@ function UpdateVariantData(element) {
 				maxIdx = idx;
 			}
 		}
-
 		let key = keys[maxIdx];
 		let existingVal = variantItem.getIn(['variant', key]);
 		variantItem.deleteIn(['variant', key]);
-
 		let newPair = selectedDoc.createPair(element.value, existingVal);
 		variantItem.get('variant').items.push(newPair);
 	}
@@ -46,21 +35,10 @@ function UpdateVariantData(element) {
 		variantItem.setIn(['variant', key], element.value);
 	}
 	else if (element.id === 'VariantDependencies') {
-		if (element.value !== '') {
-			if (variantItem.get('dependencies') === undefined) {
-				const newSeq = selectedDoc.createNode([element.value]);
-				newSeq.type = 'SEQ';
-				variantItem.set('dependencies', newSeq);
-			} else {
-				variantItem.get('dependencies').items = [];
-				variantDependencySelect.getValue().split(',').forEach(dep => {
-					variantItem.get('dependencies').add(dep);
-				});
-			}
-
-		} else if (element.value === '' && variantItem.has('dependencies')) {
-			variantItem.delete('dependencies');
-		}
+		UpdateYamlSeqField(variantItem, 'dependencies', variantDependencySelect.getValue());
+	}
+	else if (element.id === 'VariantConflicting') {
+		UpdateYamlSeqField(variantItem, 'conflicting', variantConflictingSelect.getValue());
 	}
 	else if (element.id === 'VariantAssetId') {
 		if (selectedVariantAssetIdx === null) {
@@ -72,186 +50,88 @@ function UpdateVariantData(element) {
 				variantItem.get('assets').add(selectedDoc.createNode({ assetId: element.value }));
 			}
 			selectedVariantAssetIdx = variantItem.get('assets').items.length - 1;
-			document.getElementById('CurrentVariantAssetId').innerHTML = 'Editing asset: ' + variantItem.get('assets').items[selectedVariantAssetIdx].get('assetId')
+			document.getElementById('CurrentVariantAssetId').innerHTML = variantItem.get('assets').items[selectedVariantAssetIdx].get('assetId');
 		} else {
 			assetItem.set('assetId', element.value);
 		}
 	}
 	else if (element.id === 'VariantAssetInclude') {
-		if (element.value !== '') {
-			if (assetItem.get('include') === undefined) {
-				const newSeq = selectedDoc.createNode([element.value]);
-				newSeq.type = 'SEQ';
-				assetItem.set('include', newSeq);
-			} else {
-				assetItem.get('include').items = [];
-				variantIncludeSelect.getValue().split(',').forEach(item => {
-					assetItem.get('include').add(item);
-				});
-			}
-
-		} else if (element.value === '' && assetItem.has('include')) {
-			assetItem.delete('include');
-		}
+		UpdateYamlSeqField(assetItem, 'include', variantIncludeSelect.getValue());
 	}
 	else if (element.id === 'VariantAssetExclude') {
-		if (element.value !== '') {
-			if (assetItem.get('exclude') === undefined) {
-				const newSeq = selectedDoc.createNode([element.value]);
-				newSeq.type = 'SEQ';
-				assetItem.set('exclude', newSeq);
-			} else {
-				assetItem.get('exclude').items = [];
-				variantExcludeSelect.getValue().split(',').forEach(item => {
-					assetItem.get('exclude').add(item);
-				});
-			}
-
-		} else if (element.value === '' && assetItem.has('exclude')) {
-			assetItem.delete('exclude');
-		}
-	}
-	else if (element.id === 'VariantDescription') {
-		if (element.value !== '') {
-			if (variantInfo !== undefined) {
-				vInfoItem.set('description', element.value);
-			} else {
-				const newSeq = selectedDoc.createNode([{ variantId: variantKey, description: element.value }]);
-				newSeq.type = 'SEQ';
-				selectedDoc.set('variantInfo', newSeq);
-			}
-		} else if (element.value === '' && selectedDoc.has('variantInfo')) {
-			selectedDoc.delete('variantInfo');
-		}
-	}
-	else if (element.id === 'VariantValueDescription') {
-		if (element.value !== '') {
-			if (vInfoItem.get('values') === undefined) {
-				const newSeq = selectedDoc.createNode([])
-				newSeq.type = 'SEQ';
-				vInfoItem.set('values', newSeq);
-			}
-
-			const valueItem = vInfoItem.get('values').items.find(i => i.get('value') === variantValue);
-			if (valueItem !== undefined) {
-				valueItem.set('description', element.value);
-			} else {
-				if (variantInfo === undefined) {
-					const newSeq = selectedDoc.createNode([{ variantId: variantKey, description: element.value }]);
-					newSeq.type = 'SEQ';
-					selectedDoc.set('variantInfo', newSeq);
-				}
-				
-				const newItem = selectedDoc.createNode({ value: variantValue, description: element.value });
-				vInfoItem.get('values').add(newItem);
-			}
-		} else if (element.value === '' && selectedDoc) {
-			const valueIdx = vInfoItem.get('values').items.findIndex(i => i.get('value') === variantValue);
-			vInfoItem.deleteIn(['values', valueIdx]);
-			if (vInfoItem.get('values').items.length === 0) {
-				vInfoItem.delete('values');
-			}
-		}
+		UpdateYamlSeqField(assetItem, 'exclude', variantExcludeSelect.getValue());
 	}
 	UpdateData();
 }
 
 /**
- * Add a new input group element to the variant header container with the specified name-value set.
- * @param {number} idx The 0-based index of this key-value set. Equal to the count of existing key-value sets in this variant plus one. A maximum 10 key-value sets is supported.
- * @param {string} name The variant name (or key)
+ * Creates a table row for a variant key-value pair and appends it to VariantKVTableBody.
+ * @param {number} idx The 0-based index of this key-value set
+ * @param {string} name The variant key
  * @param {string} value The variant value
  */
 function CreateVariantKeyValueElements(idx, name, value) {
-	const inputGroupDiv = document.createElement('div');
-	inputGroupDiv.className = 'mb-2 input-group input-group-sm VariantKVItem';
-	inputGroupDiv.id = 'VariantKVSet' + idx;
+	const tr = document.createElement('tr');
+	tr.id = 'VariantKVSet' + idx;
+	tr.className = 'VariantKVItem';
 
-	const nameLabel = document.createElement('label');
-	nameLabel.className = 'input-group-text';
-	nameLabel.textContent = 'Name';
-	nameLabel.htmlFor = 'VariantName' + idx;
-	inputGroupDiv.appendChild(nameLabel);
-
+	const tdName = document.createElement('td');
 	const nameInput = document.createElement('input');
 	nameInput.id = 'VariantName' + idx;
-	nameInput.className = 'form-control';
+	nameInput.className = 'form-control form-control-sm font-monospace';
 	nameInput.type = 'text';
 	nameInput.value = name;
-	nameInput.addEventListener("input", function(event) {
+	nameInput.addEventListener('input', function (event) {
+		ValidateInput(event.target.id);
 		UpdateVariantData(event.target);
-		console.log(event.target.id + ' updated');
 	});
-	inputGroupDiv.appendChild(nameInput);
+	tdName.appendChild(nameInput);
+	tr.appendChild(tdName);
 
-	const valueLabel = document.createElement('label');
-	valueLabel.className = 'input-group-text';
-	valueLabel.textContent = 'Value';
-	valueLabel.htmlFor = 'VariantValue' + idx;
-	inputGroupDiv.appendChild(valueLabel);
-
+	const tdValue = document.createElement('td');
 	const valueInput = document.createElement('input');
 	valueInput.id = 'VariantValue' + idx;
-	valueInput.className = 'form-control';
+	valueInput.className = 'form-control form-control-sm font-monospace';
 	valueInput.type = 'text';
 	valueInput.value = value;
-	valueInput.addEventListener("input", function (event) {
+	valueInput.addEventListener('input', function (event) {
+		ValidateInput(event.target.id);
 		UpdateVariantData(event.target);
-		console.log(event.target.id + ' updated');
 	});
-	inputGroupDiv.appendChild(valueInput);
+	tdValue.appendChild(valueInput);
+	tr.appendChild(tdValue);
 
+	const tdBtn = document.createElement('td');
 	const removeBtn = document.createElement('button');
 	removeBtn.id = 'RemoveVariantKVSet' + idx;
-	removeBtn.className = 'btn btn-outline-danger';
+	removeBtn.className = 'btn btn-outline-danger btn-sm';
 	removeBtn.type = 'button';
-	removeBtn.textContent = 'Remove';
-	removeBtn.addEventListener("click", (function (idx) {
-		return function () {
-			RemoveVariantKeyValueSet(idx);
-			console.log('deleted ' + idx);
-		};
+	removeBtn.textContent = '×';
+	removeBtn.addEventListener('click', (function (capturedIdx) {
+		return function () { RemoveVariantKeyValueSet(capturedIdx); };
 	})(idx));
-	inputGroupDiv.appendChild(removeBtn);
+	tdBtn.appendChild(removeBtn);
+	tr.appendChild(tdBtn);
 
-	document.getElementById('VariantKeyValuesContainer').appendChild(inputGroupDiv);
+	document.getElementById('VariantKVTableBody').appendChild(tr);
 	document.getElementById('VariantName').value = '';
 	document.getElementById('VariantValue').value = '';
 }
 
 
-/**
- * Toggle between a local variant (where the package name is prepended to the variant name) and a global variant.
- */
-function ToggleLocalVariant() {
-	if (selectedDoc === null) { return; }
-	let nameInput = document.getElementById('VariantName');
-	let pkg = selectedDoc.get('group') + ':' + selectedDoc.get('name');
-	if (document.getElementById('IsLocalVariant').checked) {
-		nameInput.value = pkg + ':' + nameInput.value;
-	} else {
-		nameInput.value =  nameInput.value.replace(pkg + ':', '')
-	}
-
-	nameInput.focus();
-}
-
 
 /**
- * Add a new key value set to the currently selected variant.
- * 
- * If `selectedPkgVariantIdx` is null then the key value set will be added to a new variant. 
+ * Add a new key-value set to the currently selected variant.
+ * If `selectedVariantIdx` is null the key-value set will be added to a new variant.
  * @param {string} key Variant key (name)
  * @param {string} value Variant value
  */
 function AddVariantKeyValueSet(key, value) {
 	if (selectedVariantIdx === null) {
 		const newMap = selectedDoc.createNode({
-			variant: {
-				[key]: value
-			},
+			variant: { [key]: value },
 		});
-		newMap.get('variant').flow = true; // Use inline array brace style
+		newMap.get('variant').flow = true; // Use inline brace style
 		if (selectedDoc.get('variants') === undefined) {
 			const newSeq = selectedDoc.createNode([newMap]);
 			newSeq.type = 'SEQ';
@@ -260,16 +140,15 @@ function AddVariantKeyValueSet(key, value) {
 			selectedDoc.get('variants').add(newMap);
 		}
 		selectedVariantIdx = selectedDoc.get('variants').items.length - 1;
-	}
-	else {
+	} else {
 		let variantItem = selectedDoc.get('variants').items[selectedVariantIdx];
-		variantItem.addIn(['variant', key], value);
+		variantItem.get('variant').add(selectedDoc.createPair(key, value));
 	}
 	UpdateData();
 }
 
 /**
- * Removes the key value set at the specified index from the currently selected variant.
+ * Removes the key-value set at the specified index from the currently selected variant.
  * @param {number} idx Index of the key-value set to remove
  */
 function RemoveVariantKeyValueSet(idx) {
@@ -305,24 +184,21 @@ function RemoveVariant() {
  * Resets the variant input form fields.
  */
 function ResetVariantForm() {
-	document.querySelectorAll('.VariantKVItem').forEach(e => e.remove());
-	document.getElementById('IsLocalVariant').checked = false;
+	document.getElementById('VariantKVTableBody').innerHTML = '';
 	document.getElementById('VariantName').value = '';
 	document.getElementById('VariantValue').value = '';
-	document.getElementById('VariantDescription').value = '';
-	document.getElementById('VariantValueDescription').value = '';
 	variantDependencySelect.clear(true);
+	variantConflictingSelect.clear(true);
 	document.getElementById('CurrentVariantId').innerHTML = '[new variant]';
-	document.getElementById('CurrentVariantId2').innerHTML = '[new variant]';
 	selectedVariantIdx = null;
-	//UpdateVariantTree();
 }
+
 /**
- * Fill the variant form fields (key-value sets, dependencies, and descriptions).
+ * Fill the variant form fields (key-value table, dependencies, conflicting).
  */
 function FillVariantForm() {
 	let variant = selectedDoc.get('variants').items[selectedVariantIdx];
-	let variantKVsets = variant.get('variant').items; // a variant can have one or more key-value pairs
+	let variantKVsets = variant.get('variant').items;
 
 	for (let idx = 0; idx < variantKVsets.length; idx++) {
 		let kvset = variantKVsets[idx];
@@ -330,27 +206,17 @@ function FillVariantForm() {
 	}
 
 	if (variant.get('dependencies') !== undefined) {
-		let deps = variant.get('dependencies').items;
-		deps.forEach(dep => {
+		variant.get('dependencies').items.forEach(dep => {
 			variantDependencySelect.addItem(dep.value, true);
 		});
 	}
 
-	let vInfo = selectedDoc.get('variantInfo').items
-	if (vInfo !== undefined) {
-		let vKey = variantKVsets[0].key.value;
-		let vItem = vInfo.find(i => i.get('variantId') === vKey);
-		document.getElementById('VariantDescription').value = vItem.get('description');
-
-		let vValue = variantKVsets[0].value.value
-		let vValueItem = vItem.get('values').items.find(i => i.get('value') === vValue);
-		if (vValueItem !== undefined) {
-			document.getElementById('VariantValueDescription').value = vValueItem.get('description');
-		}
+	if (variant.get('conflicting') !== undefined) {
+		variant.get('conflicting').items.forEach(c => {
+			variantConflictingSelect.addItem(c.value, true);
+		});
 	}
 }
-
-
 
 
 
@@ -368,26 +234,13 @@ function ResetVariantAssetForm() {
 	//UpdateVariantAssetTree();
 }
 /**
- * Fill the variant input form fields with values from the specified variant.
+ * Fill the variant asset form fields with values from the currently selected asset.
  */
 function FillVariantAssetForm() {
 	let variant = selectedDoc.get('variants').items[selectedVariantIdx];
 	let asset = variant.get('assets').items[selectedVariantAssetIdx];
 
 	variantAssetSelect.addItem(asset.get('assetId'), true);
-
-	if (asset.has('include')) {
-		let includes = asset.get('include').items;
-		includes.forEach(incl => {
-			variantIncludeSelect.addOption({ value: incl.value, text: incl.value });
-			variantIncludeSelect.addItem(incl.value, true);
-		}); 
-	}
-	if (asset.has('exclude')) {
-		let excludes = asset.get('exclude').items;
-		excludes.forEach(excl => {
-			variantExcludeSelect.addOption({ value: excl.value, text: excl.value });
-			variantExcludeSelect.addItem(excl.value, true);
-		});
-	}
+	FillTomSelectFromYamlSeq(asset, 'include', variantIncludeSelect);
+	FillTomSelectFromYamlSeq(asset, 'exclude', variantExcludeSelect);
 }

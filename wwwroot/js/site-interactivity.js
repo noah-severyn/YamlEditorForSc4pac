@@ -1,71 +1,44 @@
+const PACKAGE_TABS = ['PackagePropertiesTab', 'PackageInfoTab', 'PackageAssetsTab', 'VariantsTab', 'VariantInfoTab'];
+const ASSET_TABS = ['AssetPropertiesTab'];
 
-
-
-/**
-* Disables the package tabs and enables the asset tab.
-*/
-function EnableAssetTab() {
-	document.getElementById('PackagePropertiesTab').classList.add('disabled');
-	document.getElementById('PackagePropertiesTab').removeAttribute('data-bs-toggle');
-	document.getElementById('PackageInfoTab').classList.add('disabled');
-	document.getElementById('PackageInfoTab').removeAttribute('data-bs-toggle');
-	document.getElementById('PackageAssetsTab').classList.add('disabled');
-	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle');
-	document.getElementById('VariantsTab').classList.add('disabled');
-	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle');
-	document.getElementById('VariantAssetsTab').classList.add('disabled');
-	document.getElementById('VariantAssetsTab').removeAttribute('data-bs-toggle');
-
-	document.getElementById('AssetPropertiesTab').classList.remove('disabled');
-	document.getElementById('AssetPropertiesTab').setAttribute('data-bs-toggle', 'tab');
-}
-/**
-* Enables the package tabs and disables the asset tab.
-*/
-function EnablePackageTabs() {
-	document.getElementById('PackagePropertiesTab').classList.remove('disabled');
-	document.getElementById('PackagePropertiesTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageInfoTab').classList.remove('disabled');
-	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageAssetsTab').classList.remove('disabled');
-	document.getElementById('PackageAssetsTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('VariantsTab').classList.remove('disabled');
-	document.getElementById('VariantsTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('VariantAssetsTab').classList.remove('disabled');
-	document.getElementById('VariantAssetsTab').setAttribute('data-bs-toggle', 'tab');
-
-	document.getElementById('AssetPropertiesTab').classList.add('disabled');
-	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
-}
-/**
-* Enables the only first two package tabs (Properties and Info), for when partial package metadata is being created.
-*/
-function EnablePartialPackageTabs() {
-	document.getElementById('PackagePropertiesTab').classList.remove('disabled');
-	document.getElementById('PackagePropertiesTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageInfoTab').classList.remove('disabled');
-	document.getElementById('PackageInfoTab').setAttribute('data-bs-toggle', 'tab');
-	document.getElementById('PackageAssetsTab').classList.add('disabled');
-	document.getElementById('PackageAssetsTab').removeAttribute('data-bs-toggle', 'tab');
-	document.getElementById('VariantsTab').classList.add('disabled');
-	document.getElementById('VariantsTab').removeAttribute('data-bs-toggle', 'tab');
-
-	document.getElementById('AssetPropertiesTab').classList.add('disabled');
-	document.getElementById('AssetPropertiesTab').removeAttribute('data-bs-toggle');
-}
 
 /**
 * Sets the state of the package tabs and asset tab to enabled or disabled based on the type of `selectedDoc`.
 */
 function SetTabState() {
 	if (localStorage.getItem('allow-partial-packages') === 'true') {
-		EnablePartialPackageTabs();
-	} 
-	else if (IsAsset(selectedDoc)) {
-		EnableAssetTab();
+		//Enable the only first two package tabs (Properties and Info), for when partial package metadata is being created.
+		SetTabsEnabled(['PackagePropertiesTab', 'PackageInfoTab'], true);
+		SetTabsEnabled(['PackageAssetsTab', 'VariantsTab', 'VariantInfoTab', 'AssetPropertiesTab'], false);
 	}
-	else {
-		EnablePackageTabs();
+	else if (IsPackage(selectedDoc)) {
+		SetTabsEnabled(PACKAGE_TABS, true);
+		SetTabsEnabled(ASSET_TABS, false);
+	}
+	else if (IsAsset(selectedDoc)) {
+		SetTabsEnabled(PACKAGE_TABS, false);
+		SetTabsEnabled(ASSET_TABS, true);
+	}
+	else if (selectedDoc === null) {
+		SetTabsEnabled(PACKAGE_TABS, true);
+		SetTabsEnabled(ASSET_TABS, true);
+	}
+	/**
+	* Enable or disable a list of tab elements.
+	* @param {string[]} tabIds Array of tab element ids
+	* @param {boolean} enabled Set to `TRUE` to enable, `FALSE` to disable
+	*/
+	function SetTabsEnabled(tabIds, enabled) {
+		tabIds.forEach(id => {
+			const el = document.getElementById(id);
+			if (enabled) {
+				el.classList.remove('disabled');
+				el.setAttribute('data-bs-toggle', 'tab');
+			} else {
+				el.classList.add('disabled');
+				el.removeAttribute('data-bs-toggle');
+			}
+		});
 	}
 }
 /**
@@ -176,11 +149,14 @@ function ResetPackageInputs() {
 	pkgSummaryEditor.codemirror.on("change", UpdatePackageData);
 	document.getElementById('PackageAuthor').value = '';
 	document.getElementById('PackageImages').value = '';
+	pkgImageSelect.clear(true);
+	pkgImageSelect.clearOptions();
 	pkgWebsitesSelect.clear(true);
 	pkgWebsitesSelect.clearOptions();
 
 	document.getElementById('CurrentDocumentType').innerHTML = 'package';
 	document.getElementById('CurrentDocumentName').innerHTML = '[new package]';
+	document.getElementById('VariantInfoContainer').innerHTML = '<p class="text-muted fst-italic">No variants defined. Add variants in the Variants tab first.</p>';
 }
 /**
  * Fill the Package input form fields with the values from the currently selected package number.
@@ -354,7 +330,7 @@ function UpdatePackageData() {
 		UpdateProperty(['info', 'websites'], sites);
 		UpdateProperty(['info', 'website'], '');
 	} else {
-		UpdateProperty(['info', 'website'], sites);
+		UpdateProperty(['info', 'website'], sites[0]);
 		UpdateProperty(['info', 'websites'], '');
 	}
 
@@ -371,41 +347,15 @@ function UpdatePackageData() {
 		selectedPkgAssetIdx = 0;
 	} else if (selectedDoc.has('assets') && selectedPkgAssetIdx != null) {
 		let assetItem = selectedDoc.get('assets').items[selectedPkgAssetIdx];
-		if (document.getElementById('PackageAssetInclude').value !== '') {
-			if (assetItem.get('include') === undefined) {
-				const newSeq = selectedDoc.createNode([document.getElementById('PackageAssetInclude').value]);
-				newSeq.type = 'SEQ';
-				assetItem.set('include', newSeq);
-			} else {
-				assetItem.get('include').items = [];
-				pkgAssetIncSelect.getValue().split(',').forEach(asset => {
-					assetItem.get('include').add(asset);
-				});
-			}
-		} else if (document.getElementById('PackageAssetInclude').value === '' && assetItem.has('include')) {
-			assetItem.delete('include');
-		}
-
-		if (document.getElementById('PackageAssetExclude').value !== '') {
-			if (assetItem.get('exclude') === undefined) {
-				const newSeq = selectedDoc.createNode([document.getElementById('PackageAssetExclude').value]);
-				newSeq.type = 'SEQ';
-				assetItem.set('exclude', newSeq);
-			} else {
-				assetItem.get('exclude').items = [];
-				pkgAssetExcSelect.getValue().split(',').forEach(asset => {
-					assetItem.get('exclude').add(asset);
-				});
-			}
-		} else if (document.getElementById('PackageAssetExclude').value === '' && assetItem.has('exclude')) {
-			assetItem.delete('exclude');
-		}
+		UpdateYamlSeqField(assetItem, 'include', pkgAssetIncSelect.getValue());
+		UpdateYamlSeqField(assetItem, 'exclude', pkgAssetExcSelect.getValue());
 	}
 	//#endregion
 
 
 	//To push the package to the list, at a minimum it must have a group and name so the cm.OnChange can pick it up
 	if (currDocIdx === null && selectedDoc.has('group') && selectedDoc.has('name')) {
+		selectedDoc.directives.docStart = false;
 		yamlData.push(selectedDoc);
 		SetSelectedDoc(yamlData.filter((doc) => IsPackage(doc)).length - 1, 'p');
 		document.getElementById('CurrentDocumentName').innerHTML = selectedDoc.get('group') + ':' + selectedDoc.get('name');
@@ -417,11 +367,13 @@ function UpdatePackageData() {
  */
 function ResetPackageAssetForm() {
 	selectedPkgAssetIdx = null;
+	document.getElementById('CurrentAsset').innerHTML = '[new asset]';
 	pkgAssetSelect.clear(true);
 	pkgAssetIncSelect.clear(true);
 	pkgAssetIncSelect.clearOptions();
 	pkgAssetExcSelect.clear(true);
 	pkgAssetExcSelect.clearOptions();
+	ResetConditionForm();
 }
 /**
  * Fill the Package Asset input form fields with the values from the currently selected package and asset index.
@@ -429,21 +381,11 @@ function ResetPackageAssetForm() {
 function FillPackageAssetForm(assetName) {
 	const pkgAsset = selectedDoc.get('assets').items.find((i) => i.get('assetId') === assetName);
 	selectedPkgAssetIdx = selectedDoc.get('assets').items.findIndex((i) => i.get('assetId') === assetName);
+	document.getElementById('CurrentAsset').innerHTML = assetName;
 	pkgAssetSelect.addItem(assetName, true);
 
-	if (pkgAsset.has('include')) {
-		pkgAsset.get('include').items.forEach(item => {
-			pkgAssetIncSelect.addOption({ value: item.value, text: item.value });
-			pkgAssetIncSelect.addItem(item.value, true);
-		});
-	}
-
-	if (pkgAsset.has('exclude')) {
-		pkgAsset.get('exclude').items.forEach(item => {
-			pkgAssetExcSelect.addOption({ value: item.value, text: item.value });
-			pkgAssetExcSelect.addItem(item.value, true);
-		});
-	}
+	FillTomSelectFromYamlSeq(pkgAsset, 'include', pkgAssetIncSelect);
+	FillTomSelectFromYamlSeq(pkgAsset, 'exclude', pkgAssetExcSelect);
 }
 
 
@@ -505,6 +447,7 @@ function UpdateAssetData() {
 
 	//To push the package to the list it at minimum must have an assetId
 	if (currDocIdx === null && selectedDoc.has('assetId')) {
+		selectedDoc.directives.docStart = false;
 		yamlData.push(selectedDoc);
 		SetSelectedDoc(yamlData.filter((doc) => IsAsset(doc)).length - 1, 'a');
 	}

@@ -11,6 +11,7 @@ cm.on('change', CodeMirrorOnChange);
 
 function CodeMirrorOnChange(instance, changeObj) {
 	yamlData = YAML.parseAllDocuments(cm.getValue());
+	yamlData.forEach(doc => { doc.directives.docStart = false; });
 
 	//Figure which document we're editing within the code so it can be set as the selected document
 	let tabName = 'PackagePropertiesTab';
@@ -94,6 +95,10 @@ let selectedVariantIdx = null;
  */
 let selectedVariantAssetIdx = null;
 /**
+ * Index of the currently selected condition (withConditions entry) within the currently selected package asset.
+ */
+let selectedConditionIdx = null;
+/**
  * Main Tree View element
  */
 let mtv;
@@ -109,6 +114,10 @@ let vtv;
  * Variant Asset Tree View element
  */
 let vatv;
+/**
+ * Condition Tree View element
+ */
+let ctv;
 /**
  * Load From ... dialog element
  */
@@ -129,8 +138,43 @@ const pkgSummaryEditor = new EasyMDE({
 	forceSync: true,
 	previewImagesInEditor: true,
 	status: false //hide the status bar
+	, minHeight: "250px"
 });
 pkgSummaryEditor.codemirror.on("change", UpdatePackageData);
+
+
+/**
+ * Create a TomSelect for searching pre-loaded id/value items (packages or assets).
+ * @param {string} elementId CSS selector for the underlying element
+ * @param {Object} [extra={}] Additional TomSelect options to merge in
+ */
+function CreateSearchableTomSelect(elementId, extra = {}) {
+	return new TomSelect(elementId, {
+		create: false,
+		valueField: 'value',
+		labelField: 'id',
+		searchField: ['id'],
+		render: {
+			option: (item, escape) => `<div class="py-2 d-flex">${escape(item.id)}</div>`,
+			optgroup_header: (data, escape) => `<div class="optgroup-label">${escape(data.label)}</div>`
+		},
+		...extra
+	});
+}
+
+/**
+ * Create a TomSelect for a freeform tag/list input.
+ * @param {string} elementId CSS selector for the underlying element
+ * @param {Object} [extra={}] Additional TomSelect options to merge in
+ */
+function CreateTagTomSelect(elementId, extra = {}) {
+	return new TomSelect(elementId, {
+		persist: false,
+		createOnBlur: true,
+		create: true,
+		...extra
+	});
+}
 
 
 const pkgGroupSelect = new TomSelect('#PackageGroup', {
@@ -157,120 +201,38 @@ const pkgSubfolderSelect = new TomSelect('#PackageSubfolder', {
 	},
 });
 
-const pkgDependencySelect = new TomSelect("#PackageDependencies", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	searchField: ['id'],
+const pkgDependencySelect = CreateSearchableTomSelect("#PackageDependencies");
+const pkgConflictingSelect = CreateSearchableTomSelect("#PackageConflicting");
 
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		}
-	}
-});
+const pkgWebsitesSelect = CreateTagTomSelect("#PackageWebsite");
+const pkgImageSelect = CreateTagTomSelect("#PackageImages");
 
-const pkgConflictingSelect = new TomSelect("#PackageConflicting", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	searchField: ['id'],
+const pkgAssetSelect = CreateSearchableTomSelect("#PackageAssetId", { maxItems: 1 });
+const pkgAssetIncSelect = CreateTagTomSelect("#PackageAssetInclude");
+const pkgAssetExcSelect = CreateTagTomSelect("#PackageAssetExclude");
 
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		}
-	}
-});
-
-const pkgWebsitesSelect = new TomSelect("#PackageWebsite", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
-
-const pkgImageSelect = new TomSelect("#PackageImages", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
-
-const pkgAssetSelect = new TomSelect("#PackageAssetId", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	maxItems: 1,
-	searchField: ['id'],
-
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		},
-		optgroup_header: function (data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	}
-});
-
-const pkgAssetIncSelect = new TomSelect("#PackageAssetInclude", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
-
-const pkgAssetExcSelect = new TomSelect("#PackageAssetExclude", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
-
-const variantDependencySelect = new TomSelect("#VariantDependencies", {
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	searchField: ['id'],
-
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		},
-		optgroup_header: function (data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	}
-});
-
-const variantAssetSelect = new TomSelect("#VariantAssetId", {
-	maxItems: 1,
-	create: false,
-	valueField: 'value',
-	labelField: 'id',
-	searchField: ['id'],
-
-	render: {
-		option: function (item, escape) {
-			return '<div class="py-2 d-flex">' + escape(item.id) + '</div>';
-		},
-		optgroup_header: function (data, escape) {
-			return '<div class="optgroup-label">' + escape(data.label) + '</span></div>';
-		}
-	}
-});
+const variantDependencySelect = CreateSearchableTomSelect("#VariantDependencies");
+const variantConflictingSelect = CreateSearchableTomSelect("#VariantConflicting");
+const variantAssetSelect = CreateSearchableTomSelect("#VariantAssetId", { maxItems: 1 });
 /**
  * Variant Asset Include TomSelect element
  */
-const variantIncludeSelect = new TomSelect("#VariantAssetInclude", {
-	persist: false,
-	createOnBlur: true,
-	create: true
-});
+const variantIncludeSelect = CreateTagTomSelect("#VariantAssetInclude");
 /**
  * Variant Asset Exclude TomSelect element
  */
-const variantExcludeSelect = new TomSelect("#VariantAssetExclude", {
-	persist: false,
-	createOnBlur: true,
-	create: true
+const variantExcludeSelect = CreateTagTomSelect("#VariantAssetExclude");
+/**
+ * Condition Include TomSelect element
+ */
+const conditionIncludeSelect = CreateTagTomSelect("#ConditionInclude", {
+	onChange: function() { UpdateConditionData(document.getElementById('ConditionInclude')); }
+});
+/**
+ * Condition Exclude TomSelect element
+ */
+const conditionExcludeSelect = CreateTagTomSelect("#ConditionExclude", {
+	onChange: function() { UpdateConditionData(document.getElementById('ConditionExclude')); }
 });
 
 /**
@@ -326,7 +288,7 @@ function UpdateData(dumpData = true) {
 	SetTabState();
 
 	//Update the TomSelect dropdowns with the local packages and assets.Only remove a local package or asset from the TomSelects if it is not included in the local lists. If it's removed from the TomSelect while still present in the file as a local package or asset, the field in the currently selected node referencing this local package or asset will be set to a blank string. Example, editing an asset include/exclude field would otherwise cause the parent `assetId` field to be cleared if that asset is local. However, this is desired behavior if the parent node references a pkg/asset that has actually been removed from the local file.
-	[pkgDependencySelect, variantDependencySelect].forEach(tsControl => {
+	[pkgDependencySelect, variantDependencySelect, variantConflictingSelect].forEach(tsControl => {
 		let allOpts = tsControl.options
 		for (const key in allOpts) {
 			if (allOpts[key].channel === 'local' && !localPackages.includes(allOpts[key].id)) {
@@ -362,6 +324,7 @@ function UpdateData(dumpData = true) {
 	SetSelectedDoc(currDocIdx);
 	UpdateMainTree();
 	UpdatePackageAssetTree();
+	UpdateConditionTree();
 	UpdateVariantTree();
 	UpdateVariantAssetTree();
 
@@ -383,11 +346,15 @@ function UpdateData(dumpData = true) {
 					indentSeq: false
 				});
 
-				newYaml = newYaml + docu;
-				if (idx < yamlData.length - 1) {
-					newYaml = newYaml + '\n---\n';
+				// Strip the doc separator to fix bug where a double separator can be added 
+				if (docu.startsWith('---\n')) {
+					docu = docu.slice(4);
+				}
+
+				if (idx === 0) {
+					newYaml = docu;
 				} else {
-					newYaml = newYaml + '\n';
+					newYaml = newYaml + '\n---\n' + docu;
 				}
 				 
 			}
@@ -435,10 +402,7 @@ function UpdateMainTree() {
 	//}
 
 	mtv.on("select", function (t) {
-		mtv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
-			leaf.classList.remove('selected');
-		});
-		t.target.target.closest('.tree-leaf').classList.add('selected');
+		SelectTreeLeaf(mtv, t);
 
 		let selectedIdx;
 		if (t.data.name.indexOf('(') > 0) { //A heading category was selected. Do nothing
@@ -453,6 +417,7 @@ function UpdateMainTree() {
 			FillPackageForm();
 			UpdatePackageAssetTree();
 			UpdateVariantTree();
+			FillVariantInfoTab();
 		} else { //An asset was selected
 			selectedIdx = t.data.name.slice(0, t.data.name.indexOf(' '));
 			SelectTab('AssetPropertiesTab');
@@ -476,12 +441,11 @@ function UpdatePackageAssetTree() {
 	atv = new TreeView(data, document.getElementById('AssetTreeView'));
 
 	atv.on("select", function (t) {
-		atv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
-			leaf.classList.remove('selected');
-		});
-		t.target.target.closest('.tree-leaf').classList.add('selected');
+		SelectTreeLeaf(atv, t);
 
+		ResetConditionForm();
 		FillPackageAssetForm(t.data.name);
+		UpdateConditionTree();
 	});
 }
 
@@ -492,15 +456,14 @@ function UpdateVariantTree() {
 		variants = selectedDoc.get('variants').items;
 		for (let idx = 0; idx < variants.length; idx++) {
 			let variant = variants[idx].get('variant').items; // a variant can have one or more key-value pairs
-			let title = idx + ' - ' + variant.map(v => v.value.value).join(' - '); //▸
-			pkgVariants.push({ name: title, expanded: false, children: [] })
+			const title = idx + ' • ' + variant.map(cond => cond.key.value.split(':').slice(-1)[0] + ':' + cond.value.value).join(', ');
+			pkgVariants.push({ name: title, expanded: false, children: [] });
 		}
 
 		if (selectedVariantIdx !== null) {
 			let kvSets = variants[selectedVariantIdx].get('variant').items;
-			let kvTitle = kvSets.map(kv => kv.key.value + ': ' + kv.value.value).join(', ');
+			const kvTitle = kvSets.map(kv => kv.key.value + ':"' + kv.value.value + '"').join(', ');
 			document.getElementById('CurrentVariantId').innerHTML = kvTitle;
-			document.getElementById('CurrentVariantId2').innerHTML = kvTitle;
 		}
 	}
 
@@ -510,10 +473,7 @@ function UpdateVariantTree() {
 	vtv = new TreeView(data, document.getElementById('VariantTreeView'));
 
 	vtv.on("select", function (t) {
-		vtv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
-			leaf.classList.remove('selected');
-		});
-		t.target.target.closest('.tree-leaf').classList.add('selected');
+		SelectTreeLeaf(vtv, t);
 
 
 		ResetVariantForm();
@@ -521,10 +481,8 @@ function UpdateVariantTree() {
 		selectedVariantIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
 
 		let kvSets = variants[selectedVariantIdx].get('variant').items;
-		let kvTitle = kvSets.map(kv => kv.key.value + ': ' + kv.value.value).join(', ');
+		const kvTitle = kvSets.map(kv => kv.key.value + ':"' + kv.value.value + '"').join(', ');
 		document.getElementById('CurrentVariantId').innerHTML = kvTitle;
-		document.getElementById('CurrentVariantId2').innerHTML = kvTitle;
-
 		FillVariantForm();
 		ResetVariantAssetForm();
 		UpdateVariantAssetTree();
@@ -554,10 +512,7 @@ function UpdateVariantAssetTree() {
 	vatv = new TreeView(data, document.getElementById('VariantAssetTreeView'));
 
 	vatv.on("select", function (t) {
-		vatv.node.querySelectorAll('.tree-leaf').forEach(leaf => {
-			leaf.classList.remove('selected');
-		});
-		t.target.target.closest('.tree-leaf').classList.add('selected');
+		SelectTreeLeaf(vatv, t);
 
 		ResetVariantAssetForm();
 		let selectedItem = t.data.name;
@@ -570,7 +525,34 @@ function UpdateVariantAssetTree() {
 	});
 }
 
+function UpdateConditionTree() {
+	let conditions = [];
+	if (selectedDoc !== null && selectedPkgAssetIdx !== null) {
+		let assetItem = selectedDoc.get('assets')?.items[selectedPkgAssetIdx];
+		if (assetItem !== undefined && assetItem.has('withConditions')) {
+			let conds = assetItem.get('withConditions').items;
+			for (let idx = 0; idx < conds.length; idx++) {
+				let kvPairs = conds[idx].get('ifVariant').items;
+				const title = idx + ' • ' + kvPairs.map(kv => kv.key.value.split(':').slice(-1)[0] + ':' + kv.value.value).join(', ');
+				conditions.push({ name: title, expanded: false, children: [] });
+			}
+		}
+	}
 
+	const data = [
+		{ name: 'Conditions (' + conditions.length + ')', expanded: true, children: conditions }
+	];
+	ctv = new TreeView(data, document.getElementById('ConditionTreeView'));
+
+	ctv.on('select', function (t) {
+		SelectTreeLeaf(ctv, t);
+
+		ResetConditionForm();
+		let selectedItem = t.data.name;
+		selectedConditionIdx = Number(selectedItem.substring(0, selectedItem.indexOf(' ')));
+		FillConditionForm();
+	});
+}
 
 
 

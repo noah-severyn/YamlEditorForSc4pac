@@ -108,7 +108,7 @@ document.getElementById('NewPackageAssetButton').addEventListener('click', () =>
 // --------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------   Package Variant tab events   ------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
-for (const input of document.querySelectorAll('#VariantDependencies, #VariantAssetId, #VariantAssetInclude, #VariantAssetExclude, #VariantDescription, #VariantValueDescription')) {
+for (const input of document.querySelectorAll('#VariantDependencies, #VariantConflicting, #VariantAssetId, #VariantAssetInclude, #VariantAssetExclude')) {
 	input.addEventListener('input', event => {
 		UpdateVariantData(event.target);
 	});
@@ -118,9 +118,6 @@ for (const input of document.querySelectorAll('#VariantName, #VariantValue')) {
 		ValidateInput(event.target.id);
 	});
 }
-document.getElementById('IsLocalVariant').addEventListener('click', () => {
-	ToggleLocalVariant();
-});
 document.getElementById('ResetUpperVariantFormButton').addEventListener('click', () => {
 	ResetVariantForm();
 });
@@ -134,8 +131,16 @@ document.getElementById('RemoveAssetFromVariantButton').addEventListener('click'
 	RemoveAssetFromVariant();
 });
 document.getElementById('VariantAddKeyValueBtn').addEventListener('click', () => {
-	let vIdx = document.getElementById('VariantKeyValuesContainer').childElementCount - 1;
+	let vIdx = document.getElementById('VariantKVTableBody').childElementCount;
 	let vKey = document.getElementById('VariantName').value;
+	
+	const globalVariants = ["nightmode", "driveside", "roadstyle", "CAM"];
+	const isThisVariantGlobal = globalVariants.includes(vKey.trim());
+	const pkg = selectedDoc ? selectedDoc.get('group') + ':' + selectedDoc.get('name') : '';
+	if (!isThisVariantGlobal && !vKey.startsWith(pkg)) {
+		vKey = pkg + ':' + vKey;
+	}
+	
 	let vValue = document.getElementById('VariantValue').value;
 	CreateVariantKeyValueElements(vIdx, vKey, vValue);
 	AddVariantKeyValueSet(vKey, vValue);
@@ -144,6 +149,34 @@ document.getElementById('VariantAddKeyValueBtn').addEventListener('click', () =>
 
 
 // --------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------   Variant Info tab events   ---------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+document.getElementById('VariantInfoTab').addEventListener('click', () => {
+	FillVariantInfoTab();
+});
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------   Condition tab events   ------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
+document.getElementById('NewConditionButton').addEventListener('click', () => {
+	ResetConditionForm();
+});
+document.getElementById('RemoveConditionButton').addEventListener('click', () => {
+	RemoveCondition();
+});
+document.getElementById('ConditionAddKeyValueBtn').addEventListener('click', () => {
+	const key = document.getElementById('ConditionVariantKey').value.trim();
+	const value = document.getElementById('ConditionVariantValue').value.trim();
+	if (!key) { return; }
+	const idx = document.getElementById('ConditionKVTableBody').childElementCount;
+	CreateConditionKVElement(idx, key, value);
+	AddConditionKeyValuePair(key, value);
+});
+
+
+
 // ------------------------------------------   Asset Properties tab events   -----------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
 for (const input of document.querySelectorAll('#AssetPropertiesForm input')) {
