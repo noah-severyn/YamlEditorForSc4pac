@@ -316,9 +316,11 @@ function UpdateData(dumpData = true) {
 	});
 
 	if (dumpData) {
+		const scrollInfo = cm.getScrollInfo();
 		cm.off('change', CodeMirrorOnChange);
 		cm.setValue(DumpYaml());
 		cm.on('change', CodeMirrorOnChange);
+		cm.scrollTo(scrollInfo.left, scrollInfo.top);
 	}
 	
 	SetSelectedDoc(currDocIdx);
