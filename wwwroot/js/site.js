@@ -327,6 +327,7 @@ function UpdateData(dumpData = true) {
 	UpdateConditionTree();
 	UpdateVariantTree();
 	UpdateVariantAssetTree();
+	FillVariantInfoTab();
 
 	function DumpYaml() {
 		if (yamlData.length === 0) {
