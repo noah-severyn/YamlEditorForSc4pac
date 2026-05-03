@@ -77,6 +77,7 @@ function ClearAll() {
 	document.getElementById('YamlFileName').textContent = '';
 	currDocIdx = null;
 	UpdateData();
+	FillVariantInfoTab();
 }
 
 
